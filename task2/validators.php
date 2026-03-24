@@ -26,3 +26,33 @@ echo "$email2 - " . var_export($result, true) . "</br>";
 $email3 = "";
 $result = validateEmail($email3);
 echo "$email3 - " . var_export($result, true) . "</br>";
+echo "</br>";
+
+
+// Проверить формат номера телефона
+function validatePhone(string $phone): bool
+{
+    $phone = str_replace(' ', '', $phone);
+    $result = false;
+    $pattern = '/^[0-9+\-()]+$/';
+
+    if ((preg_match_all('/[0-9]/', $phone) >= 10)
+        && (preg_match($pattern, $phone) === 1))
+    {
+        $result = true;
+    }
+
+    return $result;
+}
+
+$phone1 = "+7 (999) 123-45-67";
+$result = validatePhone($phone1);
+echo "$phone1 - " . var_export($result, true) . "</br>";
+
+$phone2 = "89991234567";
+$result = validatePhone($phone2);
+echo "$phone2 - " . var_export($result, true) . "</br>";
+
+$phone3 = "abc";
+$result = validatePhone($phone3);
+echo "$phone3 - " . var_export($result, true) . "</br>";
