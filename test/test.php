@@ -52,7 +52,3 @@ echo "$phone1 - " . var_export($result, true) . "</br>";
 $phone2 = "89991234567";
 $result = validate_phone($phone2);
 echo "$phone2 - " . var_export($result, true) . "</br>";
-
-$phone3 = "abc";
-$result = validate_phone($phone3);
-echo "$phone3 - " . var_export($result, true) . "</br>";
