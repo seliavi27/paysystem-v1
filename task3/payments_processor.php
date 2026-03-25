@@ -1,14 +1,5 @@
 <?php
-
 declare(strict_types=1);
-
-
-function get_all_amounts(array $payments): float
-{
-    $amounts = array_column($payments, 'amount');
-    //$sumPayments = array_sum($amounts);
-    return $sumPayments;
-}
 
 $payments = [
     [
@@ -31,6 +22,15 @@ $payments = [
     ],
     // ... больше платежей
 ];
+
+function get_all_amounts(array $payments): array
+{
+    $amounts = array_column($payments, 'amount');
+    return $amounts;
+}
+
+$result = get_all_amounts($payments);
+echo print_r($result, true) . "</br>";
 
 
 
