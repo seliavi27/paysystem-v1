@@ -1,53 +1,91 @@
 <?php
 declare(strict_types=1);
 
-$payments = [
-    [
-        'id' => 1,
-        'user_id' => 101,
-        'amount' => 1500.50,
-        'type' => 'card',
-        'status' => 'completed',
-        'date' => '2024-01-15',
-        'description' => 'Оплата заказа #12345'
-    ],
-    [
-        'id' => 2,
-        'user_id' => 102,
-        'amount' => 500.00,
-        'type' => 'wallet',
-        'status' => 'pending',
-        'date' => '2024-01-16',
-        'description' => 'Пополнение счета'
-    ],
-    // ... больше платежей
-];
-
 function get_all_amounts(array $payments): array
 {
     $amounts = array_column($payments, 'amount');
     return $amounts;
 }
 
-$result = get_all_amounts($payments);
-echo print_r($result, true) . "</br>";
 
-
-
-function filter_payments_by_amount(array $payments, float $min, float $max): array
+function group_payments_by_status(array $payments): array
 {
-    $filterPayments = array_filter(
+    $group = array_reduce(
         $payments,
-        function ($payment) use ($min, $max) {
-            if (!isset($payment['amount'])) {
+        function ($carry, $payment)
+        {
+            $status = $payment['status'];
+            if (!isset($status)) {
                 return false;
             }
 
-            $amount = $payment['amount'];
-            $result = $amount >= $min && $amount <= $max;
-            return $result;
+            $carry[$status][] = $payment;
+            return $carry;
         }
     );
 
-    return $filterPayments;
+    return $group;
+}
+
+
+function calculate_total_by_type(array $payments): array
+{
+    $group = array_reduce(
+        $payments,
+        function ($carry, $payment)
+        {
+            $type = $payment['type'] ?? 'unknown';
+            $amount = $payment['amount'] ?? 0;
+
+            $carry[$type] = ($carry[$type] ?? 0) + $amount;
+            return $carry;
+        }
+    );
+
+    return $group;
+}
+
+
+function sort_payments_by_amount(array $payments, bool $descending = true): array
+{
+    $sorted = $payments;
+
+    usort(
+        $sorted,
+        function($a, $b) use ($descending)
+        {
+            $amountA = $a['amount'] ?? 0;
+            $amountB = $b['amount'] ?? 0;
+
+            if ($descending)
+            {
+                return $amountB <=> $amountA;
+            }
+            else
+            {
+                return $amountA <=> $amountB;
+            }
+        }
+    );
+
+    return $sorted;
+}
+
+
+function get_top_payments(array $payments, int $limit = 5): array
+{
+    $sorted = $payments;
+
+    usort(
+        $sorted,
+        function($a, $b)
+        {
+            $amountA = $a['amount'] ?? 0;
+            $amountB = $b['amount'] ?? 0;
+            return $amountB <=> $amountA;
+        }
+    );
+
+    $topPayments = array_slice($sorted, 0, $limit);
+    return $topPayments;
 }
