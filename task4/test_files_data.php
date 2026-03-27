@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 require_once "json_storage.php";
 require_once "csv_handler.php";
+require_once "logger.php";
+require_once "directory_manager.php";
 
 $payments = [
     [
@@ -75,31 +77,47 @@ echo "---------------csv_handler.php-----------------" . "</br>";
 //
 //$result = import_transactions_from_csv('export.csv');
 //echo var_export($result, true) . "</br>";
+//
+//$result = validate_csv_structure('export.csv', ['id', 'date', 'amount']);
+//echo var_export($result, true) . "</br>";
 
-$result = validate_csv_structure('export.csv', ['id', 'date', 'amount']);
+
+
+echo "</br>";
+echo "---------------logger.php-----------------" . "</br>";
+
+//$result = log_operation('PAYMENT_CREATE', 'Payment #1 created for user 101');
+//echo var_export($result, true) . "</br>";
+//$result = log_operation('PAYMENT_UPDATE', 'Payment #1 status changed to completed');
+//echo var_export($result, true) . "</br>";
+//
+//$result = log_error("File not found: transactions.csv");
+//echo var_export($result, true) . "</br>";
+//
+//$result = get_logs('logs/operations.log', 1);
+//echo var_export($result, true) . "</br>";
+
+
+
+echo "</br>";
+echo "---------------directory_manager.php-----------------" . "</br>";
+
+$result = get_logs('logs/operations.log', 1);
 echo var_export($result, true) . "</br>";
 
 
 
 
 
-//echo "</br>";
-//echo "---------------validators_advanced.php-----------------" . "</br>";
-
-//$result = slugify_payment_id("Payment #12345");
-//echo print_r($result, true) . "</br>";
-//$result = slugify_payment_id("Оплата заказа");
-//echo print_r($result, true) . "</br>";
 
 
-//$result = validate_credit_card("4111 1111 1111 1111");
-//echo var_export($result, true) . "</br>";
-//$result = validate_credit_card("4111111111111111");
-//echo var_export($result, true) . "</br>";
-//$result = validate_credit_card("4111111111111112");
-//echo var_export($result, true) . "</br>";
-//$result = validate_credit_card("invalid");
-//echo var_export($result, true) . "</br>";
+
+
+
+
+
+
+
 
 
 echo "</pre>";
