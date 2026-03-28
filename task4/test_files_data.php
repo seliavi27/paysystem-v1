@@ -5,6 +5,7 @@ require_once "json_storage.php";
 require_once "csv_handler.php";
 require_once "logger.php";
 require_once "directory_manager.php";
+require_once "storage_manager.php";
 
 $payments = [
     [
@@ -47,64 +48,104 @@ $payments = [
 echo "<pre>";
 echo "---------------json_storage.php-----------------" . "</br>";
 
-//$payments = [
-//    ['id' => 1, 'amount' => 100, 'status' => 'completed'],
-//    ['id' => 2, 'amount' => 200, 'status' => 'pending'],
-//];
-//$result = save_payments_to_json($payments, 'payments.json');
-//echo var_export($result, true) . "</br>";
-//
-//$result = load_payments_from_json('payments.json');
-//echo var_export($result, true) . "</br>";
-//
-//$payment = [
-//    'amount' => 300,
-//    'status' => 'pending',
-//    'date' => date('Y-m-d')];
-//$result = add_payment_to_storage($payment, 'payments.json');
-//echo var_export($result, true) . "</br>";
-//
-//$result = update_payment_status(1, 'completed', 'payments.json');
-//echo var_export($result, true) . "</br>";
+$payments = [
+    ['id' => 1, 'amount' => 100, 'status' => 'completed'],
+    ['id' => 2, 'amount' => 200, 'status' => 'pending'],
+];
+$result = save_payments_to_json($payments, 'payments.json');
+echo var_export($result, true) . "</br>";
+
+$result = load_payments_from_json('payments.json');
+echo var_export($result, true) . "</br>";
+
+$payment = [
+    'amount' => 300,
+    'status' => 'pending',
+    'date' => date('Y-m-d')];
+$result = add_payment_to_storage($payment, 'payments.json');
+echo var_export($result, true) . "</br>";
+
+$result = update_payment_status(1, 'completed', 'payments.json');
+echo var_export($result, true) . "</br>";
 
 
 
 echo "</br>";
 echo "---------------csv_handler.php-----------------" . "</br>";
 
-//$result = export_payments_to_csv($payments, 'export.csv');
-//echo var_export($result, true) . "</br>";
-//
-//$result = import_transactions_from_csv('export.csv');
-//echo var_export($result, true) . "</br>";
-//
-//$result = validate_csv_structure('export.csv', ['id', 'date', 'amount']);
-//echo var_export($result, true) . "</br>";
+$result = export_payments_to_csv($payments, 'export.csv');
+echo var_export($result, true) . "</br>";
+
+$result = import_transactions_from_csv('export.csv');
+echo var_export($result, true) . "</br>";
+
+$result = validate_csv_structure('export.csv', ['id', 'date', 'amount']);
+echo var_export($result, true) . "</br>";
 
 
 
 echo "</br>";
 echo "---------------logger.php-----------------" . "</br>";
 
-//$result = log_operation('PAYMENT_CREATE', 'Payment #1 created for user 101');
-//echo var_export($result, true) . "</br>";
-//$result = log_operation('PAYMENT_UPDATE', 'Payment #1 status changed to completed');
-//echo var_export($result, true) . "</br>";
-//
-//$result = log_error("File not found: transactions.csv");
-//echo var_export($result, true) . "</br>";
-//
-//$result = get_logs('logs/operations.log', 1);
-//echo var_export($result, true) . "</br>";
+$result = log_operation('PAYMENT_CREATE', 'Payment #1 created for user 101');
+echo var_export($result, true) . "</br>";
+$result = log_operation('PAYMENT_UPDATE', 'Payment #1 status changed to completed');
+echo var_export($result, true) . "</br>";
+
+$result = log_error("File not found: transactions.csv");
+echo var_export($result, true) . "</br>";
+
+$result = get_logs('logs/operations.log', 1);
+echo var_export($result, true) . "</br>";
 
 
 
 echo "</br>";
 echo "---------------directory_manager.php-----------------" . "</br>";
 
-$result = get_logs('logs/operations.log', 1);
+$result = ensure_directory_exists('data/payments');
+echo var_export($result, true) . "</br>";
+$result = ensure_directory_exists('logs');
+echo var_export($result, true) . "</br>";
+$result = ensure_directory_exists('exports');
 echo var_export($result, true) . "</br>";
 
+$result = list_files_in_directory('data/');
+echo var_export($result, true) . "</br>";
+$result = list_files_in_directory('logs/', '.log');
+echo var_export($result, true) . "</br>";
+
+$result = get_file_info('payments.json');
+echo var_export($result, true) . "</br>";
+
+$result = backup_file('payments.json');
+echo var_export($result, true) . "</br>";
+
+
+
+echo "</br>";
+echo "---------------storage_manager.php-----------------" . "</br>";
+
+$payment = [
+    'id' => 1,
+    'date' => '2024-01-15',
+    'amount' => 100.50,
+    'description' => 'Покупка',
+    'type' => 'card'
+];
+$storageManager = new StorageManager('data/');
+$result = $storageManager->save_payments($payments);
+echo var_export($result, true) . "</br>";
+$result = $storageManager->save_payment($payment);
+echo var_export($result, true) . "</br>";
+$result = $storageManager->delete_payment(2);
+echo var_export($result, true) . "</br>";
+$result = $storageManager->get_payment(10);
+echo var_export($result, true) . "</br>";
+$result = $storageManager->get_payment(3);
+echo var_export($result, true) . "</br>";
+$result = $storageManager->get_all_payments();
+echo var_export($result, true) . "</br>";
 
 
 
