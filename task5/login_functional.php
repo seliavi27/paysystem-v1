@@ -36,20 +36,6 @@ function get_current_user_from_session(): array|false
     return $_SESSION['user'];
 }
 
-function logout_user(): void
-{
-    if (session_status() === PHP_SESSION_NONE)
-    {
-        session_start();
-    }
-
-    $_SESSION = [];
-
-    session_destroy();
-
-    clear_remember_me_cookie();
-}
-
 function set_remember_me_cookie(string $email): void
 {
     setcookie('remember_me', $email, [
@@ -71,4 +57,34 @@ function clear_remember_me_cookie(): void
         'expires' => time() - 3600,
         'path' => '/'
     ]);
+}
+
+function logout_user(): void
+{
+    if (session_status() === PHP_SESSION_NONE)
+    {
+        session_start();
+    }
+
+    $_SESSION = [];
+
+    session_destroy();
+
+    clear_remember_me_cookie();
+}
+
+function require_login(): array
+{
+    if (session_status() === PHP_SESSION_NONE)
+    {
+        session_start();
+    }
+
+    if (empty($_SESSION['user']))
+    {
+        header('Location: login.php');
+        exit;
+    }
+
+    return $_SESSION['user'];
 }
