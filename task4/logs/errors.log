@@ -1,0 +1,3 @@
+[2026-03-27 21:52:18] ERROR: File not found: transactions.csv
+[2026-03-28 19:44:22] ERROR: Payment with id=2 not deleted: payments.json
+[2026-03-28 19:44:22] ERROR: Payment with id=10 not found: payments.json

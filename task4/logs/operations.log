@@ -1,0 +1,3 @@
+[2026-03-27 21:48:30] PAYMENT_CREATE: Payment #1 created for user 101
+[2026-03-27 21:48:30] PAYMENT_UPDATE: Payment #1 status changed to completed[2026-03-28 19:44:22] PAYMENT_CREATE: Payments created
+[2026-03-28 19:44:22] PAYMENT_CREATE: Payment created
