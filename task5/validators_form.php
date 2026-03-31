@@ -1,9 +1,11 @@
 <?php
 declare(strict_types=1);
 
-function ensure_users_storage(string $users_file = 'data/users.json'): bool
+require_once 'security.php';
+
+function ensure_users_storage(string $usersFile = 'data/users.json'): bool
 {
-    $dir = dirname($users_file);
+    $dir = dirname($usersFile);
 
     if (!is_dir($dir))
     {
@@ -13,9 +15,9 @@ function ensure_users_storage(string $users_file = 'data/users.json'): bool
         }
     }
 
-    if (!file_exists($users_file))
+    if (!file_exists($usersFile))
     {
-        $result = file_put_contents($users_file, json_encode([], JSON_PRETTY_PRINT));
+        $result = file_put_contents($usersFile, json_encode([], JSON_PRETTY_PRINT));
 
         if ($result === false) {
             return false;
@@ -25,11 +27,12 @@ function ensure_users_storage(string $users_file = 'data/users.json'): bool
     return true;
 }
 
-function validate_registration_form(array $data): array
+function validateRegistrationForm(array $data): array
 {
     $errors = [];
 
-    $required = ['email', 'password', 'password_confirm', 'full_name', 'phone'];
+    $required = ['email', 'password', 'passwordConfirm', 'fullName', 'phone'];
+
     foreach ($required as $field)
     {
         if (empty(trim($data[$field] ?? '')))
@@ -38,28 +41,28 @@ function validate_registration_form(array $data): array
         }
     }
 
-    if (!empty($data['email']) && !validate_email_format($data['email']))
+    if (!empty($data['email']) && !validateEmailFormat($data['email']))
     {
         $errors['email'] = 'Invalid email format';
     }
 
-    if (!empty($data['password']) && !validate_password_strength($data['password']))
+    if (!empty($data['password']) && !validatePasswordStrength($data['password']))
     {
         $errors['password'] = 'The password must be at least 6 characters long and contain letters and numbers';
     }
 
-    if (!empty($data['password']) && !empty($data['password_confirm']) &&
-        $data['password'] !== $data['password_confirm'])
+    if (!empty($data['password']) && !empty($data['passwordConfirm']) &&
+        $data['password'] !== $data['passwordConfirm'])
     {
-        $errors['password_confirm'] = "The passwords don't match";
+        $errors['passwordConfirm'] = "The passwords don't match";
     }
 
-    if (!empty($data['phone']) && !validate_phone_format($data['phone']))
+    if (!empty($data['phone']) && !validatePhoneFormat($data['phone']))
     {
         $errors['phone'] = 'Invalid phone format';
     }
 
-    if (!empty($data['email']) && user_exists($data['email']))
+    if (!empty($data['email']) && userExists($data['email']))
     {
         $errors['email'] = 'A user with this email already exists';
     }
@@ -70,36 +73,36 @@ function validate_registration_form(array $data): array
     ];
 }
 
-function validate_email_format(string $email): bool
+function validateEmailFormat(string $email): bool
 {
     return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
 }
 
-function validate_password_strength(string $password): bool
+function validatePasswordStrength(string $password): bool
 {
     return strlen($password) >= 6
         && (preg_match('/[A-Za-z]/', $password) === 1)
         && (preg_match('/\d/', $password) === 1);
 }
 
-function hash_password(string $password): string
+function hashPassword(string $password): string
 {
     return password_hash($password, PASSWORD_DEFAULT);
 }
 
-function validate_phone_format(string $phone): bool
+function validatePhoneFormat(string $phone): bool
 {
     return (preg_match('/^\+?\d{7,15}$/', $phone) === 1);
 }
 
-function user_exists(string $email, string $users_file = 'data/users.json'): bool
+function userExists(string $email, string $usersFile = 'data/users.json'): bool
 {
-    if (!is_file($users_file))
+    if (!is_file($usersFile))
     {
         return false;
     }
 
-    $users = json_decode(file_get_contents($users_file), true);
+    $users = json_decode(file_get_contents($usersFile), true);
 
     if (!is_array($users))
     {

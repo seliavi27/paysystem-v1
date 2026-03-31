@@ -1,0 +1,38 @@
+[
+    {
+        "id": 1,
+        "userId": 1,
+        "date": "2026-03-30 10:55:35",
+        "amount": 1000,
+        "type": "wallet",
+        "description": "Оплата",
+        "status": "pending"
+    },
+    {
+        "id": 2,
+        "userId": 1,
+        "date": "2026-03-30 10:58:41",
+        "amount": 140.6,
+        "type": "card",
+        "description": "Ноут",
+        "status": "pending"
+    },
+    {
+        "id": 3,
+        "userId": 2,
+        "date": "2026-03-30 11:40:01",
+        "amount": 14,
+        "type": "wallet",
+        "description": "Pay",
+        "status": "pending"
+    },
+    {
+        "id": 4,
+        "userId": 1,
+        "date": "2026-03-30 12:07:29",
+        "amount": 450.21,
+        "type": "bankTransfer",
+        "description": "Pay",
+        "status": "pending"
+    }
+]

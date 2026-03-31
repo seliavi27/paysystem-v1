@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-function start_user_session(array $user): void
+function startUserSession(array $user): void
 {
     if (session_status() === PHP_SESSION_NONE)
     {
@@ -9,14 +9,15 @@ function start_user_session(array $user): void
     }
 
     $_SESSION['user'] = [
+        'id' => $user['id'],
         'email' => $user['email'],
-        'full_name' => $user['full_name'] ?? '',
+        'fullName' => $user['fullName'] ?? '',
         'phone' => $user['phone'] ?? '',
-        'logged_at' => date('Y-m-d H:i:s')
+        'loggedAt' => date('Y-m-d H:i:s')
     ];
 }
 
-function is_user_logged_in(): bool
+function isUserLoggedIn(): bool
 {
     if (session_status() === PHP_SESSION_NONE)
     {
@@ -26,17 +27,17 @@ function is_user_logged_in(): bool
     return isset($_SESSION['user']);
 }
 
-function get_current_user_from_session(): array|false
-{
-    if (!is_user_logged_in())
-    {
-        return false;
-    }
+//function getCurrentUserFromSession(): array|false
+//{
+//    if (!isUserLoggedIn())
+//    {
+//        return false;
+//    }
+//
+//    return $_SESSION['user'];
+//}
 
-    return $_SESSION['user'];
-}
-
-function set_remember_me_cookie(string $email): void
+function setRememberMeCookie(string $email): void
 {
     setcookie('remember_me', $email, [
         'expires' => time() + 60 * 60 * 24 * 30,
@@ -46,12 +47,12 @@ function set_remember_me_cookie(string $email): void
     ]);
 }
 
-function get_remembered_email(): string|false
+function getRememberedEmail(): string|false
 {
     return $_COOKIE['remember_me'] ?? false;
 }
 
-function clear_remember_me_cookie(): void
+function clearRememberMeCookie(): void
 {
     setcookie('remember_me', '', [
         'expires' => time() - 3600,
@@ -70,10 +71,10 @@ function logout_user(): void
 
     session_destroy();
 
-    clear_remember_me_cookie();
+    clearRememberMeCookie();
 }
 
-function require_login(): array
+function requireLogin(): array
 {
     if (session_status() === PHP_SESSION_NONE)
     {

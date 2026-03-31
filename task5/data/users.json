@@ -1,9 +1,19 @@
 [
     {
+        "id": 1,
         "email": "anton1999@gmail.com",
         "password": "$2y$12$CdhNwaU3jWHc0BVxQblUo.RGPqH3gsnopDwiTcyG6TRk\/zoRPFQ\/C",
-        "full_name": "Anton Saliava",
-        "phone": "+375299824124",
-        "created_at": "2026-03-28 21:58:22"
+        "fullName": "Anton",
+        "phone": "+375299824121",
+        "createdAt": "2026-03-28 21:58:22",
+        "avatar": "uploads\/avatars\/\\1_1774902169.jpg"
+    },
+    {
+        "email": "anton2709@gmail.com",
+        "password": "$2y$12$..O0eieauYtOVspcudr6EeNhf1Da8hVkoeLqCu18JiU6IgKguVb7u",
+        "fullName": "anton2709",
+        "phone": "+375299824121",
+        "createdAt": "2026-03-30 11:39:24",
+        "id": 2
     }
 ]

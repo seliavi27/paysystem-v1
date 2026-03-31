@@ -1,7 +1,24 @@
 <?php
 declare(strict_types=1);
 
-require 'login_functional.php';
+require 'auth_functional.php';
+
+$flash = [];
+
+if (session_status() === PHP_SESSION_NONE)
+{
+    session_start();
+}
+
+if (!empty($_SESSION['flash']))
+{
+    $flash = $_SESSION['flash'];
+    unset($_SESSION['flash']);
+}
+
+$theme = $_SESSION['theme'] ?? 'light';
+
+$user = requireLogin();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['logout']))
 {
@@ -10,15 +27,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['logout']))
     exit;
 }
 
-$user = require_login();
-
-$payments_file = 'data/payments.json';
-$payments = is_file($payments_file)
-    ? json_decode(file_get_contents($payments_file), true)
+$paymentsFile = 'data/payments.json';
+$payments = is_file($paymentsFile)
+    ? json_decode(file_get_contents($paymentsFile), true)
     : [];
 
-$userPayments = array_filter($payments, function ($pay) use ($user) {
-    return ($pay['email'] ?? '') === $user['email'];
+$userPayments = array_filter($payments, function ($pay) use ($user)
+{
+    return ($pay['userId'] ?? '') === $user['id'];
 });
 
 $count = count($userPayments);
@@ -34,7 +50,13 @@ $average = $count > 0 ? $total / $count : 0;
 </head>
 <body>
 
-<h2>Добро пожаловать, <?= htmlspecialchars($user['full_name']) ?>!</h2>
+<?php if (isset($flash['type']) && isset($flash['message'])): ?>
+    <div style="color: <?= $flash['type'] === 'success' ? 'green' : 'red' ?>">
+        <?= htmlspecialchars($flash['message']) ?>
+    </div>
+<?php endif; ?>
+
+<h2>Добро пожаловать, <?= htmlspecialchars($user['fullName']) ?>!</h2>
 
 <h3>Статистика</h3>
 <ul>
@@ -48,16 +70,20 @@ $average = $count > 0 ? $total / $count : 0;
     <?php foreach (array_slice($userPayments, -5) as $payment): ?>
         <li>
             <?= htmlspecialchars($payment['date']) ?> —
-            <?= htmlspecialchars($payment['amount']) ?> —
+            <?= htmlspecialchars((string)$payment['amount']) ?> —
             <?= htmlspecialchars($payment['description']) ?>
         </li>
     <?php endforeach; ?>
 </ul>
 
-<br>
+<a href="payments.php">Список всех платежей</a>
+<br><br>
 
-<a href="create_payment.php">Создать платёж</a><br>
-<a href="profile.php">Профиль</a><br>
+<a href="create_payment.php">Создать платёж</a>
+<br><br>
+
+<a href="profile.php">Профиль</a>
+<br><br>
 
 <form method="POST" style="display:inline;">
     <button type="submit" name="logout">Выход</button>

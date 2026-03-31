@@ -1,16 +1,19 @@
 <?php
 declare(strict_types=1);
 
-require 'login_functional.php';
+require 'auth_functional.php';
+require 'logger.php';
+require 'security.php';
 
 session_start();
 
-$users_file = 'data/users.json';
+$usersFile = 'data/users.json';
 $errors = [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST')
 {
     $email = trim($_POST['email'] ?? '');
+    log_operation('LOGIN_ATTEMPT', "Email: $email");
     $password = $_POST['password'] ?? '';
     $remember = isset($_POST['remember_me']);
 
@@ -20,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
     }
     else
     {
-        $users = is_file($users_file) ? json_decode(file_get_contents($users_file), true) : [];
+        $users = is_file($usersFile) ? json_decode(file_get_contents($usersFile), true) : [];
 
         foreach ($users as $user)
         {
@@ -28,14 +31,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
             {
                 if (password_verify($password, $user['password']))
                 {
-                    start_user_session($user);
+                    startUserSession($user);
 
-                    if ($remember) {
-                        set_remember_me_cookie($user['email']);
+                    if ($remember)
+                    {
+                        setRememberMeCookie($user['email']);
                     }
 
+                    log_operation('LOGIN_SUCCESS', "Email: $email");
+                    redirectWithMessage('dashboard.php', 'Вход выполнен');
                     //header('Location: dashboard.php');
-                    exit;
+                    //exit;
                 }
                 else
                 {
@@ -49,6 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
         if (empty($errors))
         {
             $errors[] = 'User not found';
+            log_error("User not found: " . basename(__FILE__));
         }
     }
 }
@@ -84,9 +91,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
     </label>
 
     <br><br>
+
     <button type="submit">Войти</button>
 
     <br><br>
+
     <a href="register.php" class="register-link">Зарегистрироваться</a>
 </form>
 </body>
