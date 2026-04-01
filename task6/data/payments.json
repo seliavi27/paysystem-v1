@@ -1,0 +1,29 @@
+[
+    {
+        "id": 1,
+        "userId": 1,
+        "date": "2026-04-01 15:22:28",
+        "amount": 329,
+        "type": "card",
+        "status": "pending",
+        "description": "Test payment #1"
+    },
+    {
+        "id": 2,
+        "userId": 1,
+        "date": "2026-04-01 15:22:28",
+        "amount": 416,
+        "type": "card",
+        "status": "pending",
+        "description": "Test payment #2"
+    },
+    {
+        "id": 3,
+        "userId": 1,
+        "date": "2026-04-01 15:22:28",
+        "amount": 155,
+        "type": "card",
+        "status": "pending",
+        "description": "Test payment #3"
+    }
+]
