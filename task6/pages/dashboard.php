@@ -17,7 +17,6 @@ function handleDashboardPost($data): array
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($data['logout']))
     {
-        logoutUser();
         redirectToPage('logout');
     }
 
