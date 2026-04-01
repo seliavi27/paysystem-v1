@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 require_once CONFIG_PATH . '/config.php';
 
-$required_dirs = [DATA_PATH, LOGS_PATH, UPLOADS_PATH, UPLOADS_PATH . '/avatars'];
+$required_dirs = [DATA_PATH, LOGS_PATH, UPLOADS_PATH, AVATARS_PATH];
 
 foreach ($required_dirs as $dir)
 {
@@ -22,5 +22,3 @@ if (!file_exists(PAYMENTS_FILE))
 {
     file_put_contents(PAYMENTS_FILE, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 }
-
-//session_start();

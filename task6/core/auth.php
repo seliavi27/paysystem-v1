@@ -3,9 +3,10 @@ declare(strict_types=1);
 
 function startUserSession(array $user): void
 {
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
-    }
+//    if (session_status() === PHP_SESSION_NONE)
+//    {
+//        session_start();
+//    }
 
     $_SESSION['user'] = [
         'id' => $user['id'],
@@ -18,7 +19,8 @@ function startUserSession(array $user): void
 
 function isUserLoggedIn(): bool
 {
-    if (session_status() === PHP_SESSION_NONE) {
+    if (session_status() === PHP_SESSION_NONE)
+    {
         session_start();
     }
 
@@ -58,9 +60,10 @@ function clearRememberMeCookie(): void
     ]);
 }
 
-function logout_user(): void
+function logoutUser(): void
 {
-    if (session_status() === PHP_SESSION_NONE) {
+    if (session_status() === PHP_SESSION_NONE)
+    {
         session_start();
     }
 
@@ -73,61 +76,15 @@ function logout_user(): void
 
 function requireLogin(): array
 {
-    if (session_status() === PHP_SESSION_NONE) {
+    if (session_status() === PHP_SESSION_NONE)
+    {
         session_start();
     }
 
-    if (empty($_SESSION['user'])) {
-        header('Location: login.php');
-        exit;
+    if (empty($_SESSION['user']))
+    {
+        redirectToPage('login');
     }
 
     return $_SESSION['user'];
-}
-
-//---------------------register-----------------------
-
-function registerUser($formData): bool
-{
-    $success = false;
-    $validation = validateRegistrationForm($formData);
-
-    if (!$validation['valid'])
-    {
-        $errors = $validation['errors'];
-        log_error("Registration was failed: " . basename(__FILE__));
-    }
-    else
-    {
-        $newUser = [
-            'email' => $formData['email'],
-            'password' => hashPassword($formData['password']),
-            'fullName' => $formData['fullName'],
-            'phone' => $formData['phone'],
-            'createdAt' => date('Y-m-d H:i:s')
-        ];
-
-        $users = is_file(USERS_FILE) ?
-            json_decode(file_get_contents(USERS_FILE), true) :
-            ensure_users_storage(USERS_FILE);
-
-        if (!is_array($users))
-        {
-            $users = [];
-        }
-
-        $listId = array_column($users, 'id');
-        $newUser['id'] = max($listId) + 1;
-
-        $users[] = $newUser;
-
-        file_put_contents(USERS_FILE, json_encode($users, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-
-        $success = true;
-
-//        header('Location: login.php');
-//        exit;
-    }
-
-    return $success;
 }

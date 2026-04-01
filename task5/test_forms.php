@@ -8,7 +8,7 @@ require 'logger.php';
 
 
 echo '<pre>';
-echo "---------------validators_form.php-----------------" . "</br>";
+echo "---------------validators.php-----------------" . "</br>";
 
 $validData = [
     'email' => 'test@gmail.com',

@@ -1,1 +1,19 @@
-[]
+[
+    {
+        "email": "anton1999@gmail.com",
+        "password": "$2y$12$mtf6EG2DuQsViuLxqPGdD.JMGK6ns8dHvtbMiophpJkqJY2ODxTHy",
+        "fullName": "anton1999",
+        "phone": "+375299824124",
+        "createdAt": "2026-03-31 22:22:18",
+        "id": 1,
+        "avatar": "uploads\/avatars\/1_1775052189.jpg"
+    },
+    {
+        "email": "anton129@gmail.com",
+        "password": "$2y$12$S03yichpidVkjFuRe1\/s7.8Ip1Asov4OfC.utX6r5pWZu2Q\/lx6t.",
+        "fullName": "anton129",
+        "phone": "+375299824125",
+        "createdAt": "2026-04-01 14:23:25",
+        "id": 2
+    }
+]

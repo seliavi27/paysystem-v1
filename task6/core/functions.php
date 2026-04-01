@@ -1,74 +1,6 @@
 <?php
 declare(strict_types=1);
 
-function handlePostRequest(callable $handler): void
-{
-    if ($_SERVER['REQUEST_METHOD'] === 'POST')
-    {
-        $handler($_POST);
-    }
-
-//    $csrf_token = $_POST['csrf_token'] ?? '';
-//
-//    if (!hash_equals($_SESSION['csrf_token'], $csrf_token))
-//    {
-//        $errors['csrf'] = 'Invalid CSRF token';
-//    }
-//    else
-//    {
-//
-//    }
-//
-//
-//    if (!validateCsrfToken())
-//    {
-//        setFlashMessage('Ошибка безопасности. Попробуйте снова.', 'error');
-//        redirectBack();
-//        return;
-//    }
-
-
-//    switch ($handler)
-//    {
-//        case 'login':
-//            handleLoginPost($handler);
-//            break;
-//
-//        case 'register':
-//            handleRegisterPost();
-//            break;
-//
-//        case 'profile':
-//            handleProfilePost();
-//            break;
-//
-//        case 'settings':
-//            handleSettingsPost();
-//            break;
-//
-//        case 'upload_avatar':
-//            handleUploadAvatarPost();
-//            break;
-//
-//        case 'change_password':
-//            handleChangePasswordPost();
-//            break;
-//
-//        default:
-//            http_response_code(404);
-//            exit;
-//    }
-}
-
-function validateCsrfToken(): bool
-{
-    if (!isset($_POST['csrf_token']) || !isset($_SESSION['csrf_token'])) {
-        return false;
-    }
-
-    return hash_equals($_SESSION['csrf_token'], $_POST['csrf_token']);
-}
-
 function setFlashMessage(string $message, string $type = 'success'): void
 {
     $_SESSION['flash'] = [
@@ -77,10 +9,141 @@ function setFlashMessage(string $message, string $type = 'success'): void
     ];
 }
 
-function redirectBack(): void
+function calculatePaymentStats(array $payments): array
 {
-    $redirect = $_SERVER['HTTP_REFERER'] ?? '/';
-    header("Location: $redirect");
-    exit;
+    $count = count($payments);
+    $total = array_sum(array_column($payments, 'amount'));
+    $average = $count > 0 ? $total / $count : 0;
+
+    $byStatus = [];
+
+    foreach ($payments as $payment)
+    {
+        $status = $payment['status'] ?? 'unknown';
+
+        if (!isset($byStatus[$status]))
+        {
+            $byStatus[$status] = 0;
+        }
+
+        $byStatus[$status]++;
+    }
+
+    usort($payments, function ($a, $b) {
+        return strtotime($b['date']) <=> strtotime($a['date']);
+    });
+
+    $lastPayments = array_slice($payments, 0, 5);
+
+    return [
+        'count' => $count,
+        'total' => $total,
+        'average' => $average,
+        'byStatus' => $byStatus,
+        'lastPayments' => $lastPayments,
+    ];
 }
 
+//-----------------image-------------------------
+
+function validateUploadedFile(array $file, string $type = 'image'): array
+{
+    if ($file['error'] !== UPLOAD_ERR_OK)
+    {
+        return ['valid' => false, 'error' => 'File upload error'];
+    }
+
+    if ($file['size'] > 2 * 1024 * 1024)
+    {
+        return ['valid' => false, 'error' => 'File is too large (max 2MB)'];
+    }
+
+    if ($type === 'image')
+    {
+        $allowed = ['image/jpeg', 'image/png', 'image/gif'];
+        $mime = mime_content_type($file['tmp_name']);
+
+        if (!in_array($mime, $allowed, true))
+        {
+            return ['valid' => false, 'error' => 'Only images (jpg, png, gif)'];
+        }
+    }
+
+    return ['valid' => true, 'error' => ''];
+}
+
+function saveUploadedFile(array $file, string $upload_dir, string $new_name): string|false
+{
+    if (!is_dir($upload_dir))
+    {
+        mkdir($upload_dir, 0755, true);
+    }
+
+    $destination = rtrim($upload_dir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $new_name;
+
+    if (move_uploaded_file($file['tmp_name'], $destination))
+    {
+        return AVATARS_URL . '/' . $new_name;
+    }
+
+    return false;
+}
+
+function deleteOldAvatar(string $avatar_path): void
+{
+    if ($avatar_path && file_exists($avatar_path))
+    {
+        unlink($avatar_path);
+    }
+}
+
+//---------------------------cookies--------------------------
+
+function setOneCookie(string $name, $value, int $days = 30): void
+{
+    setcookie($name, json_encode($value), [
+        'expires' => time() + 60 * 60 * 24 * $days,
+        'path' => '/',
+        'httponly' => false,
+        'samesite' => 'Lax'
+    ]);
+}
+
+function getCookie(string $name, $default = null): mixed
+{
+    if (!isset($_COOKIE[$name]))
+    {
+        return $default;
+    }
+
+    $value = json_decode($_COOKIE[$name], true);
+
+    return $value ?? $_COOKIE[$name];
+}
+
+function deleteCookie(string $name): void
+{
+    setcookie($name, '', [
+        'expires' => time() - 3600,
+        'path' => '/'
+    ]);
+}
+
+function setThemePreference(string $theme = 'light'): void
+{
+    $allowed = ['light', 'dark'];
+
+    if (!in_array($theme, $allowed, true))
+    {
+        $theme = 'light';
+    }
+
+    setOneCookie('theme', $theme);
+}
+
+function getThemePreference(): string
+{
+    $theme = getCookie('theme', 'light');
+
+    return in_array($theme, ['light', 'dark'], true) ? $theme : 'light';
+}

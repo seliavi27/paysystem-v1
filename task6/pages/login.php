@@ -1,63 +1,75 @@
 <?php
 declare(strict_types=1);
 
-//require 'security.php';
+$errors = [];
 
-function handleLoginPost($data): void
+function handleLoginPost($data): array
 {
-    if ($_SERVER['REQUEST_METHOD'] === 'POST')
+    $errors = [];
+
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST')
     {
-        $errors = [];
-        $email = trim($_POST['email'] ?? '');
+        return $errors;
+    }
+
+    try
+    {
+
+        $email = trim($data['email'] ?? '');
         log_operation('LOGIN_ATTEMPT', "Email: $email");
-        $password = $_POST['password'] ?? '';
-        $remember = isset($_POST['remember_me']);
+        $password = $data['password'] ?? '';
+        $remember = isset($data['remember_me']);
 
         if ($email === '' || $password === '')
         {
             $errors[] = 'Please fill in all fields';
+            return $errors;
         }
-        else
+
+        $users = is_file(USERS_FILE) ? json_decode(file_get_contents(USERS_FILE), true) : [];
+
+        foreach ($users as $user)
         {
-            $users = is_file(USERS_FILE) ? json_decode(file_get_contents(USERS_FILE), true) : [];
-
-            foreach ($users as $user)
+            if (strtolower($user['email']) === strtolower($email))
             {
-                if (strtolower($user['email']) === strtolower($email))
+                if (password_verify($password, $user['password']))
                 {
-                    if (password_verify($password, $user['password']))
-                    {
-                        startUserSession($user);
+                    startUserSession($user);
 
-                        if ($remember)
-                        {
-                            setRememberMeCookie($user['email']);
-                        }
-
-                        log_operation('LOGIN_SUCCESS', "Email: $email");
-                        //redirectWithMessage('dashboard.php', 'Вход выполнен');
-                        //header('Location: dashboard.php');
-                        //exit;
-                    }
-                    else
+                    if ($remember)
                     {
-                        $errors[] = 'Incorrect password';
+                        setRememberMeCookie($user['email']);
                     }
 
-                    break;
+                    log_operation('LOGIN_SUCCESS', "Email: $email");
+                    redirectWithMessage('dashboard', 'Вход выполнен');
                 }
-            }
+                else
+                {
+                    $errors[] = 'Incorrect password';
+                }
 
-            if (empty($errors))
-            {
-                $errors[] = 'User not found';
-                log_error("User not found: " . basename(__FILE__));
+                break;
             }
-
-            $_SESSION['error'] = $errors;
         }
+
+        if (empty($errors))
+        {
+            $errors[] = 'User not found';
+            log_error("User not found: " . basename(__FILE__));
+        }
+
     }
-};
+    catch (Exception $e)
+    {
+        log_error($e->getMessage());
+        $errors = $e->getMessage();
+    }
+
+    return $errors;
+}
+
+$errors = handleLoginPost($_POST);
 
 ?>
 
@@ -79,7 +91,7 @@ function handleLoginPost($data): void
 
 </head>
 <body>
-<form method="POST" action="login.php">
+<form method="POST">
     <h2>Вход</h2>
 
     <input type="email" name="email" placeholder="Email" required><br><br>
@@ -96,7 +108,7 @@ function handleLoginPost($data): void
 
     <br><br>
 
-    <a href="/?page=register.php" class="register-link">Зарегистрироваться</a>
+    <a href="/?page=register" class="register-link">Зарегистрироваться</a>
 </form>
 </body>
 </html>

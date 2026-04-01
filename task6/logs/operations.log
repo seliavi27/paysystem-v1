@@ -1,0 +1,176 @@
+[2026-03-31 22:22:53] LOGIN_ATTEMPT: Email: anton1999@gmail.com
+[2026-03-31 22:22:53] LOGIN_SUCCESS: Email: anton1999@gmail.com
+[2026-03-31 22:49:09] LOGIN_ATTEMPT: Email: anton1999@gmail.com
+[2026-03-31 22:49:09] LOGIN_SUCCESS: Email: anton1999@gmail.com
+[2026-04-01 00:02:57] PAYMENT_CREATE: Payment #1 created by anton1999@gmail.com amount 463.13
+[2026-04-01 00:06:57] PAYMENT_CREATE: Payment #2 created by anton1999@gmail.com amount 14
+[2026-04-01 00:07:14] PAYMENT_CREATE: Payment #3 created by anton1999@gmail.com amount 140.60
+[2026-04-01 00:07:33] PAYMENT_CREATE: Payment #4 created by anton1999@gmail.com amount 43
+[2026-04-01 00:07:59] PAYMENT_CREATE: Payment #5 created by anton1999@gmail.com amount 5223
+[2026-04-01 00:08:17] PAYMENT_CREATE: Payment #6 created by anton1999@gmail.com amount 2
+[2026-04-01 09:59:19] LOGIN_ATTEMPT: Email: anton1999@gmail.com
+[2026-04-01 09:59:19] LOGIN_SUCCESS: Email: anton1999@gmail.com
+[2026-04-01 10:15:02] LOGIN_ATTEMPT: Email: anton1999@gmail.com
+[2026-04-01 10:15:03] LOGIN_SUCCESS: Email: anton1999@gmail.com
+[2026-04-01 10:15:45] LOGIN_ATTEMPT: Email: anton1999@gmail.com
+[2026-04-01 10:15:45] LOGIN_SUCCESS: Email: anton1999@gmail.com
+[2026-04-01 12:53:46] LOGIN_ATTEMPT: Email: anton1999@gmail.com
+[2026-04-01 12:53:47] LOGIN_SUCCESS: Email: anton1999@gmail.com
+[2026-04-01 12:54:56] FILE_UPLOADED: Avatar uploaded
+[2026-04-01 12:54:59] FILE_UPLOADED: Avatar uploaded
+[2026-04-01 13:02:23] FILE_UPLOADED: Avatar uploaded
+[2026-04-01 13:12:54] FILE_UPLOADED: Avatar uploaded
+[2026-04-01 13:12:56] FILE_UPLOADED: Avatar uploaded
+[2026-04-01 13:22:19] FILE_UPLOADED: Avatar uploaded
+[2026-04-01 13:22:24] FILE_UPLOADED: Avatar uploaded
+[2026-04-01 13:22:27] FILE_UPLOADED: Avatar uploaded
+[2026-04-01 13:23:27] FILE_UPLOADED: Avatar uploaded
+[2026-04-01 13:24:39] FILE_UPLOADED: Avatar uploaded
+[2026-04-01 13:24:42] FILE_UPLOADED: Avatar uploaded
+[2026-04-01 13:24:46] FILE_UPLOADED: Avatar uploaded
+[2026-04-01 13:31:21] FILE_UPLOADED: Avatar uploaded
+[2026-04-01 13:31:22] FILE_UPLOADED: Avatar uploaded
+[2026-04-01 13:31:26] FILE_UPLOADED: Avatar uploaded
+[2026-04-01 13:31:32] FILE_UPLOADED: Avatar uploaded
+[2026-04-01 13:31:34] FILE_UPLOADED: Avatar uploaded
+[2026-04-01 13:35:02] FILE_UPLOADED: Avatar uploaded
+[2026-04-01 13:35:07] FILE_UPLOADED: Avatar uploaded
+[2026-04-01 13:35:36] FILE_UPLOADED: Avatar uploaded
+[2026-04-01 13:39:07] FILE_UPLOADED: Avatar uploaded
+[2026-04-01 14:00:02] FILE_UPLOADED: Avatar uploaded
+[2026-04-01 14:00:14] FILE_UPLOADED: Avatar uploaded
+[2026-04-01 14:00:17] FILE_UPLOADED: Avatar uploaded
+[2026-04-01 14:00:19] FILE_UPLOADED: Avatar uploaded
+[2026-04-01 14:03:04] FILE_UPLOADED: Avatar uploaded
+[2026-04-01 14:03:09] FILE_UPLOADED: Avatar uploaded
+[2026-04-01 14:23:34] LOGIN_ATTEMPT: Email: anton129@gmail.com
+[2026-04-01 14:23:34] LOGIN_SUCCESS: Email: anton129@gmail.com
+[2026-04-01 14:23:48] LOGIN_ATTEMPT: Email: anton1999@gmail.com
+[2026-04-01 14:23:48] LOGIN_SUCCESS: Email: anton1999@gmail.com
+[2026-04-01 14:26:03] LOGIN_ATTEMPT: Email: anton1999@gmail.com
+[2026-04-01 14:26:09] LOGIN_ATTEMPT: Email: anton1999@gmail.com
+[2026-04-01 14:26:12] LOGIN_ATTEMPT: Email: anton1999@gmail.com
+[2026-04-01 14:26:12] LOGIN_SUCCESS: Email: anton1999@gmail.com
+[2026-04-01 14:45:04] LOGIN_ATTEMPT: Email: anton1999@gmail.com
+[2026-04-01 14:45:05] LOGIN_SUCCESS: Email: anton1999@gmail.com
+[2026-04-01 14:45:08] LOGIN_ATTEMPT: Email: anton1999@gmail.com
+[2026-04-01 14:45:08] LOGIN_SUCCESS: Email: anton1999@gmail.com
+[2026-04-01 15:12:46] TEST: Valid registration tested step 1
+[2026-04-01 15:12:46] TEST: Valid registration tested step 2
+[2026-04-01 15:12:46] TEST: Registration validation failed
+[2026-04-01 15:13:09] TEST: Valid registration tested step 1
+[2026-04-01 15:13:09] TEST: Valid registration tested step 2
+[2026-04-01 15:13:09] TEST: Registration validation failed
+[2026-04-01 15:13:41] TEST: Valid registration tested step 1
+[2026-04-01 15:13:41] TEST: Valid registration tested step 2
+[2026-04-01 15:13:41] TEST: Registration validation failed
+[2026-04-01 15:13:53] TEST: Valid registration tested step 1
+[2026-04-01 15:13:53] TEST: Valid registration tested step 2
+[2026-04-01 15:13:53] TEST: Registration validation failed
+[2026-04-01 15:14:16] TEST: Valid registration tested step 1
+[2026-04-01 15:14:17] TEST: Valid registration tested step 2
+[2026-04-01 15:14:17] TEST: Registration validation failed
+[2026-04-01 15:14:42] TEST: Valid registration tested step 1
+[2026-04-01 15:14:42] TEST: Valid registration tested step 2
+[2026-04-01 15:14:42] TEST: Registration validation failed
+[2026-04-01 15:14:49] TEST: Valid registration tested step 1
+[2026-04-01 15:14:49] TEST: Valid registration tested step 2
+[2026-04-01 15:14:49] TEST: Registration validation failed
+[2026-04-01 15:18:23] TEST: Valid registration tested step 1
+[2026-04-01 15:18:23] TEST: Valid registration tested step 2
+[2026-04-01 15:18:23] TEST: Registration validation failed
+[2026-04-01 15:19:16] TEST: Valid registration tested step 1
+[2026-04-01 15:19:16] TEST: Valid registration tested step 2
+[2026-04-01 15:19:16] TEST: Registration validation failed
+[2026-04-01 15:21:01] TEST: Valid registration tested step 1
+[2026-04-01 15:21:01] TEST: Valid registration tested step 2
+[2026-04-01 15:21:01] TEST: Registration validation failed
+[2026-04-01 15:21:31] TEST: Valid registration tested step 1
+[2026-04-01 15:21:31] TEST: Valid registration tested step 2
+[2026-04-01 15:21:31] TEST: Registration validation failed
+[2026-04-01 15:22:28] TEST: Valid registration tested step 1
+[2026-04-01 15:22:28] TEST: Valid registration tested step 2
+[2026-04-01 15:22:28] TEST: Registration validation failed
+[2026-04-01 15:25:19] TEST: Valid registration tested step 1
+[2026-04-01 15:25:19] TEST: Valid registration tested step 2
+[2026-04-01 15:25:19] TEST: Registration validation failed
+[2026-04-01 15:25:19] TEST: Valid create payment tested step 1
+[2026-04-01 15:26:46] TEST: Valid registration tested step 1
+[2026-04-01 15:26:46] TEST: Valid registration tested step 2
+[2026-04-01 15:26:46] TEST: Registration validation failed
+[2026-04-01 15:26:46] TEST: Valid create payment tested step 1
+[2026-04-01 15:26:46] TEST: Valid create payment tested step 1
+[2026-04-01 15:30:39] TEST: Valid registration tested step 1
+[2026-04-01 15:30:39] TEST: Valid registration tested step 2
+[2026-04-01 15:30:39] TEST: Registration validation failed
+[2026-04-01 15:30:39] TEST: Valid create payment tested step 1
+[2026-04-01 15:31:11] TEST: Valid registration tested step 1
+[2026-04-01 15:31:11] TEST: Valid registration tested step 2
+[2026-04-01 15:31:11] TEST: Registration validation failed
+[2026-04-01 15:31:11] TEST: Valid create payment tested step 1
+[2026-04-01 15:31:11] TEST: Valid create payment tested step 1
+[2026-04-01 15:31:20] TEST: Valid registration tested step 1
+[2026-04-01 15:31:20] TEST: Valid registration tested step 2
+[2026-04-01 15:31:20] TEST: Registration validation failed
+[2026-04-01 15:31:20] TEST: Valid create payment tested step 1
+[2026-04-01 15:31:20] TEST: Valid create payment tested step 1
+[2026-04-01 15:31:32] TEST: Valid registration tested step 1
+[2026-04-01 15:31:32] TEST: Valid registration tested step 2
+[2026-04-01 15:31:32] TEST: Registration validation failed
+[2026-04-01 15:31:32] TEST: Valid create payment tested step 1
+[2026-04-01 15:31:32] TEST: Valid create payment tested step 1
+[2026-04-01 15:31:54] TEST: Valid registration tested step 1
+[2026-04-01 15:31:54] TEST: Valid registration tested step 2
+[2026-04-01 15:31:54] TEST: Registration validation failed
+[2026-04-01 15:31:54] TEST: Valid create payment tested step 1
+[2026-04-01 15:31:54] TEST: Valid create payment tested step 1
+[2026-04-01 15:32:05] TEST: Valid registration tested step 1
+[2026-04-01 15:32:06] TEST: Valid registration tested step 2
+[2026-04-01 15:32:06] TEST: Registration validation failed
+[2026-04-01 15:32:06] TEST: Valid create payment tested step 1
+[2026-04-01 15:32:06] TEST: Valid create payment tested step 1
+[2026-04-01 15:32:30] TEST: Valid registration tested step 1
+[2026-04-01 15:32:30] TEST: Valid registration tested step 2
+[2026-04-01 15:32:30] TEST: Registration validation failed
+[2026-04-01 15:32:30] TEST: Valid create payment tested step 1
+[2026-04-01 15:32:30] TEST: Valid create payment tested step 1
+[2026-04-01 15:33:33] TEST: Valid registration tested step 1
+[2026-04-01 15:33:33] TEST: Valid registration tested step 2
+[2026-04-01 15:33:33] TEST: Registration validation failed
+[2026-04-01 15:33:33] TEST: Valid create payment tested step 1
+[2026-04-01 15:33:33] TEST: Valid create payment tested step 1
+[2026-04-01 15:34:13] TEST: Valid registration tested step 1
+[2026-04-01 15:34:13] TEST: Valid registration tested step 2
+[2026-04-01 15:34:13] TEST: Registration validation failed
+[2026-04-01 15:34:13] TEST: Valid create payment tested step 1
+[2026-04-01 15:34:13] TEST: Valid create payment tested step 1
+[2026-04-01 15:34:28] TEST: Valid registration tested step 1
+[2026-04-01 15:34:28] TEST: Valid registration tested step 2
+[2026-04-01 15:34:28] TEST: Registration validation failed
+[2026-04-01 15:34:28] TEST: Valid create payment tested step 1
+[2026-04-01 15:34:28] TEST: Valid create payment tested step 1
+[2026-04-01 15:34:44] TEST: Valid registration tested step 1
+[2026-04-01 15:34:44] TEST: Valid registration tested step 2
+[2026-04-01 15:34:44] TEST: Registration validation failed
+[2026-04-01 15:34:44] TEST: Valid create payment tested step 1
+[2026-04-01 15:34:44] TEST: Valid create payment tested step 1
+[2026-04-01 15:34:59] TEST: Valid registration tested step 1
+[2026-04-01 15:35:00] TEST: Valid registration tested step 2
+[2026-04-01 15:35:00] TEST: Registration validation failed
+[2026-04-01 15:35:00] TEST: Valid create payment tested step 1
+[2026-04-01 15:35:00] TEST: Valid create payment tested step 1
+[2026-04-01 15:35:56] TEST: Valid registration tested step 1
+[2026-04-01 15:35:56] TEST: Valid registration tested step 2
+[2026-04-01 15:35:56] TEST: Registration validation failed
+[2026-04-01 15:35:56] TEST: Valid create payment tested step 1
+[2026-04-01 15:35:56] TEST: Valid create payment tested step 1
+[2026-04-01 15:36:15] TEST: Valid registration tested step 1
+[2026-04-01 15:36:15] TEST: Valid registration tested step 2
+[2026-04-01 15:36:15] TEST: Registration validation failed
+[2026-04-01 15:36:15] TEST: Valid create payment tested step 1
+[2026-04-01 15:36:15] TEST: Valid create payment tested step 1
+[2026-04-01 15:36:17] TEST: Valid registration tested step 1
+[2026-04-01 15:36:17] TEST: Valid registration tested step 2
+[2026-04-01 15:36:17] TEST: Registration validation failed
+[2026-04-01 15:36:17] TEST: Valid create payment tested step 1
+[2026-04-01 15:36:17] TEST: Valid create payment tested step 1
