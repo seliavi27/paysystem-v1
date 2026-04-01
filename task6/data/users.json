@@ -5,8 +5,7 @@
         "fullName": "anton1999",
         "phone": "+375299824124",
         "createdAt": "2026-03-31 22:22:18",
-        "id": 1,
-        "avatar": "uploads\/avatars\/1_1775052189.jpg"
+        "id": 1
     },
     {
         "email": "anton129@gmail.com",
@@ -15,5 +14,14 @@
         "phone": "+375299824125",
         "createdAt": "2026-04-01 14:23:25",
         "id": 2
+    },
+    {
+        "email": "vlad@mail.com",
+        "password": "$2y$12$1bFh9UtPkBTGVSBDkdi.MeCXs.4tgmWVWS\/5zM1\/QRlkmgpDF9bvu",
+        "fullName": "Vlad Laikov",
+        "phone": "+375255055712",
+        "createdAt": "2026-04-01 18:03:57",
+        "id": 3,
+        "avatar": "\/uploads\/avatars\/3_1775067026.jpg"
     }
 ]

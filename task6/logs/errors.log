@@ -46,3 +46,7 @@
 [2026-04-01 14:23:15] ERROR: Registration was failed: register.php
 [2026-04-01 14:23:59] ERROR: Payment was not created by anton1999@gmail.com
 [2026-04-01 14:45:09] ERROR: Payment was not created by anton1999@gmail.com
+[2026-04-01 17:55:52] ERROR: Registration was failed: register.php
+[2026-04-01 17:56:11] ERROR: User not found: login.php
+[2026-04-01 17:56:34] ERROR: Registration was failed: register.php
+[2026-04-01 18:03:42] ERROR: User not found: login.php

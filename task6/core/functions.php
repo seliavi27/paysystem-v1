@@ -89,11 +89,12 @@ function saveUploadedFile(array $file, string $upload_dir, string $new_name): st
     return false;
 }
 
-function deleteOldAvatar(string $avatar_path): void
+function deleteOldAvatar(string $avatar_url): void
 {
-    if ($avatar_path && file_exists($avatar_path))
+    $file_path = PUBLIC_PATH . $avatar_url;
+    if ($avatar_url && file_exists($file_path))
     {
-        unlink($avatar_path);
+        unlink($file_path);
     }
 }
 
