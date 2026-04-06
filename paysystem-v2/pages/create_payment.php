@@ -51,18 +51,6 @@ function handleCreatePaymentPost($data, $user): array
         $payments = [];
     }
 
-//    $newId = empty($payments) ? 1 : max(array_column($payments, 'id')) + 1;
-
-//    $payment = [
-//            'id' => $newId,
-//            'userId' => $user['id'],
-//            'date' => date('Y-m-d H:i:s'),
-//            'amount' => (float)$amount,
-//            'type' => $type,
-//            'description' => $description,
-//            'status' => 'pending'
-//    ];
-
     $newPayment = Payment::create(
             $user['id'],
             (float)$amount,
@@ -119,7 +107,7 @@ $errors = handleCreatePaymentPost($_POST, $user);
             <option value="<?= $type->value ?>"
                     <?= (($_POST['type'] ?? '') === $type->value) ? 'selected' : '' ?>
             >
-                <?= htmlspecialchars($type->value) ?>
+                <?= htmlspecialchars($type->getLabel()) ?>
             </option>
         <?php endforeach; ?>
     </select>

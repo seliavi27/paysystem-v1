@@ -2,8 +2,35 @@
 
 enum CurrencyType: string
 {
-    case BYN = 'Б';
-    case RUB = '₽';
-    case USD = '$';
-    case EUR = '€';
+    case BYN = 'BYN';
+    case RUB = 'RUB';
+    case USD = 'USD';
+    case EUR = 'EUR';
+
+    public function getSymbol(): string
+    {
+        return match ($this)
+        {
+            self::BYN => 'Б',
+            self::RUB => '₽',
+            self::USD => '$',
+            self::EUR => '€',
+        };
+    }
+
+    public function getLabel(): string
+    {
+        return match ($this)
+        {
+            self::BYN => 'Белорусский рубль',
+            self::RUB => 'Российский рубль',
+            self::USD => 'Доллар США',
+            self::EUR => 'Евро',
+        };
+    }
+
+    public static function tryFromString(string $value): ?self
+    {
+        return self::tryFrom(strtoupper($value));
+    }
 }

@@ -7,6 +7,7 @@ trait Timestampable
     {
         get => $this->createdAt;
     }
+
     public DateTime $updatedAt
     {
         get => $this->updatedAt;

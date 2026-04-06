@@ -91,8 +91,8 @@ $lastPayments = $data['lastPayments'];
             <td><?= $payment->id ?></td>
             <td><?= htmlspecialchars($payment->createdAt->format('Y-m-d H:i')) ?></td>
             <td><?= number_format($payment->amount, 2) ?></td>
-            <td><?= htmlspecialchars($payment->type->value) ?></td>
-            <td><?= htmlspecialchars($payment->status->value) ?></td>
+            <td><?= htmlspecialchars($payment->type->getLabel()) ?></td>
+            <td><?= htmlspecialchars($payment->status->getLabel()) ?></td>
         </tr>
     <?php endforeach; ?>
 </table>
