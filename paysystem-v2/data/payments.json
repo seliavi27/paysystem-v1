@@ -10,6 +10,11 @@
             "date": "2026-04-05 23:33:07.470456",
             "timezone_type": 3,
             "timezone": "UTC"
+        },
+        "updatedAt": {
+            "date": "2026-04-05 23:33:07.470456",
+            "timezone_type": 3,
+            "timezone": "UTC"
         }
     },
     {
@@ -20,6 +25,11 @@
         "status": "Pending",
         "type": "Wallet",
         "createdAt": {
+            "date": "2026-04-05 23:33:11.450253",
+            "timezone_type": 3,
+            "timezone": "UTC"
+        },
+        "updatedAt": {
             "date": "2026-04-05 23:33:11.450253",
             "timezone_type": 3,
             "timezone": "UTC"
@@ -36,6 +46,11 @@
             "date": "2026-04-05 23:43:53.621960",
             "timezone_type": 3,
             "timezone": "UTC"
+        },
+        "updatedAt": {
+            "date": "2026-04-05 23:43:53.621960",
+            "timezone_type": 3,
+            "timezone": "UTC"
         }
     },
     {
@@ -46,6 +61,11 @@
         "status": "Pending",
         "type": "Bank transfer",
         "createdAt": {
+            "date": "2026-04-05 23:44:08.241819",
+            "timezone_type": 3,
+            "timezone": "UTC"
+        },
+        "updatedAt": {
             "date": "2026-04-05 23:44:08.241819",
             "timezone_type": 3,
             "timezone": "UTC"

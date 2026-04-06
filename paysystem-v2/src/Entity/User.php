@@ -3,13 +3,8 @@ declare(strict_types=1);
 
 class User
 {
-    public string $id
-    {
-        get
-        {
-            return $this->id;
-        }
-    }
+    use Timestampable, Loggable, HasUuid;
+
     public string $email
     {
         get
@@ -18,7 +13,7 @@ class User
         }
         set
         {
-            if (!validateEmailFormat($value))
+            if (!UserValidator::validateEmailFormat($value))
             {
                 throw new InvalidArgumentException('Invalid email format');
             }
@@ -26,6 +21,7 @@ class User
             $this->email = $value;
         }
     }
+
     public string $password
     {
         get
@@ -34,7 +30,7 @@ class User
         }
         set
         {
-            if (!empty($value) && !validatePasswordStrength($value))
+            if (!empty($value) && !UserValidator::validatePasswordStrength($value))
             {
                 throw new InvalidArgumentException('Invalid password format');
             }
@@ -42,50 +38,24 @@ class User
             $this->password = $value;
         }
     }
+
     public string $fullName
     {
-        get
-        {
-            return $this->fullName;
-        }
-        set
-        {
-            $this->fullName = $value;
-        }
+        get => $this->fullName;
+        set => $this->fullName = $value;
     }
+
     public string $phone
     {
-        get
-        {
-            return $this->phone;
-        }
-        set
-        {
-            $this->phone = $value;
-        }
+        get => $this->phone;
+        set => $this->phone = $value;
     }
-    public DateTime $createdAt
-    {
-        get
-        {
-            return $this->createdAt;
-        }
-        set
-        {
-            $this->createdAt = $value;
-        }
-    }
+
     public float $balance
-        {
-            get
-            {
-                return $this->balance;
-            }
-            set
-            {
-                $this->balance = $value;
-            }
-        }
+    {
+        get => $this->balance;
+        set => $this->balance = $value;
+    }
 
     public function __construct(
         string $email,
@@ -94,16 +64,17 @@ class User
         string $phone,
         ?string $id = null,
         ?DateTime $createdAt = null,
+        ?DateTime $updatedAt = null,
         ?float $balance = null
     )
     {
-//        $this->id = Uuid::uuid4()->toString();
         $this->email = $email;
         $this->password = $password;
         $this->fullName = $fullName;
         $this->phone = $phone;
         $this->id = $id;
         $this->createdAt = $createdAt;
+        $this->updatedAt = $updatedAt;
         $this->balance = $balance;
     }
 
@@ -118,7 +89,8 @@ class User
             $password,
             $fullName,
             $phone,
-            self::generate_uuid(),
+            self::generateUuid(),
+            new DateTime(),
             new DateTime(),
             0
         );
@@ -133,6 +105,7 @@ class User
             'fullName' => $this->fullName,
             'phone' => $this->phone,
             'createdAt' => $this->createdAt,
+            'updatedAt' => $this->updatedAt,
             'balance' => $this->balance,
         ];
     }
@@ -141,8 +114,16 @@ class User
     {
         $createdAt = $data['createdAt'];
 
-        if (is_array($createdAt)) {
+        if (is_array($createdAt))
+        {
             $createdAt = $createdAt['date'];
+        }
+
+        $updatedAt = $data['updatedAt'];
+
+        if (is_array($updatedAt))
+        {
+            $updatedAt = $updatedAt['date'];
         }
 
         return new self(
@@ -152,6 +133,7 @@ class User
             $data['phone'],
             $data['id'],
             new DateTime($createdAt),
+            new DateTime($updatedAt),
             (float)$data['balance'],
         );
     }
@@ -173,6 +155,7 @@ class User
         }
 
         $this->balance += $amount;
+        $this->log("Add to balance: $amount");
     }
 
     public function deductBalance(float $amount): void
@@ -188,13 +171,6 @@ class User
         }
 
         $this->balance -= $amount;
-    }
-
-    public static function generate_uuid(): string
-    {
-        $data = random_bytes(16);
-        $data[6] = chr(ord($data[6]) & 0x0f | 0x40);
-        $data[8] = chr(ord($data[8]) & 0x3f | 0x80);
-        return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
+        $this->log("Deduct from balance: $amount");
     }
 }

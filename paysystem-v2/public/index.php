@@ -11,7 +11,13 @@ require LOGGER_PATH;
 
 require DATABASE_PATH;
 
-//require MODELS_PATH;
+// Entity
+require TIMESTAMPABLE_PATH;
+require LOGGABLE_PATH;
+require HASUUID_PATH;
+
+
+// Entity
 require PAYMENT_PATH;
 require USER_PATH;
 require TRANSACTION_PATH;
@@ -21,7 +27,6 @@ require PAYMENT_TYPE_PATH;
 require TRANSACTION_TYPE_PATH;
 
 // VALIDATOR
-//require VALIDATOR_PATH;
 require USER_VALIDATOR_PATH;
 
 // Interface

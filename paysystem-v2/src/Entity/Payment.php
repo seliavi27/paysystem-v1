@@ -5,13 +5,8 @@ declare(strict_types=1);
 
 class Payment
 {
-    public string $id
-    {
-        get
-        {
-            return $this->id;
-        }
-    }
+    use Timestampable, Loggable, HasUuid;
+
     public string $userId
     {
         get
@@ -23,12 +18,10 @@ class Payment
             $this->userId = $value;
         }
     }
+
     public float $amount
     {
-        get
-        {
-            return $this->amount;
-        }
+        get => $this->amount;
     }
 
     public CurrencyType $currency
@@ -38,6 +31,7 @@ class Payment
             return $this->currency;
         }
     }
+
     public PaymentStatus $status
     {
         get
@@ -49,6 +43,7 @@ class Payment
             $this->status = $value;
         }
     }
+
     public PaymentType $type
     {
         get
@@ -60,13 +55,6 @@ class Payment
             $this->type = $value;
         }
     }
-    public DateTime $createdAt
-    {
-        get
-        {
-            return $this->createdAt;
-        }
-    }
 
     private function __construct(
         string $userId,
@@ -75,7 +63,8 @@ class Payment
         PaymentType $type,
         ?string $id = null,
         ?PaymentStatus $status = null,
-        ?DateTime $createdAt = null
+        ?DateTime $createdAt = null,
+        ?DateTime $updatedAt = null
     ) {
         $this->userId = $userId;
         $this->amount = $amount;
@@ -84,6 +73,7 @@ class Payment
         $this->id = $id;
         $this->status = $status;
         $this->createdAt = $createdAt;
+        $this->updatedAt = $updatedAt;
     }
 
     public static function create(
@@ -97,8 +87,9 @@ class Payment
             $amount,
             $currency,
             $type,
-            self::generate_uuid(),
+            self::generateUuid(),
             PaymentStatus::PENDING,
+            new DateTime(),
             new DateTime()
         );
     }
@@ -107,8 +98,16 @@ class Payment
     {
         $createdAt = $data['createdAt'];
 
-        if (is_array($createdAt)) {
+        if (is_array($createdAt))
+        {
             $createdAt = $createdAt['date'];
+        }
+
+        $updatedAt = $data['updatedAt'];
+
+        if (is_array($updatedAt))
+        {
+            $updatedAt = $updatedAt['date'];
         }
 
         return new self(
@@ -118,7 +117,8 @@ class Payment
             PaymentType::from($data['type']),
             $data['id'],
             PaymentStatus::from($data['status']),
-            new DateTime($createdAt)
+            new DateTime($createdAt),
+            new DateTime($updatedAt)
         );
     }
 
@@ -131,7 +131,8 @@ class Payment
             'currency' => $this->currency,
             'status' => $this->status,
             'type' => $this->type,
-            'createdAt' => $this->createdAt
+            'createdAt' => $this->createdAt,
+            'updatedAt' => $this->updatedAt
         ];
     }
 
@@ -144,13 +145,5 @@ class Payment
             $this->currency->value,
             $this->status->value
         );
-    }
-
-    public static function generate_uuid(): string
-    {
-        $data = random_bytes(16);
-        $data[6] = chr(ord($data[6]) & 0x0f | 0x40);
-        $data[8] = chr(ord($data[8]) & 0x3f | 0x80);
-        return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
     }
 }

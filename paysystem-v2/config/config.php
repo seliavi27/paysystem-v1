@@ -55,7 +55,6 @@ const PAYMENT_STATUS_PATH = ENUM_PATH . '/PaymentStatus.php';
 const PAYMENT_TYPE_PATH = ENUM_PATH . '/PaymentType.php';
 const TRANSACTION_TYPE_PATH = ENUM_PATH . '/TransactionType.php';
 
-
 // Validator
 const VALIDATOR_PATH = SRC_PATH . '/Validator';
 const USER_VALIDATOR_PATH = VALIDATOR_PATH . '/UserValidator.php';
@@ -76,5 +75,13 @@ const INTERFACE_PATH = SRC_PATH . '/Interface';
 const PAYMENT_PROCESSOR_INTERFACE_PATH = INTERFACE_PATH . '/PaymentProcessorInterface.php';
 const STORAGE_INTERFACE_PATH = INTERFACE_PATH . '/StorageInterface.php';
 const VALIDATOR_INTERFACE_PATH = INTERFACE_PATH . '/ValidatorInterface.php';
+
+// Trait
+const TRAIT_PATH = SRC_PATH . '/Trait';
+const TIMESTAMPABLE_PATH = TRAIT_PATH . '/Timestampable.php';
+const LOGGABLE_PATH = TRAIT_PATH . '/Loggable.php';
+const HASUUID_PATH = TRAIT_PATH . '/HasUuid.php';
+
+
 
 const SESSION_TIMEOUT = 24 * 60 * 60; // 24 часа
