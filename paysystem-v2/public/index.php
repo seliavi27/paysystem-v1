@@ -24,6 +24,20 @@ require TRANSACTION_TYPE_PATH;
 //require VALIDATOR_PATH;
 require USER_VALIDATOR_PATH;
 
+// Interface
+require PAYMENT_PROCESSOR_INTERFACE_PATH;
+require STORAGE_INTERFACE_PATH;
+require VALIDATOR_INTERFACE_PATH;
+
+// Processor
+require ABSTRACT_PAYMENT_PROCESSOR;
+require STRIPE_PATH;
+require MOLLIE_PATH;
+require FLUTTERWAVE_PATH;
+
+// Service
+require PAYMENT_SERVICE_PATH;
+
 session_start();
 
 $page = getCurrentPage();

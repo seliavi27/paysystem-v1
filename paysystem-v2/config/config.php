@@ -60,11 +60,21 @@ const TRANSACTION_TYPE_PATH = ENUM_PATH . '/TransactionType.php';
 const VALIDATOR_PATH = SRC_PATH . '/Validator';
 const USER_VALIDATOR_PATH = VALIDATOR_PATH . '/UserValidator.php';
 
+// Processor
+const PROCESSOR_PATH = SRC_PATH . '/Processor';
+const ABSTRACT_PAYMENT_PROCESSOR = PROCESSOR_PATH . '/AbstractPaymentProcessor.php';
+const STRIPE_PATH = PROCESSOR_PATH . '/StripeProcessor.php';
+const MOLLIE_PATH = PROCESSOR_PATH . '/MollieProcessor.php';
+const FLUTTERWAVE_PATH = PROCESSOR_PATH . '/FlutterwaveProcessor.php';
+
+// Service
+const SERVICE_PATH = SRC_PATH . '/Service';
+const PAYMENT_SERVICE_PATH = SERVICE_PATH . '/PaymentService.php';
+
+// Interface
+const INTERFACE_PATH = SRC_PATH . '/Interface';
+const PAYMENT_PROCESSOR_INTERFACE_PATH = INTERFACE_PATH . '/PaymentProcessorInterface.php';
+const STORAGE_INTERFACE_PATH = INTERFACE_PATH . '/StorageInterface.php';
+const VALIDATOR_INTERFACE_PATH = INTERFACE_PATH . '/ValidatorInterface.php';
+
 const SESSION_TIMEOUT = 24 * 60 * 60; // 24 часа
-
-
-//const PAYMENTS_TYPES = [
-//    'card' => ['Card', 2.5],
-//    'wallet' => ['Wallet', 0.5],
-//    'bank_transfer' => ['Bank transfer', 1.0]
-//];
