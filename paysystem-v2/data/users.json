@@ -1,0 +1,15 @@
+[
+    {
+        "id": "38f091f3-2f9a-43a6-9c61-037ff57f9dee",
+        "email": "anton1999@gmail.com",
+        "password": "$2y$12$\/4o19aKl3ZJx8Dqb0Abiy.eSnqwLQElVEdEkV3tk2ImKNH\/gZiUSu",
+        "fullName": "anton1999",
+        "phone": "+375299824124",
+        "createdAt": {
+            "date": "2026-04-05 22:56:41.330084",
+            "timezone_type": 3,
+            "timezone": "UTC"
+        },
+        "balance": 0
+    }
+]

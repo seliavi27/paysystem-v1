@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-class User
-{
-    public function __construct()
-    {
-
-    }
-}
+//class User
+//{
+//    public function __construct()
+//    {
+//
+//    }
+//}
 
 $int = 1;
 $float = 1.0;
@@ -16,7 +16,7 @@ $bool = true;
 $array = [1, 2, 3];
 $arrayKey = ["a" => 'а', "b" => 'б', "c" => 'с', "d" => 'д'];
 $null = null;
-$object = new User;
+//$object = new User;
 
 if ($bool == $string)
 {
