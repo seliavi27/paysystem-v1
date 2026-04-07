@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 class User
 {
-    use Timestampable, Loggable, HasUuid;
+    use Timestampable, HasUuid;
 
     public string $email
     {
@@ -155,7 +155,6 @@ class User
         }
 
         $this->balance += $amount;
-        $this->log("Add to balance: $amount");
     }
 
     public function deductBalance(float $amount): void
@@ -171,6 +170,5 @@ class User
         }
 
         $this->balance -= $amount;
-        $this->log("Deduct from balance: $amount");
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-enum PaymentType: string
+enum PaymentMethod: string
 {
     case CREDIT_CARD = 'credit_card';
     case BANK_TRANSFER = 'bank_transfer';

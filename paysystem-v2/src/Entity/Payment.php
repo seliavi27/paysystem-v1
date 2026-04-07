@@ -44,7 +44,7 @@ class Payment
         }
     }
 
-    public PaymentType $type
+    public PaymentMethod $type
     {
         get
         {
@@ -60,7 +60,7 @@ class Payment
         string $userId,
         float $amount,
         CurrencyType $currency,
-        PaymentType $type,
+        PaymentMethod $type,
         ?string $id = null,
         ?PaymentStatus $status = null,
         ?DateTime $createdAt = null,
@@ -80,7 +80,7 @@ class Payment
         string $userId,
         float $amount,
         CurrencyType $currency,
-        PaymentType $type
+        PaymentMethod $type
     ): self {
         return new self(
             $userId,
@@ -114,7 +114,7 @@ class Payment
             $data['userId'],
             (float)$data['amount'],
             CurrencyType::from($data['currency']),
-            PaymentType::from($data['type']),
+            PaymentMethod::from($data['type']),
             $data['id'],
             PaymentStatus::from($data['status']),
             new DateTime($createdAt),

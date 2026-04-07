@@ -3,7 +3,8 @@ declare(strict_types=1);
 
 class Transaction
 {
-    use Timestampable, Loggable, HasUuid;
+    use Loggable, HasUuid;
+//    use Timestampable;
 
     public string $userId
     {
@@ -33,10 +34,15 @@ class Transaction
         get => $this->amount;
     }
 
+    public DateTime $timestamp
+    {
+        get => $this->timestamp;
+        set => $this->timestamp = $value;
+    }
+
     public string $description
     {
         get => $this->description;
-        set => $this->description = $value;
     }
 
     public function __construct(
@@ -46,8 +52,9 @@ class Transaction
         CurrencyType $currency,
         float $amount,
         string $description,
-        DateTime $createdAt,
-        DateTime $updatedAt
+        DateTime $timestamp,
+//        DateTime $createdAt,
+//        DateTime $updatedAt
     )
     {
         $this->id = self::generateUuid();
@@ -57,8 +64,9 @@ class Transaction
         $this->currency = $currency;
         $this->amount = $amount;
         $this->description = $description;
-        $this->createdAt = $createdAt;
-        $this->updatedAt = $updatedAt;
+        $this->timestamp = $timestamp;
+//        $this->createdAt = $createdAt;
+//        $this->updatedAt = $updatedAt;
     }
 
     public function toArray(): array
@@ -71,8 +79,9 @@ class Transaction
             'currency' => $this->currency,
             'amount' => $this->amount,
             'description' => $this->description,
-            'createdAt' => $this->createdAt,
-            'updatedAt' => $this->updatedAt
+            'timestamp' => $this->timestamp,
+//            'createdAt' => $this->createdAt,
+//            'updatedAt' => $this->updatedAt
         ];
     }
 

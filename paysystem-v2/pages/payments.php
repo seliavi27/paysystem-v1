@@ -97,7 +97,7 @@ $maxAmount = $filters['max_amount'];
     Тип:
     <select name="type">
         <option value="">Все</option>
-        <?php foreach (PaymentType::cases() as $type): ?>
+        <?php foreach (PaymentMethod::cases() as $type): ?>
             <option value="<?= $type->name ?>"
                     <?= (($_POST['type'] ?? '') === $type->value) ? 'selected' : '' ?>
             >
