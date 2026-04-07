@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-require __DIR__ . '/../config/config.php';
+require __DIR__ . '/../../config/config.php';
 require ROUTER_PATH;
 
 require AUTH_PATH;

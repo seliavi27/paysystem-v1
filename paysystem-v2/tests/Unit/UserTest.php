@@ -1,18 +1,15 @@
 <?php
 declare(strict_types=1);
 
-require __DIR__ . '/../config/config.php';
+require __DIR__ . '/../../config/config.php';
 require ROUTER_PATH;
 
 require AUTH_PATH;
 require FUNCTIONS_PATH;
 require SECURITY_PATH;
 require LOGGER_PATH;
-require DATABASE_PATH;
 
-//Var
-//require VAR_PATH;
-//require LOGS_PATH;
+require DATABASE_PATH;
 
 // Trait
 require TIMESTAMPABLE_PATH;
@@ -67,16 +64,27 @@ require SMS_NOTIFICATION_CHANNEL_PATH;
 require WEBHOOK_NOTIFICATION_CHANNEL_PATH;
 require LOG_NOTIFICATION_CHANNEL_PATH;
 
-// Repository
+// Notification
 require REPOSITORY_INTERFACE_PATH;
 require PAYMENT_REPOSITORY_PATH;
 require USER_REPOSITORY_PATH;
 require TRANSACTION_REPOSITORY_PATH;
 
 
+$user = User::create("anton1999@example.com", "anton1999",
+    "anton1999", "+375297463952");
+echo $user . "</br>";
 
-session_start();
+$user = new User("anton1999@example.com", "anton1999",
+    "anton1999", "+375297463952",
+    "38f091f3-2f9a-43a6-9c61-037ff57f9dee",
+    new DateTime(), new DateTime(), 10);
+$result = $user->toArray();
+echo var_dump($result) . "</br>";
 
-$page = getCurrentPage();
-renderPage($page);
-
+$user = new User("anton1999@example.com", "anton1999",
+    "anton1999", "+375297463952",
+    "38f091f3-2f9a-43a6-9c61-037ff57f9dee",
+    new DateTime(), new DateTime(), 10);
+$result = $user->toArray();
+echo var_dump($result) . "</br>";

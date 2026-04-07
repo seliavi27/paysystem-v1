@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+//namespace PaySystem\DTO;
+
 final readonly class TransactionRequest
 {
     public function __construct(

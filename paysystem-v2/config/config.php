@@ -13,7 +13,11 @@ const PUBLIC_PATH = BASE_PATH . '/public';
 const PAGES_PATH = BASE_PATH . '/pages';
 
 const DATA_PATH = BASE_PATH . '/data';
-const LOGS_PATH = BASE_PATH . '/logs';
+
+//Var
+const VAR_PATH = BASE_PATH . '/var';
+//Logs
+const LOGS_PATH = VAR_PATH . '/logs';
 
 const UPLOADS_PATH = PUBLIC_PATH . '/uploads';
 const AVATARS_PATH = UPLOADS_PATH . '/avatars';

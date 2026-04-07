@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+//namespace PaySystem\DTO;
+
 final readonly class RefundRequest
 {
     public function __construct(

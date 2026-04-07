@@ -14,7 +14,6 @@ function handleLoginPost($data): array
 
     try
     {
-
         $email = trim($data['email'] ?? '');
         log_operation('LOGIN_ATTEMPT', "Email: $email");
         $password = $data['password'] ?? '';
