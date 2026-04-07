@@ -69,6 +69,10 @@ const FLUTTERWAVE_PATH = PROCESSOR_PATH . '/FlutterwaveProcessor.php';
 // Service
 const SERVICE_PATH = SRC_PATH . '/Service';
 const PAYMENT_SERVICE_PATH = SERVICE_PATH . '/PaymentService.php';
+const USER_SERVICE_PATH = SERVICE_PATH . '/UserService.php';
+const AUTHENTICATION_SERVICE_PATH = SERVICE_PATH . '/AuthenticationService.php';
+const NOTIFICATION_SERVICE_PATH = SERVICE_PATH . '/NotificationService.php';
+const LOG_SERVICE_PATH = SERVICE_PATH . '/LogService.php';
 
 // Interface
 const INTERFACE_PATH = SRC_PATH . '/Interface';
@@ -89,6 +93,24 @@ const PAYMENT_RESPONSE_PATH = DTO_PATH . '/PaymentResponse.php';
 const TRANSACTION_REQUEST_PATH = DTO_PATH . '/TransactionRequest.php';
 const REFUND_REQUEST_PATH = DTO_PATH . '/RefundRequest.php';
 
+// Notification
+const NOTIFICATION_PATH = SRC_PATH . '/Notification';
+const NOTIFICATION_CHANNEL_INTERFACE_PATH = NOTIFICATION_PATH . '/NotificationChannelInterface.php';
+const EMAIL_NOTIFICATION_CHANNEL_PATH = NOTIFICATION_PATH . '/EmailNotificationChannel.php';
+const SMS_NOTIFICATION_CHANNEL_PATH = NOTIFICATION_PATH . '/SMSNotificationChannel.php';
+const WEBHOOK_NOTIFICATION_CHANNEL_PATH = NOTIFICATION_PATH . '/WebhookNotificationChannel.php';
+const LOG_NOTIFICATION_CHANNEL_PATH = NOTIFICATION_PATH . '/LogNotificationChannel.php';
+
+// Notification
+const REPOSITORY_PATH = SRC_PATH . '/Repository';
+const REPOSITORY_INTERFACE_PATH = REPOSITORY_PATH . '/RepositoryInterface.php';
+const PAYMENT_REPOSITORY_PATH = REPOSITORY_PATH . '/PaymentRepository.php';
+const USER_REPOSITORY_PATH = REPOSITORY_PATH . '/UserRepository.php';
+const TRANSACTION_REPOSITORY_PATH = REPOSITORY_PATH . '/TransactionRepository.php';
+
+// Tests
+const TESTS_PATH = BASE_PATH . '/test';
+const SOLID_TEST_PATH = TESTS_PATH . '/SOLIDTest.php';
 
 
 const SESSION_TIMEOUT = 24 * 60 * 60; // 24 часа
