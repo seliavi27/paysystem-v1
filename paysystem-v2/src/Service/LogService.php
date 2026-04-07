@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-class LogService
+class LogService implements LogServiceInterface
 {
     private array $logs = [];
     private array $channels;
@@ -42,7 +42,7 @@ class LogService
             }
             catch (Throwable $e)
             {
-                error_log($e->getMessage());
+                log_error($e->getMessage());
             }
         }
     }

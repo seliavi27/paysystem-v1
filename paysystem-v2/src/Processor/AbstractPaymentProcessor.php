@@ -7,20 +7,23 @@ abstract class AbstractPaymentProcessor implements PaymentProcessorInterface
     {
         get => $this->apiKey;
     }
+
     protected string $webhookSecret
-        {
-            get => $this->webhookSecret;
-        }
+    {
+        get => $this->webhookSecret;
+    }
+
     protected float $commissionRate
-        {
-            get => $this->commissionRate;
-        }
+    {
+        get => $this->commissionRate;
+    }
 
     public function __construct(
         string $apiKey,
         string $webhookSecret,
         float $commissionRate
-    ) {
+    )
+    {
         $this->apiKey = $apiKey;
         $this->webhookSecret = $webhookSecret;
         $this->commissionRate = $commissionRate;

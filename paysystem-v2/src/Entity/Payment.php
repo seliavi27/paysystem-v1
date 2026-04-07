@@ -61,7 +61,7 @@ class Payment
         }
     }
 
-    private function __construct(
+    public function __construct(
         string $userId,
         float $amount,
         string $description,
@@ -74,6 +74,7 @@ class Payment
     ) {
         $this->userId = $userId;
         $this->amount = $amount;
+        $this->description = $description;
         $this->currency = $currency;
         $this->type = $type;
         $this->id = $id;

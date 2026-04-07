@@ -79,6 +79,11 @@ const INTERFACE_PATH = SRC_PATH . '/Interface';
 const PAYMENT_PROCESSOR_INTERFACE_PATH = INTERFACE_PATH . '/PaymentProcessorInterface.php';
 const STORAGE_INTERFACE_PATH = INTERFACE_PATH . '/StorageInterface.php';
 const VALIDATOR_INTERFACE_PATH = INTERFACE_PATH . '/ValidatorInterface.php';
+const COMMISSIONABLE_INTERFACE_PATH = INTERFACE_PATH . '/CommissionableInterface.php';
+const PROCESSABLE_INTERFACE_PATH = INTERFACE_PATH . '/ProcessableInterface.php';
+const REFUNDABLE_INTERFACE_PATH = INTERFACE_PATH . '/RefundableInterface.php';
+const WEBHOOKABLE_INTERFACE_PATH = INTERFACE_PATH . '/WebhookableInterface.php';
+const LOG_SERVICE_INTERFACE_PATH = INTERFACE_PATH . '/LogServiceInterface.php';
 
 // Trait
 const TRAIT_PATH = SRC_PATH . '/Trait';
@@ -108,9 +113,6 @@ const PAYMENT_REPOSITORY_PATH = REPOSITORY_PATH . '/PaymentRepository.php';
 const USER_REPOSITORY_PATH = REPOSITORY_PATH . '/UserRepository.php';
 const TRANSACTION_REPOSITORY_PATH = REPOSITORY_PATH . '/TransactionRepository.php';
 
-// Tests
-const TESTS_PATH = BASE_PATH . '/test';
-const SOLID_TEST_PATH = TESTS_PATH . '/SOLIDTest.php';
 
 
 const SESSION_TIMEOUT = 24 * 60 * 60; // 24 часа

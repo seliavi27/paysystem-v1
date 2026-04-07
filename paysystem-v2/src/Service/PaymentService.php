@@ -5,14 +5,20 @@ class PaymentService
 {
     private PaymentProcessorInterface $processor;
     private RepositoryInterface $repository;
+    private NotificationChannelInterface $notifier;
+    private LogServiceInterface $logger;
 
     public function __construct(
         PaymentProcessorInterface $processor,
-        RepositoryInterface $repository
+        RepositoryInterface $repository,
+        NotificationChannelInterface $notifier,
+        LogServiceInterface $logger
     )
     {
         $this->processor = $processor;
         $this->repository = $repository;
+        $this->notifier = $notifier;
+        $this->logger = $logger;
     }
 
     public function create(CreatePaymentRequest $request): Payment
@@ -38,17 +44,17 @@ class PaymentService
         try
         {
             $this->processor->process($payment);
-
             $payment->status = PaymentStatus::COMPLETED;
         }
         catch (Throwable $e)
         {
             $payment->status = PaymentStatus::FAILED;
-            log_error($e->getMessage());
+            $this->logger->error($e->getMessage());
             throw $e;
         }
 
         $this->repository->update($payment);
+        $this->logger->info("Payment COMPLETED");
     }
 
     public function refund(Payment $payment): void
