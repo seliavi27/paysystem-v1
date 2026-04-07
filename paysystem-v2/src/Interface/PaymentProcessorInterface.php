@@ -1,6 +1,10 @@
 <?php
 declare(strict_types=1);
 
+/* TODO: Как правильно реализовать Processors с передачей
+    AbstractPaymentProcessor, что реализован с
+    множеством мелких интерфейсов
+*/
 interface PaymentProcessorInterface
 {
     public function process(Payment $payment): void;
