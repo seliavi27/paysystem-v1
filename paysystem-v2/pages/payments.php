@@ -1,6 +1,10 @@
 <?php
 declare(strict_types=1);
 
+use PaySystem\Entity\Payment;
+use PaySystem\Enum\PaymentMethod;
+use PaySystem\Enum\PaymentStatus;
+
 function handlePaymentsGet($data, $user): array
 {
     $paymentsFile = PAYMENTS_FILE;
@@ -81,38 +85,46 @@ $maxAmount = $filters['max_amount'];
     <input type="hidden" name="page" value="payments">
 
     Статус:
-    <select name="status">
-        <option value="">Все</option>
-        <?php foreach (PaymentStatus::cases() as $status): ?>
-            <option value="<?= $status->name ?>"
-                    <?= (($_POST['status'] ?? '') === $status->value) ? 'selected' : '' ?>
-            >
-                <?= htmlspecialchars($status->getLabel()) ?>
-            </option>
-        <?php endforeach; ?>
-    </select>
+    <label>
+        <select name="status">
+            <option value="">Все</option>
+            <?php foreach (PaymentStatus::cases() as $status): ?>
+                <option value="<?= $status->name ?>"
+                        <?= (($_POST['status'] ?? '') === $status->value) ? 'selected' : '' ?>
+                >
+                    <?= htmlspecialchars($status->getLabel()) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+    </label>
 
     <br><br>
 
     Тип:
-    <select name="type">
-        <option value="">Все</option>
-        <?php foreach (PaymentMethod::cases() as $type): ?>
-            <option value="<?= $type->name ?>"
-                    <?= (($_POST['type'] ?? '') === $type->value) ? 'selected' : '' ?>
-            >
-                <?= htmlspecialchars($type->getLabel()) ?>
-            </option>
-        <?php endforeach; ?>
-    </select>
+    <label>
+        <select name="type">
+            <option value="">Все</option>
+            <?php foreach (PaymentMethod::cases() as $type): ?>
+                <option value="<?= $type->name ?>"
+                        <?= (($_POST['type'] ?? '') === $type->value) ? 'selected' : '' ?>
+                >
+                    <?= htmlspecialchars($type->getLabel()) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+    </label>
 
     <br><br>
     Минимальная сумма:
-    <input type="text" name="min_amount" value="<?= htmlspecialchars($minAmount) ?>">
+    <label>
+        <input type="text" name="min_amount" value="<?= htmlspecialchars($minAmount) ?>">
+    </label>
 
     <br><br>
     Максимальная сумма:
-    <input type="text" name="max_amount" value="<?= htmlspecialchars($maxAmount) ?>">
+    <label>
+        <input type="text" name="max_amount" value="<?= htmlspecialchars($maxAmount) ?>">
+    </label>
 
     <br><br>
     <button type="submit">Фильтр</button>

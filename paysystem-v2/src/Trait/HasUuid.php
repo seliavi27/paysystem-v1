@@ -1,12 +1,14 @@
 <?php
 declare(strict_types=1);
 
+namespace PaySystem\Trait;
+
 trait HasUuid
 {
     public string $id
-    {
-        get => $this->id;
-    }
+        {
+            get => $this->id;
+        }
 
     protected function initializeUuid(): void
     {

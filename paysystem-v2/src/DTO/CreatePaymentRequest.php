@@ -1,15 +1,19 @@
 <?php
 declare(strict_types=1);
 
-//namespace PaySystem\DTO;
+namespace PaySystem\DTO;
+
+use PaySystem\Enum\CurrencyType;
+use InvalidArgumentException;
+use PaySystem\Enum\PaymentMethod;
 
 final readonly class CreatePaymentRequest
 {
     public function __construct(
-        public string $userId,
-        public float $amount,
-        public string $description,
-        public CurrencyType $currency,
+        public string        $userId,
+        public float         $amount,
+        public string        $description,
+        public CurrencyType  $currency,
         public PaymentMethod $paymentMethod
     )
     {
@@ -18,23 +22,19 @@ final readonly class CreatePaymentRequest
 
     private function validate(): void
     {
-        if (trim($this->userId) === '')
-        {
+        if (trim($this->userId) === '') {
             throw new InvalidArgumentException('User ID is required');
         }
 
-        if ($this->amount < 0)
-        {
+        if ($this->amount < 0) {
             throw new InvalidArgumentException('Amount must be greater than 0');
         }
 
-        if (trim($this->description) === '')
-        {
+        if (trim($this->description) === '') {
             throw new InvalidArgumentException('Description is required');
         }
 
-        if (mb_strlen($this->description) > 500)
-        {
+        if (mb_strlen($this->description) > 500) {
             throw new InvalidArgumentException('Description must be <= 500 characters');
         }
     }

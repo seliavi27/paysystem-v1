@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+use PaySystem\Entity\Payment;
+
 function handlePaymentsGet($data, $user): array
 {
     $errors = [];

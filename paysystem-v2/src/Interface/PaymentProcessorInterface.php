@@ -5,6 +5,11 @@ declare(strict_types=1);
     AbstractPaymentProcessor, что реализован с
     множеством мелких интерфейсов
 */
+
+namespace PaySystem\Interface;
+
+use PaySystem\Entity\Payment;
+
 interface PaymentProcessorInterface
 {
     public function process(Payment $payment): void;

@@ -1,7 +1,10 @@
 <?php
 declare(strict_types=1);
 
-//namespace PaySystem\DTO;
+namespace PaySystem\DTO;
+
+use InvalidArgumentException;
+use PaySystem\Enum\TransactionType;
 
 final readonly class TransactionRequest
 {

@@ -1,12 +1,15 @@
 <?php
 declare(strict_types=1);
 
+namespace PaySystem\Notification;
+
+use PaySystem\Entity\User;
+
 class SMSNotificationChannel implements NotificationChannelInterface
 {
     public function send(User $user, string $message): bool
     {
-        if (empty($user->phone))
-        {
+        if (empty($user->phone)) {
             return false;
         }
 

@@ -1,71 +1,74 @@
 <?php
 declare(strict_types=1);
 
+namespace PaySystem\Entity;
+
+use DateTime;
+use PaySystem\Trait\HasUuid;
+use InvalidArgumentException;
+use PaySystem\Trait\Timestampable;
+use RuntimeException;
+use PaySystem\Validator\UserValidator;
+
 class User
 {
     use Timestampable, HasUuid;
 
     public string $email
-    {
-        get
         {
-            return $this->email;
-        }
-        set
-        {
-            if (!UserValidator::validateEmailFormat($value))
-            {
-                throw new InvalidArgumentException('Invalid email format');
+            get {
+                return $this->email;
             }
+            set {
+                if (!UserValidator::validateEmailFormat($value)) {
+                    throw new InvalidArgumentException('Invalid email format');
+                }
 
-            $this->email = $value;
+                $this->email = $value;
+            }
         }
-    }
 
     public string $password
-    {
-        get
         {
-            return $this->password;
-        }
-        set
-        {
-            if (!empty($value) && !UserValidator::validatePasswordStrength($value))
-            {
-                throw new InvalidArgumentException('Invalid password format');
+            get {
+                return $this->password;
             }
+            set {
+                if (!empty($value) && !UserValidator::validatePasswordStrength($value)) {
+                    throw new InvalidArgumentException('Invalid password format');
+                }
 
-            $this->password = $value;
+                $this->password = $value;
+            }
         }
-    }
 
     public string $fullName
-    {
-        get => $this->fullName;
-        set => $this->fullName = $value;
-    }
+        {
+            get => $this->fullName;
+            set => $this->fullName = $value;
+        }
 
     public string $phone
-    {
-        get => $this->phone;
-        set => $this->phone = $value;
-    }
+        {
+            get => $this->phone;
+            set => $this->phone = $value;
+        }
 
     public float $balance
-    {
-        get => $this->balance;
-        set => $this->balance = $value;
-    }
+        {
+            get => $this->balance;
+            set => $this->balance = $value;
+        }
 
     public function __construct(
-        string $email,
-        string $password,
-        string $fullName,
-        string $phone,
-        ?string $id = null,
+        string    $email,
+        string    $password,
+        string    $fullName,
+        string    $phone,
+        ?string   $id = null,
         ?DateTime $createdAt = null,
         ?DateTime $updatedAt = null,
-        ?float $balance = null
+        ?float    $balance = null
     )
     {
         $this->email = $email;
@@ -83,7 +86,8 @@ class User
         string $password,
         string $fullName,
         string $phone
-    ): self {
+    ): self
+    {
         return new self(
             $email,
             $password,
@@ -99,11 +103,11 @@ class User
     public function toArray(): array
     {
         return [
-            'id' => $this->id,
             'email' => $this->email,
             'password' => $this->password,
             'fullName' => $this->fullName,
             'phone' => $this->phone,
+            'id' => $this->id,
             'createdAt' => $this->createdAt,
             'updatedAt' => $this->updatedAt,
             'balance' => $this->balance,
@@ -114,15 +118,13 @@ class User
     {
         $createdAt = $data['createdAt'];
 
-        if (is_array($createdAt))
-        {
+        if (is_array($createdAt)) {
             $createdAt = $createdAt['date'];
         }
 
         $updatedAt = $data['updatedAt'];
 
-        if (is_array($updatedAt))
-        {
+        if (is_array($updatedAt)) {
             $updatedAt = $updatedAt['date'];
         }
 
@@ -149,8 +151,7 @@ class User
 
     public function addBalance(float $amount): void
     {
-        if ($amount <= 0)
-        {
+        if ($amount <= 0) {
             throw new InvalidArgumentException('Amount must be greater than 0');
         }
 
@@ -159,13 +160,11 @@ class User
 
     public function deductBalance(float $amount): void
     {
-        if ($amount <= 0)
-        {
+        if ($amount <= 0) {
             throw new InvalidArgumentException('Amount must be greater than 0');
         }
 
-        if ($this->balance < $amount)
-        {
+        if ($this->balance < $amount) {
             throw new RuntimeException('Insufficient funds');
         }
 

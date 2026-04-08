@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+use PaySystem\Entity\User;
+
 $errors = [];
 
 function handleLoginPost($data): array
@@ -97,8 +99,12 @@ $errors = handleLoginPost($_POST);
 <form method="POST">
     <h2>Вход</h2>
 
-    <input type="email" name="email" placeholder="Email" required><br><br>
-    <input type="password" name="password" placeholder="Пароль" required><br><br>
+    <label>
+        <input type="email" name="email" placeholder="Email" required>
+    </label><br><br>
+    <label>
+        <input type="password" name="password" placeholder="Пароль" required>
+    </label><br><br>
 
     <label>
         <input type="checkbox" name="remember_me">

@@ -1,27 +1,33 @@
 <?php
 declare(strict_types=1);
 
+namespace PaySystem\Processor;
+
+use InvalidArgumentException;
+use PaySystem\Entity\Payment;
+use PaySystem\Interface\PaymentProcessorInterface;
+
 abstract class AbstractPaymentProcessor implements PaymentProcessorInterface
 {
     protected string $apiKey
-    {
-        get => $this->apiKey;
-    }
+        {
+            get => $this->apiKey;
+        }
 
     protected string $webhookSecret
-    {
-        get => $this->webhookSecret;
-    }
+        {
+            get => $this->webhookSecret;
+        }
 
     protected float $commissionRate
-    {
-        get => $this->commissionRate;
-    }
+        {
+            get => $this->commissionRate;
+        }
 
     public function __construct(
         string $apiKey,
         string $webhookSecret,
-        float $commissionRate
+        float  $commissionRate
     )
     {
         $this->apiKey = $apiKey;

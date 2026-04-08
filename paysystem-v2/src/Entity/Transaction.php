@@ -1,58 +1,67 @@
 <?php
 declare(strict_types=1);
 
+namespace PaySystem\Entity;
+
+use DateTime;
+use PaySystem\Enum\CurrencyType;
+use PaySystem\Enum\TransactionType;
+use PaySystem\Trait\HasUuid;
+use PaySystem\Trait\Loggable;
+
 class Transaction
 {
     use Loggable, HasUuid;
+
 //    use Timestampable;
 
     public string $userId
-    {
-        get => $this->userId;
-        set => $this->userId = $value;
-    }
+        {
+            get => $this->userId;
+            set => $this->userId = $value;
+        }
 
     public string $paymentId
-    {
-        get => $this->paymentId;
-        set => $this->paymentId = $value;
-    }
+        {
+            get => $this->paymentId;
+            set => $this->paymentId = $value;
+        }
 
     public TransactionType $type
-    {
-        get => $this->type;
-        set => $this->type = $value;
-    }
+        {
+            get => $this->type;
+            set => $this->type = $value;
+        }
 
     public CurrencyType $currency
-    {
-        get => $this->currency;
-    }
+        {
+            get => $this->currency;
+        }
 
     public float $amount
-    {
-        get => $this->amount;
-    }
+        {
+            get => $this->amount;
+        }
 
     public DateTime $timestamp
-    {
-        get => $this->timestamp;
-        set => $this->timestamp = $value;
-    }
+        {
+            get => $this->timestamp;
+            set => $this->timestamp = $value;
+        }
 
     public string $description
-    {
-        get => $this->description;
-    }
+        {
+            get => $this->description;
+        }
 
     public function __construct(
-        string $userId,
-        string $paymentId,
+        string          $userId,
+        string          $paymentId,
         TransactionType $type,
-        CurrencyType $currency,
-        float $amount,
-        string $description,
-        DateTime $timestamp,
+        CurrencyType    $currency,
+        float           $amount,
+        string          $description,
+        DateTime        $timestamp,
 //        DateTime $createdAt,
 //        DateTime $updatedAt
     )
@@ -90,12 +99,9 @@ class Transaction
         $sign = "+";
 
         if ($this->type === TransactionType::INCOME
-            || $this->type === TransactionType::REFUND)
-        {
+            || $this->type === TransactionType::REFUND) {
             $sign = "+";
-        }
-        elseif ($this->type === TransactionType::EXPENSE)
-        {
+        } elseif ($this->type === TransactionType::EXPENSE) {
             $sign = "-";
         }
 

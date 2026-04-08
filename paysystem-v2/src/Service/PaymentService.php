@@ -1,6 +1,18 @@
 <?php
 declare(strict_types=1);
 
+namespace PaySystem\Service;
+
+use PaySystem\Enum\PaymentStatus;
+use PaySystem\DTO\CreatePaymentRequest;
+use PaySystem\Entity\Payment;
+use PaySystem\Interface\LogServiceInterface;
+use PaySystem\Interface\PaymentProcessorInterface;
+use PaySystem\Notification\NotificationChannelInterface;
+use PaySystem\Repository\RepositoryInterface;
+use RuntimeException;
+use Throwable;
+
 class PaymentService
 {
     private PaymentProcessorInterface $processor;
@@ -9,10 +21,10 @@ class PaymentService
     private LogServiceInterface $logger;
 
     public function __construct(
-        PaymentProcessorInterface $processor,
-        RepositoryInterface $repository,
+        PaymentProcessorInterface    $processor,
+        RepositoryInterface          $repository,
         NotificationChannelInterface $notifier,
-        LogServiceInterface $logger
+        LogServiceInterface          $logger
     )
     {
         $this->processor = $processor;

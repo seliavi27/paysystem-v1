@@ -1,6 +1,12 @@
 <?php
 declare(strict_types=1);
 
+namespace PaySystem\Processor;
+
+use PaySystem\Enum\PaymentStatus;
+use PaySystem\Entity\Payment;
+use RuntimeException;
+
 class MollieProcessor extends AbstractPaymentProcessor
 {
     public function process(Payment $payment): void
@@ -14,8 +20,7 @@ class MollieProcessor extends AbstractPaymentProcessor
 
         $success = random_int(0, 1) === 1;
 
-        if (!$success)
-        {
+        if (!$success) {
             $payment->status = PaymentStatus::FAILED;
             $this->logTransaction($payment, 'Mollie: failed');
             throw new RuntimeException('Mollie payment failed');

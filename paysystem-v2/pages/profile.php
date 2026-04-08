@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+use PaySystem\Validator\UserValidator;
+
 function handleThemeGet($data): string
 {
     if (isset($data['theme']))
@@ -140,7 +142,7 @@ $userInfo = $result['userInfo'];
 <p>Email: <?= htmlspecialchars($userInfo['email']) ?></p>
 
 <?php if (!empty($userInfo['avatar'])): ?>
-    <img src="<?= htmlspecialchars($userInfo['avatar']) ?>" width="150"><br><br>
+    <img src="<?= htmlspecialchars($userInfo['avatar']) ?>" width="150" alt=""><br><br>
 <?php endif; ?>
 
 <?php if ($errors): ?>
@@ -156,8 +158,12 @@ $userInfo = $result['userInfo'];
 <?php endif; ?>
 
 <form method="POST">
-    <input type="text" name="fullName" value="<?= htmlspecialchars($userInfo['fullName']) ?>"><br><br>
-    <input type="text" name="phone" value="<?= htmlspecialchars($userInfo['phone']) ?>"><br><br>
+    <label>
+        <input type="text" name="fullName" value="<?= htmlspecialchars($userInfo['fullName']) ?>">
+    </label><br><br>
+    <label>
+        <input type="text" name="phone" value="<?= htmlspecialchars($userInfo['phone']) ?>">
+    </label><br><br>
     <button name="updateProfile">Сохранить</button>
 </form>
 

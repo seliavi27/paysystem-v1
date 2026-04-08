@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+use PaySystem\Entity\User;
+
 require __DIR__ . '/../../config/config.php';
 require ROUTER_PATH;
 

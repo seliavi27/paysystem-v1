@@ -1,6 +1,11 @@
 <?php
 declare(strict_types=1);
 
+namespace PaySystem\Service;
+
+use PaySystem\Interface\LogServiceInterface;
+use Throwable;
+
 class LogService implements LogServiceInterface
 {
     private array $logs = [];

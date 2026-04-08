@@ -1,6 +1,14 @@
 <?php
 declare(strict_types=1);
 
+namespace PaySystem\Service;
+
+use InvalidArgumentException;
+use PaySystem\Entity\Payment;
+use PaySystem\Entity\User;
+use PaySystem\Notification\NotificationChannelInterface;
+use Throwable;
+
 class NotificationService
 {
     private array $channels;

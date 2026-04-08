@@ -1,6 +1,10 @@
 <?php
 declare(strict_types=1);
 
+namespace PaySystem\Notification;
+
+use PaySystem\Entity\User;
+
 class WebhookNotificationChannel implements NotificationChannelInterface
 {
     private string $url;
