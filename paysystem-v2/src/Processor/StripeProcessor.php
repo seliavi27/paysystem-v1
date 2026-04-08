@@ -20,7 +20,8 @@ class StripeProcessor extends AbstractPaymentProcessor
 
         $success = random_int(0, 1) === 1;
 
-        if (!$success) {
+        if (!$success)
+        {
             $payment->status = PaymentStatus::FAILED;
             $this->logTransaction($payment, 'Stripe: failed');
             throw new RuntimeException('Stripe payment failed');

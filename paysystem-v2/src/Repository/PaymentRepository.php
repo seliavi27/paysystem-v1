@@ -4,16 +4,17 @@ declare(strict_types=1);
 namespace PaySystem\Repository;
 
 use PaySystem\Entity\Payment;
+use PaySystem\Storage\StorageInterface;
 
 class PaymentRepository implements PaymentRepositoryInterface
 {
-    private string $context;
+    private StorageInterface $storage;
     private array $payments = [];
 
     public function __construct(
-        string $_context)
+        StorageInterface $storage)
     {
-        $this->context = $_context;
+        $this->storage = $storage;
         $this->load();
     }
 
@@ -43,6 +44,13 @@ class PaymentRepository implements PaymentRepositoryInterface
         $this->payments[$payment->id] = $payment;
         $this->saveToFile();
         return true;
+    }
+
+    public function update(Payment $payment): bool
+    {
+//        $this->payments[$payment->id] = $payment;
+//        $this->saveToFile();
+//        return true;
     }
 
     public function delete(string $id): bool

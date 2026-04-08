@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 use PaySystem\Entity\Payment;
 use PaySystem\Enum\CurrencyType;
+use PaySystem\Enum\PaymentMethod;
 use PaySystem\Processor\AbstractPaymentProcessor;
 use PaySystem\Processor\FlutterwaveProcessor;
 use PaySystem\Processor\MollieProcessor;

@@ -1,6 +1,10 @@
 <?php
 declare(strict_types=1);
 
+use Dotenv\Dotenv;
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+
 require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/config/config.php';
 
@@ -15,11 +19,6 @@ if (session_status() === PHP_SESSION_NONE)
 {
     session_start();
 }
-
-// Загрузить переменные окружения
-use Dotenv\Dotenv;
-use Monolog\Logger;
-use Monolog\Handler\StreamHandler;
 
 $dotenv = Dotenv::createImmutable(BASE_PATH);
 $dotenv->safeLoad();

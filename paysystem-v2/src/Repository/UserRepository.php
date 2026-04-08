@@ -4,16 +4,17 @@ declare(strict_types=1);
 namespace PaySystem\Repository;
 
 use PaySystem\Entity\User;
+use PaySystem\Storage\StorageInterface;
 
 class UserRepository implements UserRepositoryInterface
 {
-    private string $context;
+    private StorageInterface $storage;
     private array $users = [];
 
     public function __construct(
-        string $_context)
+        StorageInterface $storage)
     {
-        $this->context = $_context;
+        $this->storage = $storage;
         $this->load();
     }
 

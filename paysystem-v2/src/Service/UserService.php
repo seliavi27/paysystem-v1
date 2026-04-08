@@ -5,20 +5,16 @@ namespace PaySystem\Service;
 
 use InvalidArgumentException;
 use PaySystem\Entity\User;
-use PaySystem\Interface\StorageInterface;
 use PaySystem\Repository\UserRepositoryInterface;
 
 class UserService
 {
-    private StorageInterface $storage;
     private UserRepositoryInterface $repository;
 
     public function __construct(
-        StorageInterface    $storage,
         UserRepositoryInterface $repository
     )
     {
-        $this->storage = $storage;
         $this->repository = $repository;
     }
 
