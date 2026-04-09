@@ -13,8 +13,9 @@ class PaymentRepository implements PaymentRepositoryInterface
     private StorageInterface $storage;
     private string $filePath;
 
-    public function __construct(string $dataDir = 'var/data') {
-        $this->filePath = $dataDir . '/payments.json';
+    public function __construct(string $filePath = PAYMENTS_FILE)
+    {
+        $this->filePath = $filePath;
         $this->ensureFileExists();
     }
 
