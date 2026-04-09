@@ -1,4 +1,7 @@
 <?php
+declare(strict_types=1);
+
+namespace PaySystem\Enum;
 
 enum CurrencyType: string
 {
@@ -9,8 +12,7 @@ enum CurrencyType: string
 
     public function getSymbol(): string
     {
-        return match ($this)
-        {
+        return match ($this) {
             self::BYN => 'Б',
             self::RUB => '₽',
             self::USD => '$',
@@ -20,8 +22,7 @@ enum CurrencyType: string
 
     public function getLabel(): string
     {
-        return match ($this)
-        {
+        return match ($this) {
             self::BYN => 'Белорусский рубль',
             self::RUB => 'Российский рубль',
             self::USD => 'Доллар США',

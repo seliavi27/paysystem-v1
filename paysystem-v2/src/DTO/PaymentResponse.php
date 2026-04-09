@@ -1,6 +1,12 @@
 <?php
 declare(strict_types=1);
 
+namespace PaySystem\DTO;
+
+use PaySystem\Enum\CurrencyType;
+use PaySystem\Enum\PaymentStatus;
+use DateTime;
+
 final readonly class PaymentResponse
 {
     public function __construct(
@@ -10,7 +16,9 @@ final readonly class PaymentResponse
         public CurrencyType $currency,
         public PaymentStatus $status,
         public DateTime $createdAt
-    ) {}
+    )
+    {
+    }
 
     public function toArray(): array
     {

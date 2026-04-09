@@ -1,17 +1,20 @@
 <?php
 declare(strict_types=1);
 
+namespace PaySystem\Service;
+
+use InvalidArgumentException;
+use PaySystem\Entity\User;
+use PaySystem\Repository\UserRepositoryInterface;
+
 class UserService
 {
-    private StorageInterface $storage;
-    private RepositoryInterface $repository;
+    private UserRepositoryInterface $repository;
 
     public function __construct(
-        StorageInterface $storage,
-        RepositoryInterface $repository
+        UserRepositoryInterface $repository
     )
     {
-        $this->storage = $storage;
         $this->repository = $repository;
     }
 

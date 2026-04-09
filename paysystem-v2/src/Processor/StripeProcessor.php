@@ -1,6 +1,12 @@
 <?php
 declare(strict_types=1);
 
+namespace PaySystem\Processor;
+
+use PaySystem\Enum\PaymentStatus;
+use PaySystem\Entity\Payment;
+use RuntimeException;
+
 class StripeProcessor extends AbstractPaymentProcessor
 {
     public function process(Payment $payment): void

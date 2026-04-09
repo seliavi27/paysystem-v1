@@ -1,6 +1,9 @@
 <?php
 declare(strict_types=1);
 
+use PaySystem\Entity\User;
+use PaySystem\Validator\UserValidator;
+
 function handleRegisterPost($data): array
 {
     $errors = [];
@@ -107,11 +110,21 @@ $errors = handleRegisterPost($_POST);
 <form method="POST">
     <h2>Регистрация</h2>
 
-    <input type="email" name="email" placeholder="Email" required><br><br>
-    <input type="password" name="password" placeholder="Пароль" required><br><br>
-    <input type="password" name="passwordConfirm" placeholder="Подтверждение пароля" required><br><br>
-    <input type="text" name="fullName" placeholder="Имя и фамилия" required><br><br>
-    <input type="tel" name="phone" placeholder="Телефон" required><br><br>
+    <label>
+        <input type="email" name="email" placeholder="Email" required>
+    </label><br><br>
+    <label>
+        <input type="password" name="password" placeholder="Пароль" required>
+    </label><br><br>
+    <label>
+        <input type="password" name="passwordConfirm" placeholder="Подтверждение пароля" required>
+    </label><br><br>
+    <label>
+        <input type="text" name="fullName" placeholder="Имя и фамилия" required>
+    </label><br><br>
+    <label>
+        <input type="tel" name="phone" placeholder="Телефон" required>
+    </label><br><br>
 
     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>" class="csrf-token">
 

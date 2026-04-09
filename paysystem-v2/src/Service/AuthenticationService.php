@@ -1,21 +1,31 @@
 <?php
 declare(strict_types=1);
 
+namespace PaySystem\Service;
+
+use PaySystem\Entity\User;
+use PaySystem\Repository\UserRepositoryInterface;
+use RuntimeException;
+
 class AuthenticationService
 {
     private const SESSION_KEY = 'userId';
-    private UserServiceInterface $userService;
+    //private UserRepositoryInterface $userService;
+    private UserRepositoryInterface $repository;
 
     public function __construct(
-        UserServiceInterface $userService
+        //UserServiceInterface $userService
+        UserRepositoryInterface $repository
     )
     {
-        $this->userService = $userService;
+        //$this->userService = $userService;
+        $this->repository = $repository;
     }
 
     public function authenticate(string $email, string $password): User
     {
-        $user = $this->userService->findByEmail($email);
+//        $user = $this->userService->findByEmail($email);
+        $user = null;
 
         if (!$user)
         {

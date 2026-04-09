@@ -1,77 +1,80 @@
 <?php
 declare(strict_types=1);
 
+namespace PaySystem\Entity;
+
 //use Cassandra\Uuid;
+use DateTime;
+use PaySystem\Trait\HasUuid;
+use PaySystem\Trait\Loggable;
+use PaySystem\Enum\PaymentMethod;
+use PaySystem\Enum\PaymentStatus;
+use PaySystem\Enum\CurrencyType;
+use PaySystem\Trait\Timestampable;
 
 class Payment
 {
     use Timestampable, Loggable, HasUuid;
 
     public string $userId
-    {
-        get
         {
-            return $this->userId;
+            get {
+                return $this->userId;
+            }
+            set {
+                $this->userId = $value;
+            }
         }
-        set
-        {
-            $this->userId = $value;
-        }
-    }
 
     public float $amount
-    {
-        get => $this->amount;
-    }
+        {
+            get => $this->amount;
+        }
 
     public string $description
-    {
-        get => $this->description;
-    }
+        {
+            get => $this->description;
+        }
 
     public CurrencyType $currency
-    {
-        get
         {
-            return $this->currency;
+            get {
+                return $this->currency;
+            }
         }
-    }
 
     public PaymentStatus $status
-    {
-        get
         {
-            return $this->status;
+            get {
+                return $this->status;
+            }
+            set {
+                $this->status = $value;
+            }
         }
-        set
-        {
-            $this->status = $value;
-        }
-    }
 
     public PaymentMethod $type
-    {
-        get
         {
-            return $this->type;
+            get {
+                return $this->type;
+            }
+            set {
+                $this->type = $value;
+            }
         }
-        set
-        {
-            $this->type = $value;
-        }
-    }
 
     public function __construct(
-        string $userId,
-        float $amount,
-        string $description,
-        CurrencyType $currency,
-        PaymentMethod $type,
-        ?string $id = null,
+        string         $userId,
+        float          $amount,
+        string         $description,
+        CurrencyType   $currency,
+        PaymentMethod  $type,
+        ?string        $id = null,
         ?PaymentStatus $status = null,
-        ?DateTime $createdAt = null,
-        ?DateTime $updatedAt = null
-    ) {
+        ?DateTime      $createdAt = null,
+        ?DateTime      $updatedAt = null
+    )
+    {
         $this->userId = $userId;
         $this->amount = $amount;
         $this->description = $description;
@@ -84,12 +87,13 @@ class Payment
     }
 
     public static function create(
-        string $userId,
-        float $amount,
-        string $description,
-        CurrencyType $currency,
+        string        $userId,
+        float         $amount,
+        string        $description,
+        CurrencyType  $currency,
         PaymentMethod $type
-    ): self {
+    ): self
+    {
         return new self(
             $userId,
             $amount,
@@ -107,15 +111,13 @@ class Payment
     {
         $createdAt = $data['createdAt'];
 
-        if (is_array($createdAt))
-        {
+        if (is_array($createdAt)) {
             $createdAt = $createdAt['date'];
         }
 
         $updatedAt = $data['updatedAt'];
 
-        if (is_array($updatedAt))
-        {
+        if (is_array($updatedAt)) {
             $updatedAt = $updatedAt['date'];
         }
 

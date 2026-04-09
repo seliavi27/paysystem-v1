@@ -1,6 +1,10 @@
 <?php
 declare(strict_types=1);
 
+use PaySystem\Entity\Payment;
+use PaySystem\Enum\CurrencyType;
+use PaySystem\Enum\PaymentMethod;
+
 function handleCreatePaymentPost($data, $user): array
 {
     $errors = [];
@@ -90,8 +94,10 @@ $errors = handleCreatePaymentPost($_POST, $user);
 <form method="POST">
     <h2>Создать платёж</h2>
 
-    <input type="text" name="amount" placeholder="Сумма"
-           value="<?= htmlspecialchars($_POST['amount'] ?? '') ?>">
+    <label>
+        <input type="text" name="amount" placeholder="Сумма"
+               value="<?= htmlspecialchars($_POST['amount'] ?? '') ?>">
+    </label>
 
     <?php if (!empty($errors['amount'])): ?>
         <div class="error">
@@ -102,16 +108,18 @@ $errors = handleCreatePaymentPost($_POST, $user);
     <br>
     <br>
 
-    <select name="type">
-        <option value="">Выберите тип платежа</option>
-        <?php foreach (PaymentMethod::cases() as $type): ?>
-            <option value="<?= $type->value ?>"
-                    <?= (($_POST['type'] ?? '') === $type->value) ? 'selected' : '' ?>
-            >
-                <?= htmlspecialchars($type->getLabel()) ?>
-            </option>
-        <?php endforeach; ?>
-    </select>
+    <label>
+        <select name="type">
+            <option value="">Выберите тип платежа</option>
+            <?php foreach (PaymentMethod::cases() as $type): ?>
+                <option value="<?= $type->value ?>"
+                        <?= (($_POST['type'] ?? '') === $type->value) ? 'selected' : '' ?>
+                >
+                    <?= htmlspecialchars($type->getLabel()) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+    </label>
 
     <?php if (!empty($errors['type'])): ?>
         <div class="error"><?= $errors['type'] ?></div>
@@ -120,7 +128,9 @@ $errors = handleCreatePaymentPost($_POST, $user);
     <br>
     <br>
 
-    <textarea name="description" placeholder="Описание"><?= htmlspecialchars($_POST['description'] ?? '') ?></textarea>
+    <label>
+        <textarea name="description" placeholder="Описание"><?= htmlspecialchars($_POST['description'] ?? '') ?></textarea>
+    </label>
 
     <?php if (!empty($errors['description'])): ?>
         <div class="error"><?= $errors['description'] ?></div>

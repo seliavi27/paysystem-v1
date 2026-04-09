@@ -1,6 +1,10 @@
 <?php
 declare(strict_types=1);
 
+namespace PaySystem\Trait;
+
+use DateTime;
+
 trait Loggable
 {
     private array $logs = [];

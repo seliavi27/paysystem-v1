@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+namespace PaySystem\Validator;
+
 class UserValidator
 {
     public static function validateRegistrationForm(array $data): array
@@ -9,37 +11,30 @@ class UserValidator
 
         $required = ['email', 'password', 'passwordConfirm', 'fullName', 'phone'];
 
-        foreach ($required as $field)
-        {
-            if (empty(trim($data[$field] ?? '')))
-            {
+        foreach ($required as $field) {
+            if (empty(trim($data[$field] ?? ''))) {
                 $errors[$field] = 'This field is required';
             }
         }
 
-        if (!empty($data['email']) && !self::validateEmailFormat($data['email']))
-        {
+        if (!empty($data['email']) && !self::validateEmailFormat($data['email'])) {
             $errors['email'] = 'Invalid email format';
         }
 
-        if (!empty($data['password']) && !self::validatePasswordStrength($data['password']))
-        {
+        if (!empty($data['password']) && !self::validatePasswordStrength($data['password'])) {
             $errors['password'] = 'The password must be at least 6 characters long and contain letters and numbers';
         }
 
         if (!empty($data['password']) && !empty($data['passwordConfirm']) &&
-            $data['password'] !== $data['passwordConfirm'])
-        {
+            $data['password'] !== $data['passwordConfirm']) {
             $errors['passwordConfirm'] = "The passwords don't match";
         }
 
-        if (!empty($data['phone']) && !self::validatePhoneFormat($data['phone']))
-        {
+        if (!empty($data['phone']) && !self::validatePhoneFormat($data['phone'])) {
             $errors['phone'] = 'Invalid phone format';
         }
 
-        if (!empty($data['email']) && self::userExists($data['email']))
-        {
+        if (!empty($data['email']) && self::userExists($data['email'])) {
             $errors['email'] = 'A user with this email already exists';
         }
 
@@ -73,22 +68,18 @@ class UserValidator
 
     public static function userExists(string $email, string $usersFile = 'data/users.json'): bool
     {
-        if (!is_file($usersFile))
-        {
+        if (!is_file($usersFile)) {
             return false;
         }
 
         $users = json_decode(file_get_contents($usersFile), true);
 
-        if (!is_array($users))
-        {
+        if (!is_array($users)) {
             return false;
         }
 
-        foreach ($users as $user)
-        {
-            if (isset($user['email']) && strtolower($user['email']) === strtolower($email))
-            {
+        foreach ($users as $user) {
+            if (isset($user['email']) && strtolower($user['email']) === strtolower($email)) {
                 return true;
             }
         }

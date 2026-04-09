@@ -1,78 +1,50 @@
 <?php
 declare(strict_types=1);
 
-require __DIR__ . '/../config/config.php';
-require ROUTER_PATH;
+$container = require_once __DIR__ . '/../bootstrap.php';
+$logger = $container['logger'];
 
-require AUTH_PATH;
-require FUNCTIONS_PATH;
-require SECURITY_PATH;
-require LOGGER_PATH;
+use PaySystem\Notification\EmailNotificationChannel;
+use PaySystem\Repository\PaymentRepository;
+use PaySystem\Service\LogService;
+use PaySystem\Service\PaymentService;
+use PaySystem\Processor\StripeProcessor;
+use PaySystem\Storage\JsonStorage;
 
-require DATABASE_PATH;
+try
+{
+    $processor = new StripeProcessor(
+        $_ENV['STRIPE_API_KEY'] ?? '',
+        $_ENV['STRIPE_WEBHOOK_SECRET'] ?? '',
+        0.029
+    );
 
-// Trait
-require TIMESTAMPABLE_PATH;
-require LOGGABLE_PATH;
-require HASUUID_PATH;
+    $storage = new JsonStorage(
+        "context"
+    );
 
-// Entity
-require PAYMENT_PATH;
-require USER_PATH;
-require TRANSACTION_PATH;
-require CURRENCY_TYPE_PATH;
-require PAYMENT_STATUS_PATH;
-require PAYMENT_METHOD_PATH;
-require TRANSACTION_TYPE_PATH;
+    $repository = new PaymentRepository(
+        $storage
+    );
 
-// DTO
-require CREATE_PAYMENT_REQUEST_PATH;
-require PAYMENT_RESPONSE_PATH;
-require TRANSACTION_REQUEST_PATH;
-require REFUND_REQUEST_PATH;
+    $notification = new EmailNotificationChannel();
 
-// VALIDATOR
-require USER_VALIDATOR_PATH;
+    $log = new LogService(
+        [$logger]
+    );
 
-// Interface
-require PAYMENT_PROCESSOR_INTERFACE_PATH;
-require STORAGE_INTERFACE_PATH;
-require VALIDATOR_INTERFACE_PATH;
-require COMMISSIONABLE_INTERFACE_PATH;
-require PROCESSABLE_INTERFACE_PATH;
-require REFUNDABLE_INTERFACE_PATH;
-require WEBHOOKABLE_INTERFACE_PATH;
-require LOG_SERVICE_INTERFACE_PATH;
+    $service = new PaymentService(
+        $processor, $repository, $notification);
 
-// Processor
-require ABSTRACT_PAYMENT_PROCESSOR;
-require STRIPE_PATH;
-require MOLLIE_PATH;
-require FLUTTERWAVE_PATH;
+    $logger->info('PaySystem started successfully');
+    echo "PaySystem v2.0 ready!\n";
 
-// Service
-require PAYMENT_SERVICE_PATH;
-require USER_SERVICE_PATH;
-require AUTHENTICATION_SERVICE_PATH;
-require NOTIFICATION_SERVICE_PATH;
-require LOG_SERVICE_PATH;
-
-// Notification
-require NOTIFICATION_CHANNEL_INTERFACE_PATH;
-require EMAIL_NOTIFICATION_CHANNEL_PATH;
-require SMS_NOTIFICATION_CHANNEL_PATH;
-require WEBHOOK_NOTIFICATION_CHANNEL_PATH;
-require LOG_NOTIFICATION_CHANNEL_PATH;
-
-// Repository
-require REPOSITORY_INTERFACE_PATH;
-require PAYMENT_REPOSITORY_PATH;
-require USER_REPOSITORY_PATH;
-require TRANSACTION_REPOSITORY_PATH;
-
-
-
-session_start();
+}
+catch (Exception $e)
+{
+    $logger->error('Failed to start PaySystem', ['error' => $e->getMessage()]);
+    echo "Error: " . $e->getMessage() . "\n";
+}
 
 $page = getCurrentPage();
 renderPage($page);
