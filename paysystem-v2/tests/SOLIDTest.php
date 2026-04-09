@@ -64,16 +64,50 @@ require SMS_NOTIFICATION_CHANNEL_PATH;
 require WEBHOOK_NOTIFICATION_CHANNEL_PATH;
 require LOG_NOTIFICATION_CHANNEL_PATH;
 
-// Repository
+// Notification
 require REPOSITORY_INTERFACE_PATH;
 require PAYMENT_REPOSITORY_PATH;
 require USER_REPOSITORY_PATH;
 require TRANSACTION_REPOSITORY_PATH;
 
 
+function processWithAnyProcessor(
+    AbstractPaymentProcessor $processor, Payment $payment): string
+{
+    $result = "OK";
 
-session_start();
+    try
+    {
+        $processor->process($payment);
+    }
+    catch (RuntimeException $exception)
+    {
+        $result = $exception->getMessage();
+    }
 
-$page = getCurrentPage();
-renderPage($page);
+    return $result;
+}
 
+$stripe = new StripeProcessor("stripeApiKey", "publishableKey", 0.5);
+$mollie = new MollieProcessor("mollieApiKey", "publishableKey", 1.5);
+$flutterwave = new FlutterwaveProcessor("flutterwaveApiKey", "publishableKey", 1);
+
+$payment = Payment::create(
+    "38f091f3-2f9a-43a6-9c61-037ff57f9dee",
+    140,
+    "Pay",
+    CurrencyType::USD,
+    PaymentMethod::CREDIT_CARD
+);
+
+$result = processWithAnyProcessor($stripe, $payment);
+echo "<br/>";
+echo var_dump($result, true) . "<br/>";
+
+$result = processWithAnyProcessor($mollie, $payment);
+echo "<br/>";
+echo var_dump($result, true) . "<br/>";
+
+$result = processWithAnyProcessor($flutterwave, $payment);
+echo "<br/>";
+echo var_dump($result, true) . "<br/>";

@@ -24,6 +24,11 @@ class Payment
         get => $this->amount;
     }
 
+    public string $description
+    {
+        get => $this->description;
+    }
+
     public CurrencyType $currency
     {
         get
@@ -56,9 +61,10 @@ class Payment
         }
     }
 
-    private function __construct(
+    public function __construct(
         string $userId,
         float $amount,
+        string $description,
         CurrencyType $currency,
         PaymentMethod $type,
         ?string $id = null,
@@ -68,6 +74,7 @@ class Payment
     ) {
         $this->userId = $userId;
         $this->amount = $amount;
+        $this->description = $description;
         $this->currency = $currency;
         $this->type = $type;
         $this->id = $id;
@@ -79,12 +86,14 @@ class Payment
     public static function create(
         string $userId,
         float $amount,
+        string $description,
         CurrencyType $currency,
         PaymentMethod $type
     ): self {
         return new self(
             $userId,
             $amount,
+            $description,
             $currency,
             $type,
             self::generateUuid(),
@@ -113,6 +122,7 @@ class Payment
         return new self(
             $data['userId'],
             (float)$data['amount'],
+            $data['description'],
             CurrencyType::from($data['currency']),
             PaymentMethod::from($data['type']),
             $data['id'],
@@ -128,6 +138,7 @@ class Payment
             'id' => $this->id,
             'userId' => $this->userId,
             'amount' => $this->amount,
+            'description' => $this->description,
             'currency' => $this->currency,
             'status' => $this->status,
             'type' => $this->type,

@@ -54,6 +54,7 @@ function handleCreatePaymentPost($data, $user): array
     $newPayment = Payment::create(
             $user['id'],
             (float)$amount,
+            $description,
             CurrencyType::USD,
             $typeEnum);
 

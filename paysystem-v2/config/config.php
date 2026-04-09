@@ -69,12 +69,21 @@ const FLUTTERWAVE_PATH = PROCESSOR_PATH . '/FlutterwaveProcessor.php';
 // Service
 const SERVICE_PATH = SRC_PATH . '/Service';
 const PAYMENT_SERVICE_PATH = SERVICE_PATH . '/PaymentService.php';
+const USER_SERVICE_PATH = SERVICE_PATH . '/UserService.php';
+const AUTHENTICATION_SERVICE_PATH = SERVICE_PATH . '/AuthenticationService.php';
+const NOTIFICATION_SERVICE_PATH = SERVICE_PATH . '/NotificationService.php';
+const LOG_SERVICE_PATH = SERVICE_PATH . '/LogService.php';
 
 // Interface
 const INTERFACE_PATH = SRC_PATH . '/Interface';
 const PAYMENT_PROCESSOR_INTERFACE_PATH = INTERFACE_PATH . '/PaymentProcessorInterface.php';
 const STORAGE_INTERFACE_PATH = INTERFACE_PATH . '/StorageInterface.php';
 const VALIDATOR_INTERFACE_PATH = INTERFACE_PATH . '/ValidatorInterface.php';
+const COMMISSIONABLE_INTERFACE_PATH = INTERFACE_PATH . '/CommissionableInterface.php';
+const PROCESSABLE_INTERFACE_PATH = INTERFACE_PATH . '/ProcessableInterface.php';
+const REFUNDABLE_INTERFACE_PATH = INTERFACE_PATH . '/RefundableInterface.php';
+const WEBHOOKABLE_INTERFACE_PATH = INTERFACE_PATH . '/WebhookableInterface.php';
+const LOG_SERVICE_INTERFACE_PATH = INTERFACE_PATH . '/LogServiceInterface.php';
 
 // Trait
 const TRAIT_PATH = SRC_PATH . '/Trait';
@@ -88,6 +97,21 @@ const CREATE_PAYMENT_REQUEST_PATH = DTO_PATH . '/CreatePaymentRequest.php';
 const PAYMENT_RESPONSE_PATH = DTO_PATH . '/PaymentResponse.php';
 const TRANSACTION_REQUEST_PATH = DTO_PATH . '/TransactionRequest.php';
 const REFUND_REQUEST_PATH = DTO_PATH . '/RefundRequest.php';
+
+// Notification
+const NOTIFICATION_PATH = SRC_PATH . '/Notification';
+const NOTIFICATION_CHANNEL_INTERFACE_PATH = NOTIFICATION_PATH . '/NotificationChannelInterface.php';
+const EMAIL_NOTIFICATION_CHANNEL_PATH = NOTIFICATION_PATH . '/EmailNotificationChannel.php';
+const SMS_NOTIFICATION_CHANNEL_PATH = NOTIFICATION_PATH . '/SMSNotificationChannel.php';
+const WEBHOOK_NOTIFICATION_CHANNEL_PATH = NOTIFICATION_PATH . '/WebhookNotificationChannel.php';
+const LOG_NOTIFICATION_CHANNEL_PATH = NOTIFICATION_PATH . '/LogNotificationChannel.php';
+
+// Notification
+const REPOSITORY_PATH = SRC_PATH . '/Repository';
+const REPOSITORY_INTERFACE_PATH = REPOSITORY_PATH . '/RepositoryInterface.php';
+const PAYMENT_REPOSITORY_PATH = REPOSITORY_PATH . '/PaymentRepository.php';
+const USER_REPOSITORY_PATH = REPOSITORY_PATH . '/UserRepository.php';
+const TRANSACTION_REPOSITORY_PATH = REPOSITORY_PATH . '/TransactionRepository.php';
 
 
 

@@ -4,52 +4,70 @@ declare(strict_types=1);
 class PaymentService
 {
     private PaymentProcessorInterface $processor;
-    private ValidatorInterface $validator;
-    private StorageInterface $storage;
+    private RepositoryInterface $repository;
+    private NotificationChannelInterface $notifier;
+    private LogServiceInterface $logger;
 
     public function __construct(
         PaymentProcessorInterface $processor,
-        ValidatorInterface $validator,
-        StorageInterface $storage
+        RepositoryInterface $repository,
+        NotificationChannelInterface $notifier,
+        LogServiceInterface $logger
     )
     {
         $this->processor = $processor;
-        $this->validator = $validator;
-        $this->storage = $storage;
+        $this->repository = $repository;
+        $this->notifier = $notifier;
+        $this->logger = $logger;
     }
 
-    public function processPayment(Payment $payment): void
+    public function create(CreatePaymentRequest $request): Payment
     {
-        $this->validator->validate($payment);
+        $payment = Payment::create(
+            userId: $request->userId,
+            amount: $request->amount,
+            description: $request->description,
+            currency: $request->currency,
+            type: $request->paymentMethod,
+        );
+
+        $this->repository->save($payment);
+
+        return $payment;
+    }
+
+    public function process(Payment $payment): void
+    {
+        $payment->status = PaymentStatus::PROCESSING;
+        $this->repository->update($payment);
 
         try
         {
             $this->processor->process($payment);
-            $this->storage->save($payment);
-
+            $payment->status = PaymentStatus::COMPLETED;
         }
         catch (Throwable $e)
         {
             $payment->status = PaymentStatus::FAILED;
-            log_error('Payment failed: ' . $e->getMessage());
-            $this->storage->save($payment);
-
+            $this->logger->error($e->getMessage());
             throw $e;
         }
+
+        $this->repository->update($payment);
+        $this->logger->info("Payment COMPLETED");
     }
 
-    public function refundPayment(Payment $payment): void
+    public function refund(Payment $payment): void
     {
-        try
+        if ($payment->status !== PaymentStatus::COMPLETED)
         {
-            $this->processor->refund($payment);
-            $this->storage->save($payment);
+            throw new RuntimeException('Only completed payments can be refunded');
+        }
 
-        }
-        catch (Throwable $e)
-        {
-            log_error('Refund failed: ' . $e->getMessage());
-            throw $e;
-        }
+        $this->processor->refund($payment);
+
+        $payment->status = PaymentStatus::REFUNDED;
+
+        $this->repository->update($payment);
     }
 }
