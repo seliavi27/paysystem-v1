@@ -28,7 +28,7 @@ class TransactionRepository implements TransactionRepositoryInterface
         // save to $_context
     }
 
-    public function find(string $id): ?Transaction
+    public function findById(string $id): ?Transaction
     {
         return $this->transactions[$id] ?? null;
     }
@@ -38,9 +38,9 @@ class TransactionRepository implements TransactionRepositoryInterface
         return array_values($this->transactions);
     }
 
-    public function save(Transaction $transaction): bool
+    public function save(object $entity): bool
     {
-        $this->transactions[$transaction->id] = $transaction;
+        $this->transactions[$entity->id] = $entity;
         $this->saveToFile();
         return true;
     }

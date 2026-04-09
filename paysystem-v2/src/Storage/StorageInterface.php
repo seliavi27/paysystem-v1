@@ -13,5 +13,5 @@ interface StorageInterface
 
     public function findAll(): array;
 
-    public function all(): array;
+    public function load(): array;
 }

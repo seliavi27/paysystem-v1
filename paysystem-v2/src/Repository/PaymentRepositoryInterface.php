@@ -4,13 +4,12 @@ declare(strict_types=1);
 namespace PaySystem\Repository;
 
 use PaySystem\Entity\Payment;
+use PaySystem\Enum\PaymentStatus;
 
-interface PaymentRepositoryInterface
+interface PaymentRepositoryInterface extends RepositoryInterface
 {
-    public function find(string $id): ?Payment;
-    public function findAll(): array;
     public function update(Payment $payment): bool;
-    public function save(Payment $payment): bool;
-    public function delete(string $id): bool;
+    public function findByUserId(int $userId): array;
+    public function findByStatus(PaymentStatus $status): array;
 
 }
