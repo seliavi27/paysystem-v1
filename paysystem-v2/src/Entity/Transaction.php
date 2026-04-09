@@ -3,32 +3,46 @@ declare(strict_types=1);
 
 class Transaction
 {
-    public string $id
+    use Loggable, HasUuid;
+//    use Timestampable;
+
+    public string $userId
     {
-        get
-        {
-            return $this->id;
-        }
+        get => $this->userId;
+        set => $this->userId = $value;
     }
 
-    private string $userId;
-    private string $paymentId;
-    private TransactionType $type;
+    public string $paymentId
+    {
+        get => $this->paymentId;
+        set => $this->paymentId = $value;
+    }
+
+    public TransactionType $type
+    {
+        get => $this->type;
+        set => $this->type = $value;
+    }
+
     public CurrencyType $currency
     {
-        get
-        {
-            return $this->currency;
-        }
+        get => $this->currency;
     }
-    private float $amount;
-    private string $description;
+
+    public float $amount
+    {
+        get => $this->amount;
+    }
+
     public DateTime $timestamp
     {
-        get
-        {
-            return $this->timestamp;
-        }
+        get => $this->timestamp;
+        set => $this->timestamp = $value;
+    }
+
+    public string $description
+    {
+        get => $this->description;
     }
 
     public function __construct(
@@ -37,18 +51,22 @@ class Transaction
         TransactionType $type,
         CurrencyType $currency,
         float $amount,
-        string $description
+        string $description,
+        DateTime $timestamp,
+//        DateTime $createdAt,
+//        DateTime $updatedAt
     )
     {
-//        $this->id = Uuid::uuid4()->toString();
-        $this->id = $this->generate_uuid();
+        $this->id = self::generateUuid();
         $this->userId = $userId;
         $this->paymentId = $paymentId;
         $this->type = $type;
         $this->currency = $currency;
         $this->amount = $amount;
         $this->description = $description;
-        $this->timestamp = new DateTime();
+        $this->timestamp = $timestamp;
+//        $this->createdAt = $createdAt;
+//        $this->updatedAt = $updatedAt;
     }
 
     public function toArray(): array
@@ -61,7 +79,9 @@ class Transaction
             'currency' => $this->currency,
             'amount' => $this->amount,
             'description' => $this->description,
-            'timestamp' => $this->timestamp
+            'timestamp' => $this->timestamp,
+//            'createdAt' => $this->createdAt,
+//            'updatedAt' => $this->updatedAt
         ];
     }
 
@@ -87,13 +107,5 @@ class Transaction
             $this->type->value,
             $this->description,
         );
-    }
-
-    function generate_uuid(): string
-    {
-        $data = random_bytes(16);
-        $data[6] = chr(ord($data[6]) & 0x0f | 0x40);
-        $data[8] = chr(ord($data[8]) & 0x3f | 0x80);
-        return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
     }
 }

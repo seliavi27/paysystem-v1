@@ -52,9 +52,8 @@ const TRANSACTION_PATH = ENTITY_PATH . '/Transaction.php';
 const ENUM_PATH = SRC_PATH . '/Enum';
 const CURRENCY_TYPE_PATH = ENUM_PATH . '/CurrencyType.php';
 const PAYMENT_STATUS_PATH = ENUM_PATH . '/PaymentStatus.php';
-const PAYMENT_TYPE_PATH = ENUM_PATH . '/PaymentType.php';
+const PAYMENT_METHOD_PATH = ENUM_PATH . '/PaymentMethod.php';
 const TRANSACTION_TYPE_PATH = ENUM_PATH . '/TransactionType.php';
-
 
 // Validator
 const VALIDATOR_PATH = SRC_PATH . '/Validator';
@@ -76,5 +75,20 @@ const INTERFACE_PATH = SRC_PATH . '/Interface';
 const PAYMENT_PROCESSOR_INTERFACE_PATH = INTERFACE_PATH . '/PaymentProcessorInterface.php';
 const STORAGE_INTERFACE_PATH = INTERFACE_PATH . '/StorageInterface.php';
 const VALIDATOR_INTERFACE_PATH = INTERFACE_PATH . '/ValidatorInterface.php';
+
+// Trait
+const TRAIT_PATH = SRC_PATH . '/Trait';
+const TIMESTAMPABLE_PATH = TRAIT_PATH . '/Timestampable.php';
+const LOGGABLE_PATH = TRAIT_PATH . '/Loggable.php';
+const HASUUID_PATH = TRAIT_PATH . '/HasUuid.php';
+
+// DTO
+const DTO_PATH = SRC_PATH . '/DTO';
+const CREATE_PAYMENT_REQUEST_PATH = DTO_PATH . '/CreatePaymentRequest.php';
+const PAYMENT_RESPONSE_PATH = DTO_PATH . '/PaymentResponse.php';
+const TRANSACTION_REQUEST_PATH = DTO_PATH . '/TransactionRequest.php';
+const REFUND_REQUEST_PATH = DTO_PATH . '/RefundRequest.php';
+
+
 
 const SESSION_TIMEOUT = 24 * 60 * 60; // 24 часа

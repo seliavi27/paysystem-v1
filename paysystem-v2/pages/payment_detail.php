@@ -64,8 +64,8 @@ $payment = $result['payment'];
 <ul>
     <li><strong>Дата:</strong> <?= htmlspecialchars($payment->createdAt->format('Y-m-d H:i')) ?></li>
     <li><strong>Сумма:</strong> <?= number_format($payment->amount, 2) ?></li>
-    <li><strong>Тип:</strong> <?= htmlspecialchars($payment->type->value) ?></li>
-    <li><strong>Статус:</strong> <?= htmlspecialchars($payment->status->value) ?></li>
+    <li><strong>Тип:</strong> <?= htmlspecialchars($payment->type->getLabel()) ?></li>
+    <li><strong>Статус:</strong> <?= htmlspecialchars($payment->status->getLabel()) ?></li>
 </ul>
 
 <br>

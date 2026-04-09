@@ -87,7 +87,7 @@ $maxAmount = $filters['max_amount'];
             <option value="<?= $status->name ?>"
                     <?= (($_POST['status'] ?? '') === $status->value) ? 'selected' : '' ?>
             >
-                <?= htmlspecialchars($status->value) ?>
+                <?= htmlspecialchars($status->getLabel()) ?>
             </option>
         <?php endforeach; ?>
     </select>
@@ -97,11 +97,11 @@ $maxAmount = $filters['max_amount'];
     Тип:
     <select name="type">
         <option value="">Все</option>
-        <?php foreach (PaymentType::cases() as $type): ?>
+        <?php foreach (PaymentMethod::cases() as $type): ?>
             <option value="<?= $type->name ?>"
                     <?= (($_POST['type'] ?? '') === $type->value) ? 'selected' : '' ?>
             >
-                <?= htmlspecialchars($type->value) ?>
+                <?= htmlspecialchars($type->getLabel()) ?>
             </option>
         <?php endforeach; ?>
     </select>
@@ -135,9 +135,9 @@ $maxAmount = $filters['max_amount'];
             <td><?= htmlspecialchars($payment->createdAt->format('Y-m-d H:i')) ?></td>
             <td><?= $payment->amount ?></td>
             <td>
-                <?= htmlspecialchars($payment->type->value) ?>
+                <?= htmlspecialchars($payment->type->getLabel()) ?>
             </td>
-            <td><?= htmlspecialchars($payment->status->value) ?></td>
+            <td><?= htmlspecialchars($payment->status->getLabel()) ?></td>
             <td>
                 <a href="/?page=payment_detail&id=<?= $payment->id ?>">Открыть</a>
             </td>

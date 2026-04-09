@@ -23,7 +23,7 @@ function handleCreatePaymentPost($data, $user): array
         $errors['amount'] = 'The amount must be a positive number';
     }
 
-    $typeEnum = PaymentType::tryFrom($type);
+    $typeEnum = PaymentMethod::tryFrom($type);
 
     if ($typeEnum === null)
     {
@@ -50,18 +50,6 @@ function handleCreatePaymentPost($data, $user): array
     {
         $payments = [];
     }
-
-//    $newId = empty($payments) ? 1 : max(array_column($payments, 'id')) + 1;
-
-//    $payment = [
-//            'id' => $newId,
-//            'userId' => $user['id'],
-//            'date' => date('Y-m-d H:i:s'),
-//            'amount' => (float)$amount,
-//            'type' => $type,
-//            'description' => $description,
-//            'status' => 'pending'
-//    ];
 
     $newPayment = Payment::create(
             $user['id'],
@@ -115,11 +103,11 @@ $errors = handleCreatePaymentPost($_POST, $user);
 
     <select name="type">
         <option value="">Выберите тип платежа</option>
-        <?php foreach (PaymentType::cases() as $type): ?>
+        <?php foreach (PaymentMethod::cases() as $type): ?>
             <option value="<?= $type->value ?>"
                     <?= (($_POST['type'] ?? '') === $type->value) ? 'selected' : '' ?>
             >
-                <?= htmlspecialchars($type->value) ?>
+                <?= htmlspecialchars($type->getLabel()) ?>
             </option>
         <?php endforeach; ?>
     </select>
