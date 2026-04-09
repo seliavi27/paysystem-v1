@@ -6,23 +6,30 @@ namespace PaySystem\Processor;
 use InvalidArgumentException;
 use PaySystem\Entity\Payment;
 use PaySystem\Interface\PaymentProcessorInterface;
+use PaySystem\Strategy\CommissionStrategy;
 
 abstract class AbstractPaymentProcessor implements PaymentProcessorInterface
 {
+    protected CommissionStrategy $commissionStrategy
+    {
+        get => $this->commissionStrategy;
+        set => $this->commissionStrategy = $value;
+    }
+
     protected string $apiKey
-        {
-            get => $this->apiKey;
-        }
+    {
+        get => $this->apiKey;
+    }
 
     protected string $webhookSecret
-        {
-            get => $this->webhookSecret;
-        }
+    {
+        get => $this->webhookSecret;
+    }
 
     protected float $commissionRate
-        {
-            get => $this->commissionRate;
-        }
+    {
+        get => $this->commissionRate;
+    }
 
     public function __construct(
         string $apiKey,
@@ -37,6 +44,16 @@ abstract class AbstractPaymentProcessor implements PaymentProcessorInterface
         $this->validateApiKey();
     }
 
+    public function calculateCommission(float $amount): float
+    {
+        return $this->commissionStrategy->calculate($amount);
+    }
+
+    public function setCommissionStrategy(CommissionStrategy $strategy): void
+    {
+        $this->commissionStrategy = $strategy;
+    }
+
     abstract public function process(Payment $payment): void;
 
     abstract public function refund(Payment $payment): void;
@@ -44,11 +61,6 @@ abstract class AbstractPaymentProcessor implements PaymentProcessorInterface
     abstract public function getStatus(Payment $payment): string;
 
     abstract public function getName(): string;
-
-    protected function calculateCommission(float $amount): float
-    {
-        return round($amount * $this->commissionRate, 2);
-    }
 
     protected function validateApiKey(): void
     {
@@ -72,4 +84,5 @@ abstract class AbstractPaymentProcessor implements PaymentProcessorInterface
 
         log_operation('PAYMENT_PROCESSOR', $logMessage);
     }
+
 }

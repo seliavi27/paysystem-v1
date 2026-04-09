@@ -29,7 +29,7 @@ class UserRepository implements UserRepositoryInterface
         // save to $_context
     }
 
-    public function find(string $id): ?User
+    public function findById(string $id): ?User
     {
         return $this->users[$id] ?? null;
     }
@@ -39,9 +39,9 @@ class UserRepository implements UserRepositoryInterface
         return array_values($this->users);
     }
 
-    public function save(User $user): bool
+    public function save(object $entity): bool
     {
-        $this->users[$user->id] = $user;
+        $this->users[$entity->id] = $entity;
         $this->saveToFile();
         return true;
     }

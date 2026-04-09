@@ -4,46 +4,68 @@ declare(strict_types=1);
 $container = require_once __DIR__ . '/../bootstrap.php';
 $logger = $container['logger'];
 
+use PaySystem\Enum\PaymentMethod;
 use PaySystem\Notification\EmailNotificationChannel;
 use PaySystem\Repository\PaymentRepository;
 use PaySystem\Service\LogService;
 use PaySystem\Service\PaymentService;
 use PaySystem\Processor\StripeProcessor;
 use PaySystem\Storage\JsonStorage;
+use PaySystem\Strategy\TieredFeeStrategy;
 
 try
 {
-    $processor = new StripeProcessor(
-        $_ENV['STRIPE_API_KEY'] ?? '',
-        $_ENV['STRIPE_WEBHOOK_SECRET'] ?? '',
-        0.029
-    );
+//    $processor = new StripeProcessor(
+//        $_ENV['STRIPE_API_KEY'] ?? '',
+//        $_ENV['STRIPE_WEBHOOK_SECRET'] ?? '',
+//        0.029
+//    );
+//
+//    $storage = new JsonStorage(
+//        "context"
+//    );
+//
+//    $repository = new PaymentRepository(
+//        $storage
+//    );
+//
+//    $notification = new EmailNotificationChannel();
+//
+//    $log = new LogService(
+//        [$logger]
+//    );
+//
+//    $service = new PaymentService(
+//        $processor, $repository, $notification);
+//
+//    $logger->info('PaySystem started successfully');
+//    echo "PaySystem v2.0 ready!\n";
 
-    $storage = new JsonStorage(
-        "context"
-    );
 
-    $repository = new PaymentRepository(
-        $storage
-    );
+    $factory = $container['payment.factory']();
 
-    $notification = new EmailNotificationChannel();
+    $stripeProcessor = $factory->create(PaymentMethod::CREDIT_CARD);
+    $stripeProcessor->setCommissionStrategy(new TieredFeeStrategy());
+    $commission = $stripeProcessor->calculateCommission(500);
+    echo "Commission: " . $commission . "<br/>";
 
-    $log = new LogService(
-        [$logger]
-    );
+    $sameProcessor = $factory->create(PaymentMethod::CREDIT_CARD);
+    $sameProcessor->setCommissionStrategy(new TieredFeeStrategy());
+    $commission = $stripeProcessor->calculateCommission(2500);
+    echo "Commission: " . $commission . "<br/>";
 
-    $service = new PaymentService(
-        $processor, $repository, $notification);
+    $mollieProcessor = $factory->create(PaymentMethod::BANK_TRANSFER);
+    $sameProcessor->setCommissionStrategy(new TieredFeeStrategy());
+    $commission = $stripeProcessor->calculateCommission(10500);
+    echo "Commission: " . $commission . "<br/>";
 
-    $logger->info('PaySystem started successfully');
-    echo "PaySystem v2.0 ready!\n";
+    $created = $factory->getAll();
 
 }
 catch (Exception $e)
 {
     $logger->error('Failed to start PaySystem', ['error' => $e->getMessage()]);
-    echo "Error: " . $e->getMessage() . "\n";
+    echo "Error: " . $e->getMessage() . "<br/>";
 }
 
 $page = getCurrentPage();
