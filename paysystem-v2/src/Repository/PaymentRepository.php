@@ -3,14 +3,11 @@ declare(strict_types=1);
 
 namespace PaySystem\Repository;
 
-use InvalidArgumentException;
 use PaySystem\Entity\Payment;
 use PaySystem\Enum\PaymentStatus;
-use PaySystem\Storage\StorageInterface;
 
 class PaymentRepository implements PaymentRepositoryInterface
 {
-    private StorageInterface $storage;
     private string $filePath;
 
     public function __construct(string $filePath = PAYMENTS_FILE)
@@ -21,41 +18,27 @@ class PaymentRepository implements PaymentRepositoryInterface
 
     public function save(object $entity): bool
     {
-        $payments = $this->load();
-        $payments[$entity->id] = serialize($entity);
-        $result = file_put_contents($this->filePath, json_encode($payments));
-
-        if ($result === false)
-        {
-            return false;
-        }
-
-        return true;
+        $payments = $this->loadData();
+        $payments[$entity->id] = $entity->toArray();
+        return $this->writeData($payments);
     }
 
     public function update(Payment $payment): bool
     {
-        $payments = $this->load();
+        $payments = $this->loadData();
 
         if (!isset($payments[$payment->id]))
         {
             return false;
         }
 
-        $payments[$payment->id] = serialize($payment);
-        $result = file_put_contents($this->filePath, json_encode($payments));
-
-        if ($result === false)
-        {
-            return false;
-        }
-
-        return true;
+        $payments[$payment->id] = $payment->toArray();
+        return $this->writeData($payments);
     }
 
     public function delete(string $id): bool
     {
-        $payments = $this->load();
+        $payments = $this->loadData();
 
         if (!isset($payments[$id]))
         {
@@ -63,51 +46,44 @@ class PaymentRepository implements PaymentRepositoryInterface
         }
 
         unset($payments[$id]);
-        $result = file_put_contents($this->filePath, json_encode($payments));
-
-        if ($result === false)
-        {
-            return false;
-        }
-
-        return true;
+        return $this->writeData($payments);
     }
 
-    public function findById(string $id): ?object
+    public function findById(string $id): ?Payment
     {
-        $payments = $this->load();
+        $payments = $this->loadData();
 
         if (isset($payments[$id]))
         {
-            return unserialize($payments[$id]);
+            return Payment::fromArray($payments[$id]);
         }
 
         return null;
     }
 
-    public function findByUserId(int $userId): array
+    public function findByUserId(string $userId): array
     {
         $payments = $this->findAll();
 
-        return array_filter($payments, fn($p) => $p->getUserId() === $userId);
+        return array_filter($payments, fn(Payment $p) => $p->userId === $userId);
     }
 
     public function findByStatus(PaymentStatus $status): array
     {
         $payments = $this->findAll();
 
-        return array_filter($payments, fn($p) => $p->status === $status);
+        return array_filter($payments, fn(Payment $p) => $p->status === $status);
     }
 
     public function findAll(): array
     {
         return array_map(
-            fn($data) => unserialize($data),
-            $this->load()
+            fn(array $data) => Payment::fromArray($data),
+            $this->loadData()
         );
     }
 
-    private function load(): array
+    private function loadData(): array
     {
         if (!file_exists($this->filePath))
         {
@@ -115,6 +91,16 @@ class PaymentRepository implements PaymentRepositoryInterface
         }
 
         return json_decode(file_get_contents($this->filePath), true) ?? [];
+    }
+
+    private function writeData(array $payments): bool
+    {
+        $result = file_put_contents(
+            $this->filePath,
+            json_encode($payments, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
+        );
+
+        return $result !== false;
     }
 
     private function ensureFileExists(): void

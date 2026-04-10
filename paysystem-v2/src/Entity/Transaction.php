@@ -8,12 +8,11 @@ use PaySystem\Enum\CurrencyType;
 use PaySystem\Enum\TransactionType;
 use PaySystem\Trait\HasUuid;
 use PaySystem\Trait\Loggable;
+use PaySystem\Trait\Timestampable;
 
 class Transaction
 {
-    use Loggable, HasUuid;
-
-//    use Timestampable;
+    use Loggable, HasUuid, Timestampable;
 
     public string $userId
         {
@@ -62,11 +61,12 @@ class Transaction
         float           $amount,
         string          $description,
         DateTime        $timestamp,
-//        DateTime $createdAt,
-//        DateTime $updatedAt
+        ?string         $id = null,
+        ?DateTime       $createdAt = null,
+        ?DateTime       $updatedAt = null
     )
     {
-        $this->id = self::generateUuid();
+        $this->id = $id ?? self::generateUuid();
         $this->userId = $userId;
         $this->paymentId = $paymentId;
         $this->type = $type;
@@ -74,8 +74,8 @@ class Transaction
         $this->amount = $amount;
         $this->description = $description;
         $this->timestamp = $timestamp;
-//        $this->createdAt = $createdAt;
-//        $this->updatedAt = $updatedAt;
+        $this->createdAt = $createdAt ?? new DateTime();
+        $this->updatedAt = $updatedAt ?? new DateTime();
     }
 
     public function toArray(): array
@@ -89,9 +89,46 @@ class Transaction
             'amount' => $this->amount,
             'description' => $this->description,
             'timestamp' => $this->timestamp,
-//            'createdAt' => $this->createdAt,
-//            'updatedAt' => $this->updatedAt
+            'createdAt' => $this->createdAt,
+            'updatedAt' => $this->updatedAt
         ];
+    }
+
+    public static function fromArray(array $data): self
+    {
+        $timestamp = $data['timestamp'];
+
+        if (is_array($timestamp))
+        {
+            $timestamp = $timestamp['date'];
+        }
+
+        $createdAt = $data['createdAt'] ?? null;
+
+        if (is_array($createdAt))
+        {
+            $createdAt = $createdAt['date'];
+        }
+
+        $updatedAt = $data['updatedAt'] ?? null;
+
+        if (is_array($updatedAt))
+        {
+            $updatedAt = $updatedAt['date'];
+        }
+
+        return new self(
+            $data['userId'],
+            $data['paymentId'],
+            TransactionType::from($data['type']),
+            CurrencyType::from($data['currency']),
+            (float)$data['amount'],
+            $data['description'],
+            new DateTime($timestamp),
+            $data['id'] ?? null,
+            $createdAt ? new DateTime($createdAt) : null,
+            $updatedAt ? new DateTime($updatedAt) : null,
+        );
     }
 
     public function __toString(): string

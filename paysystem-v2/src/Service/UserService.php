@@ -37,20 +37,19 @@ class UserService
             phone: ''
         );
 
-        $this->storage->save($user);
+        $this->repository->save($user);
 
         return $user;
     }
 
     public function findById(string $id): ?User
     {
-        $user = $this->storage->find($id);
-        return $user;
+        return $this->repository->findById($id);
     }
 
     public function findByEmail(string $email): ?User
     {
-        $users = $this->storage->findAll();
+        $users = $this->repository->findAll();
 
         foreach ($users as $user)
         {
@@ -71,7 +70,7 @@ class UserService
         }
 
         $user->email = $newEmail;
-        $this->storage->update($user);
+        $this->repository->save($user);
     }
 
     public function addBalance(User $user, float $amount): void
@@ -82,6 +81,6 @@ class UserService
         }
 
         $user->addBalance($amount);
-        $this->storage->update($user);
+        $this->repository->save($user);
     }
 }

@@ -4,28 +4,29 @@ declare(strict_types=1);
 namespace PaySystem\Repository;
 
 use PaySystem\Entity\Transaction;
+use PaySystem\Storage\StorageInterface;
 
 class TransactionRepository implements TransactionRepositoryInterface
 {
-    private string $context;
+    private StorageInterface $storage;
     private array $transactions = [];
 
     public function __construct(
-        string $_context)
+        StorageInterface $storage)
     {
-        $this->context = $_context;
+        $this->storage = $storage;
         $this->load();
     }
 
     private function load(): void
     {
+        $items = $this->storage->load();
 
-    }
-
-    private function saveToFile(): void
-    {
-        $data = array_map(fn(Transaction $t) => $t->toArray(), $this->transactions);
-        // save to $_context
+        foreach ($items as $data)
+        {
+            $transaction = Transaction::fromArray($data);
+            $this->transactions[$transaction->id] = $transaction;
+        }
     }
 
     public function findById(string $id): ?Transaction
@@ -41,8 +42,7 @@ class TransactionRepository implements TransactionRepositoryInterface
     public function save(object $entity): bool
     {
         $this->transactions[$entity->id] = $entity;
-        $this->saveToFile();
-        return true;
+        return $this->storage->save($entity);
     }
 
     public function delete(string $id): bool
@@ -53,7 +53,6 @@ class TransactionRepository implements TransactionRepositoryInterface
         }
 
         unset($this->transactions[$id]);
-        $this->saveToFile();
-        return true;
+        return $this->storage->delete($id);
     }
 }

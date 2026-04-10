@@ -9,7 +9,7 @@ use PaySystem\Enum\PaymentStatus;
 interface PaymentRepositoryInterface extends RepositoryInterface
 {
     public function update(Payment $payment): bool;
-    public function findByUserId(int $userId): array;
+    public function findByUserId(string $userId): array;
     public function findByStatus(PaymentStatus $status): array;
 
 }

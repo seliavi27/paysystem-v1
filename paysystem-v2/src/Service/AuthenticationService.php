@@ -10,22 +10,18 @@ use RuntimeException;
 class AuthenticationService
 {
     private const SESSION_KEY = 'userId';
-    //private UserRepositoryInterface $userService;
     private UserRepositoryInterface $repository;
 
     public function __construct(
-        //UserServiceInterface $userService
         UserRepositoryInterface $repository
     )
     {
-        //$this->userService = $userService;
         $this->repository = $repository;
     }
 
     public function authenticate(string $email, string $password): User
     {
-//        $user = $this->userService->findByEmail($email);
-        $user = null;
+        $user = $this->findByEmail($email);
 
         if (!$user)
         {
@@ -54,12 +50,27 @@ class AuthenticationService
             return null;
         }
 
-        return $this->userService->findById($_SESSION[self::SESSION_KEY]);
+        return $this->repository->findById($_SESSION[self::SESSION_KEY]);
     }
 
     public function logout(): void
     {
         unset($_SESSION[self::SESSION_KEY]);
         session_destroy();
+    }
+
+    private function findByEmail(string $email): ?User
+    {
+        $users = $this->repository->findAll();
+
+        foreach ($users as $user)
+        {
+            if (strtolower($user->email) === strtolower($email))
+            {
+                return $user;
+            }
+        }
+
+        return null;
     }
 }

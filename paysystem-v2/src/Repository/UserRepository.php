@@ -20,13 +20,13 @@ class UserRepository implements UserRepositoryInterface
 
     private function load(): void
     {
+        $items = $this->storage->load();
 
-    }
-
-    private function saveToFile(): void
-    {
-        $data = array_map(fn(User $u) => $u->toArray(), $this->users);
-        // save to $_context
+        foreach ($items as $data)
+        {
+            $user = User::fromArray($data);
+            $this->users[$user->id] = $user;
+        }
     }
 
     public function findById(string $id): ?User
@@ -42,8 +42,7 @@ class UserRepository implements UserRepositoryInterface
     public function save(object $entity): bool
     {
         $this->users[$entity->id] = $entity;
-        $this->saveToFile();
-        return true;
+        return $this->storage->save($entity);
     }
 
     public function delete(string $id): bool
@@ -54,7 +53,6 @@ class UserRepository implements UserRepositoryInterface
         }
 
         unset($this->users[$id]);
-        $this->saveToFile();
-        return true;
+        return $this->storage->delete($id);
     }
 }

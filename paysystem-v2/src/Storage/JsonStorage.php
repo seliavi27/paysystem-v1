@@ -70,7 +70,7 @@ class JsonStorage implements StorageInterface
         return array_map(fn($item) => (object)$item, $this->read());
     }
 
-    public function all(): array
+    public function load(): array
     {
         return $this->read();
     }
