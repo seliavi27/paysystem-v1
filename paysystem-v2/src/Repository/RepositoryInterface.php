@@ -5,7 +5,7 @@ namespace PaySystem\Repository;
 
 interface RepositoryInterface
 {
-    public function save(object $entity): bool;
+    public function saveEntity(object $entity): bool;
 
     public function findById(string $id): ?object;
 

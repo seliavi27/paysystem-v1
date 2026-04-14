@@ -33,10 +33,6 @@ const CORE_PATH = BASE_PATH . '/core';
 
 const DATABASE_PATH = CONFIG_PATH . '/database.php';
 
-const FUNCTIONS_PATH = CORE_PATH . '/functions.php';
-const ROUTER_PATH = CORE_PATH . '/router.php';
-const AUTH_PATH = CORE_PATH . '/auth.php';
-const SECURITY_PATH = CORE_PATH . '/security.php';
 const LOGGER_PATH = CORE_PATH . '/logger.php';
 //const VALIDATORS_PATH = CORE_PATH . '/validators.php';
 

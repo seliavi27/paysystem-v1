@@ -6,7 +6,7 @@
         "description": "Pay",
         "currency": "USD",
         "status": "pending",
-        "type": "credit_card",
+        "method": "credit_card",
         "createdAt": {
             "date": "2026-04-05 23:33:07.470456",
             "timezone_type": 3,
@@ -25,7 +25,7 @@
         "description": "Pay",
         "currency": "USD",
         "status": "pending",
-        "type": "digital_wallet",
+        "method": "digital_wallet",
         "createdAt": {
             "date": "2026-04-05 23:33:11.450253",
             "timezone_type": 3,
@@ -43,8 +43,8 @@
         "amount": 140.6,
         "description": "Pay",
         "currency": "USD",
-        "status": "pending",
-        "type": "digital_wallet",
+        "status": "completed",
+        "method": "digital_wallet",
         "createdAt": {
             "date": "2026-04-05 23:43:53.621960",
             "timezone_type": 3,
@@ -63,7 +63,7 @@
         "description": "Pay",
         "currency": "USD",
         "status": "pending",
-        "type": "bank_transfer",
+        "method": "bank_transfer",
         "createdAt": {
             "date": "2026-04-05 23:44:08.241819",
             "timezone_type": 3,

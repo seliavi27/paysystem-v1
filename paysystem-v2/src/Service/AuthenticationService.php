@@ -3,31 +3,41 @@ declare(strict_types=1);
 
 namespace PaySystem\Service;
 
+use InvalidArgumentException;
 use PaySystem\Entity\User;
-use PaySystem\Repository\UserRepositoryInterface;
 use RuntimeException;
 
-class AuthenticationService
+class AuthenticationService implements AuthenticationServiceInterface
 {
-    private const SESSION_KEY = 'userId';
-    //private UserRepositoryInterface $userService;
-    private UserRepositoryInterface $repository;
+    private UserServiceInterface $userService;
 
     public function __construct(
-        //UserServiceInterface $userService
-        UserRepositoryInterface $repository
+        UserServiceInterface $userService
     )
     {
-        //$this->userService = $userService;
-        $this->repository = $repository;
+        $this->userService = $userService;
+
+        if (session_status() === PHP_SESSION_NONE)
+        {
+            session_start();
+        }
     }
 
     public function authenticate(string $email, string $password): User
     {
-//        $user = $this->userService->findByEmail($email);
-        $user = null;
+        if (empty($email))
+        {
+            throw new InvalidArgumentException('Email is required');
+        }
 
-        if (!$user)
+        if (empty($password))
+        {
+            throw new InvalidArgumentException('Password is required');
+        }
+
+        $user = $this->userService->findByEmail($email);
+
+        if (is_null($user))
         {
             throw new RuntimeException('User not found');
         }
@@ -37,14 +47,28 @@ class AuthenticationService
             throw new RuntimeException('Invalid password');
         }
 
-        $_SESSION[self::SESSION_KEY] = $user->id;
+        $_SESSION[$_ENV['SESSION_KEY']] = $user->id;
 
         return $user;
     }
 
     public function isAuthenticated(): bool
     {
-        return isset($_SESSION[self::SESSION_KEY]);
+        if (!isset($_SESSION[$_ENV['SESSION_KEY']]))
+        {
+            return false;
+        }
+
+        $userId = $_SESSION[$_ENV['SESSION_KEY']];
+        $user = $this->userService->findById($userId);
+
+        if (is_null($user))
+        {
+            $this->logout();
+            return false;
+        }
+
+        return true;
     }
 
     public function getCurrentUser(): ?User
@@ -54,12 +78,24 @@ class AuthenticationService
             return null;
         }
 
-        return $this->userService->findById($_SESSION[self::SESSION_KEY]);
+        $user = $this->userService->findById($_SESSION[$_ENV['SESSION_KEY']]);
+
+        if ($user instanceof User)
+        {
+            return $user;
+        }
+
+        return null;
     }
 
     public function logout(): void
     {
-        unset($_SESSION[self::SESSION_KEY]);
+        unset($_SESSION[$_ENV['SESSION_KEY']]);
         session_destroy();
     }
+
+//    public function validateToken(?string $header): bool
+//    {
+//        return $this->jwtTokenService->validate($header);
+//    }
 }

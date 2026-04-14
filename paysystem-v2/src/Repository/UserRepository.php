@@ -3,58 +3,88 @@ declare(strict_types=1);
 
 namespace PaySystem\Repository;
 
+use InvalidArgumentException;
 use PaySystem\Entity\User;
 use PaySystem\Storage\StorageInterface;
 
 class UserRepository implements UserRepositoryInterface
 {
     private StorageInterface $storage;
-    private array $users = [];
 
-    public function __construct(
-        StorageInterface $storage)
+    public function __construct(StorageInterface $storage)
     {
         $this->storage = $storage;
-        $this->load();
     }
 
-    private function load(): void
+    public function saveEntity(object $entity): bool
     {
-
+        $users = $this->load();
+        $users[] = $entity->toArray;
+        return $this->save($users);
     }
 
-    private function saveToFile(): void
+    public function update(User $user): bool
     {
-        $data = array_map(fn(User $u) => $u->toArray(), $this->users);
-        // save to $_context
-    }
+        $users = $this->load();
 
-    public function findById(string $id): ?User
-    {
-        return $this->users[$id] ?? null;
-    }
-
-    public function findAll(): array
-    {
-        return array_values($this->users);
-    }
-
-    public function save(object $entity): bool
-    {
-        $this->users[$entity->id] = $entity;
-        $this->saveToFile();
-        return true;
-    }
-
-    public function delete(string $id): bool
-    {
-        if (!isset($this->users[$id]))
+        if (!isset($user->id))
         {
             return false;
         }
 
-        unset($this->users[$id]);
-        $this->saveToFile();
-        return true;
+        foreach ($users as $u)
+        {
+            if (isset($user->id) && $u->id === $user->id)
+            {
+                unset($u);
+            }
+        }
+
+        return $this->save($users);
+    }
+
+    public function delete(string $id): bool
+    {
+        $users = $this->load();
+
+        foreach ($users as $user)
+        {
+            if (isset($user->id) && $user->id === $id)
+            {
+                unset($user);
+            }
+        }
+
+        return $this->save($users);
+    }
+
+    public function findById(string $id): ?User
+    {
+        $users = $this->load();
+        return array_find($users, fn($user) => isset($user->id) && $user->id === $id);
+    }
+
+    public function findByEmail(string $email): ?User
+    {
+        $users = $this->findAll();
+        return array_find($users, fn($user) => $user->email === $email);
+    }
+
+    public function findAll(): array
+    {
+        return $this->load();
+    }
+
+    private function load(): array
+    {
+        return array_map(
+            fn($item) => User::fromArray($item),
+            $this->storage->load()
+        );
+    }
+
+    private function save(array $data): bool
+    {
+        return $this->storage->save($data);
     }
 }
