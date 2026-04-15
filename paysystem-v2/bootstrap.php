@@ -91,11 +91,12 @@ $authController = new AuthController($templateEngine, $authenticationService, $j
 
 $router = new Router();
 
-$router->post('/auth/login', fn($req, $res) => $authController->loginForm($req, $res));
+$router->get('/login', fn($req, $res) => $authController->loginForm($req, $res));
+$router->post('/auth/login', fn($req, $res) => $authController->login($req, $res));
 $router->post('/auth/logout', fn($req, $res) => $authController->logout($req, $res));
 $router->get('/auth/profile', fn($req, $res) => $authController->profile($req, $res));
 
-$router->get('/payments', fn($req, $res) => $paymentController->showAllByUserId($req, $res));
+$router->get('/payments', fn($req, $res) => $paymentController->index($req, $res));
 $router->get('/payments/{id}', fn($req, $res) => $paymentController->show($req, $res));
 $router->post('/payments/{id}/refund', fn($req, $res) => $paymentController->refund($req, $res));
 $router->get('/payments/{status}', fn($req, $res) => $paymentController->showAllByStatus($req, $res));

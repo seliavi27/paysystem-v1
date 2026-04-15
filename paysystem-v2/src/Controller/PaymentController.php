@@ -29,8 +29,8 @@ class PaymentController extends AbstractController
 
     public function index(Request $request, Response $response): Response
     {
-        $id = $request->getAttribute('id');
-        $payments = $this->paymentService->showAllByUserId($id);
+        $userId = $request->getAttribute('userId');
+        $payments = $this->paymentService->showAllByUserId($userId);
 
         return $this->view('payments/list', [
             'title'    => 'Платежи',

@@ -1,6 +1,6 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1>Платежи</h1>
-    <a href="/payments/create" class="btn btn-primary">Создать платёж</a>
+<!--    <a href="/payments/create" class="btn btn-primary">Создать платёж</a>-->
 </div>
 
 <?php if (empty($payments)): ?>
@@ -21,7 +21,7 @@
             <tr>
                 <td><?= htmlspecialchars((string)$payment->id) ?></td>
                 <td><?= number_format($payment->amount, 2) ?></td>
-                <td><?= htmlspecialchars($payment->currency->value) ?></td>
+                <td><?= htmlspecialchars($payment->currency->getLabel()) ?></td>
                 <td>
                     <?php
                     $statusClass = match($payment->status->value) {

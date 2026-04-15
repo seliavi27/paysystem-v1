@@ -27,6 +27,7 @@ class AuthMiddleware implements MiddlewareInterface
         $path = $request->getPath();
 
         $publicRoutes = [
+            '/login',
             '/auth/login',
             '/auth/register'];
 
@@ -35,13 +36,7 @@ class AuthMiddleware implements MiddlewareInterface
             return;
         }
 
-//        if (mb_strpos($path, '/auth/') !== false)
-//        {
-//            return;
-//        }
-
-        $authHeader = $request->getHeader('Authorization');
-        $token = $this->jwtTokenService->extractToken($authHeader);
+        $token = $_COOKIE['access_token'] ?? null;
 
         if (!$token || !$this->jwtTokenService->validate($token))
         {

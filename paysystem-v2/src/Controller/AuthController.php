@@ -63,44 +63,30 @@ class AuthController extends AbstractController
                 $password
             );
 
-//            $token = $this->jwtTokenService->generate([
-//                'user_id' => $user->id,
-//                'email' => $user->email,
-//                'full_name' => $user->fullName
-//            ]);
+            $token = $this->jwtTokenService->generate([
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'full_name' => $user->fullName
+            ]);
 
-            $_SESSION['user_id'] = $user->id;
+            setcookie(
+                'access_token',
+                $token,
+                [
+                    'expires' => time() + 3600,
+                    'path' => '/',
+                    'httponly' => true,
+                    'secure' => false,
+                    'samesite' => 'Lax'
+                ]
+            );
 
-//            $refreshToken = $this->jwtTokenService->generate([
-//                'user_id' => $user->id,
-//                'type' => 'refresh'
-//            ]);
-//
-//            return $response->setJson([
-//                'success' => true,
-//                'message' => 'Login successful',
-//                'data' => [
-//                    'access_token' => $token,
-//                    'refresh_token' => $refreshToken,
-//                    'token_type' => 'Bearer',
-//                    'user' => [
-//                        'id' => $user->id,
-//                        'email' => $user->email,
-//                        'full_name' => $user->fullName
-//                    ]
-//                ]
-//            ]);
-
-            return $this->redirect('/dashboard', 201);
+            return $this->redirect('/payments', 302);
 
         }
         catch (Exception $e)
         {
-//            return $response->setStatusCode(401)
-//                ->setJson([
-//                    'error' => 'Unauthorized',
-//                    'message' => $e->getMessage()
-//                ]);
+
             return $this->view('auth/login', [
                 'title'  => 'Вход в систему',
                 'errors' => ['Неверный email или пароль'],
