@@ -26,19 +26,19 @@ class AuthMiddleware implements MiddlewareInterface
     {
         $path = $request->getPath();
 
-//        $publicRoutes = [
-//            '/auth/login',
-//            '/auth/register'];
-//
-//        if (in_array($path, $publicRoutes))
-//        {
-//            return;
-//        }
+        $publicRoutes = [
+            '/auth/login',
+            '/auth/register'];
 
-        if (mb_strpos($path, '/auth/') !== false)
+        if (in_array($path, $publicRoutes, true))
         {
             return;
         }
+
+//        if (mb_strpos($path, '/auth/') !== false)
+//        {
+//            return;
+//        }
 
         $authHeader = $request->getHeader('Authorization');
         $token = $this->jwtTokenService->extractToken($authHeader);
@@ -48,17 +48,26 @@ class AuthMiddleware implements MiddlewareInterface
             $response->setStatusCode(401)
                 ->setJson([
                     'error' => 'Unauthorized',
-                    'message' => 'Invalid or missing authentication token'])
+                    'message' => 'Invalid or missing authentication token'
+                ])
                 ->send();
+
+            exit;
         }
 
         $payload = $this->jwtTokenService->decode($token);
 
-        if ($payload && isset($payload['user_id']))
+        if (!$payload || !isset($payload['user_id']))
         {
-            $request->setAttribute('userId', $payload['user_id']);
-            $request->setAttribute('email', $payload['email'] ?? null);
-            $request->setAttribute('fullName', $payload['full_name'] ?? null);
+            $response->setStatusCode(401)
+            ->setJson([
+                'error' => 'Unauthorized'
+            ])
+            ->send();
+
+            exit;
         }
+
+        $request->setAttribute('userId', $payload['user_id']);
     }
 }

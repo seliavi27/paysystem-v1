@@ -12,16 +12,30 @@ use PaySystem\Exception\ValidationException;
 use PaySystem\Request;
 use PaySystem\Response;
 use PaySystem\Service\PaymentServiceInterface;
+use PaySystem\View\TemplateEngine;
 
 class PaymentController extends AbstractController
 {
     private PaymentServiceInterface $paymentService;
 
     public function __construct(
+        TemplateEngine $templateEngine,
         PaymentServiceInterface $paymentService
     )
     {
+        parent::__construct($templateEngine);
         $this->paymentService = $paymentService;
+    }
+
+    public function index(Request $request, Response $response): Response
+    {
+        $id = $request->getAttribute('id');
+        $payments = $this->paymentService->showAllByUserId($id);
+
+        return $this->view('payments/list', [
+            'title'    => 'Платежи',
+            'payments' => $payments,
+        ]);
     }
 
     public function create(Request $request, Response $response): Response

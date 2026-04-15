@@ -11,6 +11,10 @@ define('BASE_PATH', realpath(dirname(__DIR__)));
 const SRC_PATH = BASE_PATH . '/src';
 const PUBLIC_PATH = BASE_PATH . '/public';
 const PAGES_PATH = BASE_PATH . '/pages';
+const TEMPLATES_PATH = BASE_PATH . '/templates';
+const COMPONENTS_PATH = TEMPLATES_PATH . '/components';
+const AUTH_PATH = TEMPLATES_PATH . '/components';
+const LOGIN_PATH = AUTH_PATH . '/login.php';
 
 const DATA_PATH = BASE_PATH . '/data';
 

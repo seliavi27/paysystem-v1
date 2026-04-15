@@ -23,6 +23,7 @@ use PaySystem\Service\PaymentService;
 use PaySystem\Service\UserService;
 use PaySystem\Storage\JsonStorage;
 use PaySystem\Strategy\TieredFeeStrategy;
+use PaySystem\View\TemplateEngine;
 
 require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/config/config.php';
@@ -82,12 +83,15 @@ $userService = new UserService($userRepository);
 $authenticationService = new AuthenticationService($userService);
 $jwtTokenService = new JwtTokenService($_ENV['JWT_SECRET'], $_ENV['JWT_ALGORITHM'], (int)$_ENV['JWT_TTL']);
 
-$paymentController = new PaymentController($paymentService);
-$userController = new UserController($userService);
-$authController = new AuthController($authenticationService, $jwtTokenService);
+$templateEngine = new TemplateEngine(TEMPLATES_PATH);
+
+$paymentController = new PaymentController($templateEngine, $paymentService);
+$userController = new UserController($templateEngine, $userService);
+$authController = new AuthController($templateEngine, $authenticationService, $jwtTokenService);
 
 $router = new Router();
-$router->post('/auth/login', fn($req, $res) => $authController->login($req, $res));
+
+$router->post('/auth/login', fn($req, $res) => $authController->loginForm($req, $res));
 $router->post('/auth/logout', fn($req, $res) => $authController->logout($req, $res));
 $router->get('/auth/profile', fn($req, $res) => $authController->profile($req, $res));
 

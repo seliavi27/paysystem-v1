@@ -9,15 +9,18 @@ use PaySystem\Exception\ValidationException;
 use PaySystem\Request;
 use PaySystem\Response;
 use PaySystem\Service\UserService;
+use PaySystem\View\TemplateEngine;
 
 class UserController extends AbstractController
 {
     private readonly UserService $userService;
 
     public function __construct(
+        TemplateEngine $templateEngine,
         UserService $userService
     )
     {
+        parent::__construct($templateEngine);
         $this->userService = $userService;
     }
 
