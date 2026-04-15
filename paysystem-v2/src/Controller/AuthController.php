@@ -37,17 +37,11 @@ class AuthController extends AbstractController
 
     public function login(Request $request, Response $response): Response
     {
-//        $data = $request->getJson();
         $email = $request->getPost('email', '');
         $password = $request->getPost('password', '');
 
         if (empty($email) || empty($password))
         {
-//                return $response->setStatusCode(400)
-//                    ->setJson([
-//                        'error' => 'Bad Request',
-//                        'message' => 'Email and password are required'
-//                    ]);
             return $this->view('auth/login', [
                 'title'  => 'Вход в систему',
                 'errors' => ['Неверный email или пароль'],

@@ -10,15 +10,12 @@ use PaySystem\Service\JwtTokenServiceInterface;
 
 class AuthMiddleware implements MiddlewareInterface
 {
-//    private AuthenticationServiceInterface $authenticationService;
     private JwtTokenServiceInterface $jwtTokenService;
 
     public function __construct(
-//        AuthenticationServiceInterface $authenticationService,
         JwtTokenServiceInterface $jwtTokenService
     )
     {
-//        $this->authenticationService = $authenticationService;
         $this->jwtTokenService = $jwtTokenService;
     }
 
