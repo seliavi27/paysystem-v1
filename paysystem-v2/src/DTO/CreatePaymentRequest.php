@@ -10,11 +10,11 @@ use PaySystem\Enum\PaymentMethod;
 final readonly class CreatePaymentRequest
 {
     public function __construct(
-        public string        $userId,
-        public float         $amount,
-        public string        $description,
+        public string $userId,
+        public float $amount,
+        public string $description,
         public CurrencyType  $currency,
-        public PaymentMethod $paymentMethod
+        public PaymentMethod $method
     )
     {
         $this->validate();
@@ -46,7 +46,7 @@ final readonly class CreatePaymentRequest
             'amount' => $this->amount,
             'description' => $this->description,
             'currency' => $this->currency->value,
-            'paymentMethod' => $this->paymentMethod->value,
+            'method' => $this->method->value,
         ];
     }
 }

@@ -4,74 +4,51 @@ declare(strict_types=1);
 namespace PaySystem\Service;
 
 use InvalidArgumentException;
+use PaySystem\DTO\CreateUserRequest;
 use PaySystem\Entity\User;
+use PaySystem\Exception\ValidationException;
 use PaySystem\Repository\UserRepositoryInterface;
 
-class UserService
+class UserService implements UserServiceInterface
 {
-    private UserRepositoryInterface $repository;
-
     public function __construct(
-        UserRepositoryInterface $repository
-    )
-    {
-        $this->repository = $repository;
+        private UserRepositoryInterface $repository
+    ) {
     }
 
-    public function create(string $name, string $email, string $password): User
+    public function create(CreateUserRequest $request): User
     {
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL))
-        {
-            throw new InvalidArgumentException('Invalid email');
-        }
-
-        if (strlen($password) < 6)
-        {
-            throw new InvalidArgumentException('Password too short');
+        if ($this->repository->findByEmail($request->email) !== null) {
+            throw new ValidationException('User with this email already exists');
         }
 
         $user = User::create(
-            email: $email,
-            password: password_hash($password, PASSWORD_DEFAULT),
-            fullName: $name,
-            phone: ''
+            email: $request->email,
+            password: User::hashPassword($request->password),
+            fullName: $request->fullName,
+            phone: $request->phone,
         );
 
-        $this->storage->save($user);
+        $this->repository->saveEntity($user);
 
         return $user;
     }
 
     public function findById(string $id): ?User
     {
-        $user = $this->storage->find($id);
-        return $user;
+        $user = $this->repository->findById($id);
+
+        return $user instanceof User ? $user : null;
     }
 
     public function findByEmail(string $email): ?User
     {
-        $users = $this->storage->findAll();
-
-        foreach ($users as $user)
-        {
-            if (strtolower($user->email) === strtolower($email))
-            {
-                return $user;
-            }
-        }
-
-        return null;
+        return $this->repository->findByEmail($email);
     }
 
-    public function updateEmail(User $user, string $newEmail): void
+    public function update(User $user): void
     {
-        if (!filter_var($newEmail, FILTER_VALIDATE_EMAIL))
-        {
-            throw new InvalidArgumentException('Invalid email');
-        }
-
-        $user->email = $newEmail;
-        $this->storage->update($user);
+        $this->repository->update($user);
     }
 
     public function addBalance(User $user, float $amount): void
@@ -82,6 +59,6 @@ class UserService
         }
 
         $user->addBalance($amount);
-        $this->storage->update($user);
+        $this->repository->update($user);
     }
 }

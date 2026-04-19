@@ -9,7 +9,7 @@ use PaySystem\Entity\User;
 use PaySystem\Notification\NotificationChannelInterface;
 use Throwable;
 
-class NotificationService
+class NotificationService implements NotificationServiceInterface
 {
     private array $channels;
 
@@ -75,7 +75,7 @@ class NotificationService
             }
             catch (Throwable $e)
             {
-                log_error(sprintf(
+                error_log(sprintf(
                     '[%s] Notification failed: %s',
                     $channel->getName(),
                     $e->getMessage()

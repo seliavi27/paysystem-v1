@@ -65,25 +65,4 @@ class UserValidator
     {
         return (preg_match('/^\+?\d{7,15}$/', $phone) === 1);
     }
-
-    public static function userExists(string $email, string $usersFile = 'data/users.json'): bool
-    {
-        if (!is_file($usersFile)) {
-            return false;
-        }
-
-        $users = json_decode(file_get_contents($usersFile), true);
-
-        if (!is_array($users)) {
-            return false;
-        }
-
-        foreach ($users as $user) {
-            if (isset($user['email']) && strtolower($user['email']) === strtolower($email)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
 }

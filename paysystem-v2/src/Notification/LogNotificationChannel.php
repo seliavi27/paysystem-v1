@@ -9,7 +9,7 @@ class LogNotificationChannel implements NotificationChannelInterface
 {
     public function send(User $user, string $message): bool
     {
-        log_operation('NOTIFICATION', $message);
+        error_log("[NOTIFICATION] {$message}");
         return true;
     }
 

@@ -4,62 +4,37 @@ declare(strict_types=1);
 namespace PaySystem\Service;
 
 use PaySystem\Entity\User;
-use PaySystem\Repository\UserRepositoryInterface;
-use RuntimeException;
+use PaySystem\Exception\AuthenticationException;
+use PaySystem\Exception\ValidationException;
 
-class AuthenticationService
+class AuthenticationService implements AuthenticationServiceInterface
 {
-    private const SESSION_KEY = 'userId';
-    //private UserRepositoryInterface $userService;
-    private UserRepositoryInterface $repository;
-
     public function __construct(
-        //UserServiceInterface $userService
-        UserRepositoryInterface $repository
-    )
-    {
-        //$this->userService = $userService;
-        $this->repository = $repository;
+        private UserServiceInterface $userService
+    ) {
     }
 
     public function authenticate(string $email, string $password): User
     {
-//        $user = $this->userService->findByEmail($email);
-        $user = null;
-
-        if (!$user)
+        if ($email === '' || $password === '')
         {
-            throw new RuntimeException('User not found');
+            throw new ValidationException('Email and password are required');
         }
 
-        if (!password_verify($password, $user->password))
-        {
-            throw new RuntimeException('Invalid password');
-        }
+        $user = $this->userService->findByEmail($email);
 
-        $_SESSION[self::SESSION_KEY] = $user->id;
+        if ($user === null || !password_verify($password, $user->password))
+        {
+            throw new AuthenticationException('Invalid credentials');
+        }
 
         return $user;
     }
 
-    public function isAuthenticated(): bool
-    {
-        return isset($_SESSION[self::SESSION_KEY]);
-    }
-
-    public function getCurrentUser(): ?User
-    {
-        if (!$this->isAuthenticated())
-        {
-            return null;
-        }
-
-        return $this->userService->findById($_SESSION[self::SESSION_KEY]);
-    }
-
     public function logout(): void
     {
-        unset($_SESSION[self::SESSION_KEY]);
-        session_destroy();
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            $_SESSION = [];
+        }
     }
 }

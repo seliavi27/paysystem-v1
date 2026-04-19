@@ -53,13 +53,13 @@ class Payment
             }
         }
 
-    public PaymentMethod $type
+    public PaymentMethod $method
         {
             get {
-                return $this->type;
+                return $this->method;
             }
             set {
-                $this->type = $value;
+                $this->method = $value;
             }
         }
 
@@ -68,7 +68,7 @@ class Payment
         float          $amount,
         string         $description,
         CurrencyType   $currency,
-        PaymentMethod  $type,
+        PaymentMethod  $method,
         ?string        $id = null,
         ?PaymentStatus $status = null,
         ?DateTime      $createdAt = null,
@@ -79,7 +79,7 @@ class Payment
         $this->amount = $amount;
         $this->description = $description;
         $this->currency = $currency;
-        $this->type = $type;
+        $this->method = $method;
         $this->id = $id;
         $this->status = $status;
         $this->createdAt = $createdAt;
@@ -91,7 +91,7 @@ class Payment
         float         $amount,
         string        $description,
         CurrencyType  $currency,
-        PaymentMethod $type
+        PaymentMethod $method
     ): self
     {
         return new self(
@@ -99,7 +99,7 @@ class Payment
             $amount,
             $description,
             $currency,
-            $type,
+            $method,
             self::generateUuid(),
             PaymentStatus::PENDING,
             new DateTime(),
@@ -126,7 +126,7 @@ class Payment
             (float)$data['amount'],
             $data['description'],
             CurrencyType::from($data['currency']),
-            PaymentMethod::from($data['type']),
+            PaymentMethod::from($data['method']),
             $data['id'],
             PaymentStatus::from($data['status']),
             new DateTime($createdAt),
@@ -143,7 +143,7 @@ class Payment
             'description' => $this->description,
             'currency' => $this->currency,
             'status' => $this->status,
-            'type' => $this->type,
+            'method' => $this->method,
             'createdAt' => $this->createdAt,
             'updatedAt' => $this->updatedAt
         ];
@@ -159,4 +159,33 @@ class Payment
             $this->status->value
         );
     }
+
+//    public function __serialize(): array
+//    {
+//        return [
+//            'id' => $this->id,
+//            'userId' => $this->userId,
+//            'amount' => $this->amount,
+//            'description' => $this->description,
+//            'currency' => $this->currency,
+//            'status' => $this->status,
+//            'method' => $this->method,
+//            'createdAt' => $this->createdAt,
+//            'updatedAt' => $this->updatedAt
+//        ];
+//    }
+//
+//    public function __unserialize(array $data): void
+//    {
+//        $this->userId = $data['userId'];
+//        $this->amount = (float)$data['amount'];
+//        $this->description = $data['description'];
+//        $this->currency = CurrencyType::from($data['currency']);
+//        $this->method = PaymentMethod::from($data['method']);
+//        $this->id = $data['id'];
+//        $this->status = PaymentStatus::from($data['status']);
+//        $this->createdAt = new DateTime($data['createdAt']);
+//        $this->updatedAt = new DateTime($data['createdAt']);
+//    }
+
 }

@@ -1,0 +1,10 @@
+{
+    "require": {
+        "ramsey/uuid": "^4.9",
+      "ext-mbstring": "*"
+    },
+  "require-dev": {
+    "ext-curl": "*",
+    "curl_init": "*"
+  }
+}

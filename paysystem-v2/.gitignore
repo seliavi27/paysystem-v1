@@ -6,7 +6,6 @@ public/uploads/*
 .env.*.local
 
 # Composer
-composer.lock
 vendor/
 
 # Logs
