@@ -2,12 +2,11 @@
 public/uploads/*
 
 # Environment
-#.env
-#.env.*.local
+.env
+.env.*.local
 
 # Composer
-#composer.lock
-#vendor/
+vendor/
 
 # Logs
 var/logs/*

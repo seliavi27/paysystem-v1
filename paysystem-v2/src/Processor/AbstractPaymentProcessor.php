@@ -82,7 +82,7 @@ abstract class AbstractPaymentProcessor implements PaymentProcessorInterface
             $message
         );
 
-        log_operation('PAYMENT_PROCESSOR', $logMessage);
+        error_log($logMessage);
     }
 
 }

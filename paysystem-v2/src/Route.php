@@ -22,12 +22,13 @@ class Route
             return false;
         }
 
-        $pattern = preg_replace(
-            '/{(\w+)}/', '(?P<$1>\d+)',
-            $this->pattern);
+        $regex = preg_replace_callback(
+            '/\{(\w+)(?::([^}]+))?\}/',
+            fn(array $m): string => '(?P<'.$m[1].'>'.($m[2] ?? '[^/]+').')',
+            $this->pattern
+        );
 
-        $result = preg_match("#^$pattern$#", $path, $this->params) === 1;
-        return $result;
+        return preg_match("#^{$regex}$#", $path, $this->params) === 1;
     }
 
     public function getParams(): array

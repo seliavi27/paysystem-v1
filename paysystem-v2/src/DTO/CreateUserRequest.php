@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace PaySystem\DTO;
 
-use InvalidArgumentException;
+use PaySystem\Exception\ValidationException;
 use PaySystem\Validator\UserValidator;
 
 final readonly class CreateUserRequest
@@ -23,33 +23,35 @@ final readonly class CreateUserRequest
     {
         return [
             'email' => $this->email,
-            'password' => $this->password,
             'fullName' => $this->fullName,
-            'phone' => $this->phone
+            'phone' => $this->phone,
         ];
     }
 
     private function validate(): void
     {
-        if (!empty($email) && !UserValidator::validateEmailFormat($email))
+        if (!UserValidator::validateEmailFormat($this->email))
         {
-            throw new InvalidArgumentException('Invalid email format');
+            throw new ValidationException('Invalid email format');
         }
 
-        if (!empty($password) && !UserValidator::validatePasswordStrength($password))
+        if (!UserValidator::validatePasswordStrength($this->password))
         {
-            throw new InvalidArgumentException('The password must be at least 6 characters long and contain letters and numbers');
+            throw new ValidationException('Password must be at least 6 characters and contain letters and numbers');
         }
 
-        if (!empty($password) && !empty($passwordConfirm) &&
-            $password !== $passwordConfirm)
+        if ($this->password !== $this->passwordConfirm)
         {
-            throw new InvalidArgumentException("The passwords don't match");
+            throw new ValidationException("Passwords don't match");
         }
 
-        if (!empty($phone) && !UserValidator::validatePhoneFormat($phone))
+        if ($this->phone !== '' && !UserValidator::validatePhoneFormat($this->phone))
         {
-            throw new InvalidArgumentException("Invalid phone format");
+            throw new ValidationException('Invalid phone format');
+        }
+
+        if (trim($this->fullName) === '') {
+            throw new ValidationException('Full name is required');
         }
     }
 }

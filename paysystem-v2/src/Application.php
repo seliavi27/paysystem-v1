@@ -3,13 +3,16 @@ declare(strict_types=1);
 
 namespace PaySystem;
 
+use PaySystem\Exception\ExceptionHandler;
+use Throwable;
+
 class Application
 {
     public function __construct(
         private Router $router,
-        private array  $middlewares = []
-    )
-    {
+        private ExceptionHandler $exceptionHandler,
+        private array $middlewares = []
+    ) {
     }
 
     public function run(): void
@@ -27,7 +30,12 @@ class Application
             }
         }
 
-        $response = $this->router->dispatch($request);
+        try {
+            $response = $this->router->dispatch($request);
+        } catch (Throwable $e) {
+            $response = $this->exceptionHandler->handle($e, $request);
+        }
+
         $response->send();
     }
 }

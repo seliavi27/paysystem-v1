@@ -1,12 +1,8 @@
-<?php
-declare (strict_types=1);
-
-if (!empty($_SESSION['flash'])): ?>
-    <?php foreach ($_SESSION['flash'] as $type => $message): ?>
-        <div class="alert alert-<?= htmlspecialchars($type) ?> alert-dismissible fade show">
-            <?= htmlspecialchars($message) ?>
+<?php if (!empty($flash)): ?>
+    <?php foreach ($flash as $type => $message): ?>
+        <div class="alert alert-<?= $view->e($type) ?> alert-dismissible fade show">
+            <?= $view->e($message) ?>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     <?php endforeach; ?>
-    <?php unset($_SESSION['flash']); ?>
 <?php endif; ?>

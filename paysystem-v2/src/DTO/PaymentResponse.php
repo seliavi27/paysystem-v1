@@ -3,9 +3,10 @@ declare(strict_types=1);
 
 namespace PaySystem\DTO;
 
+use DateTime;
+use PaySystem\Entity\Payment;
 use PaySystem\Enum\CurrencyType;
 use PaySystem\Enum\PaymentStatus;
-use DateTime;
 
 final readonly class PaymentResponse
 {
@@ -19,6 +20,19 @@ final readonly class PaymentResponse
         public DateTime $createdAt
     )
     {
+    }
+
+    public static function fromEntity(Payment $payment): self
+    {
+        return new self(
+            id: $payment->id,
+            userId: $payment->userId,
+            amount: $payment->amount,
+            description: $payment->description,
+            currency: $payment->currency,
+            status: $payment->status,
+            createdAt: $payment->createdAt,
+        );
     }
 
     public function toArray(): array

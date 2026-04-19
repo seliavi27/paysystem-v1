@@ -18,9 +18,10 @@ class UserRepository implements UserRepositoryInterface
 
     public function saveEntity(object $entity): bool
     {
-        $users = $this->load();
-        $users[] = $entity->toArray;
-        return $this->save($users);
+        /** @var User $entity */
+        $users = $this->storage->load();
+        $users[] = $entity->toArray();
+        return $this->storage->save($users);
     }
 
     public function update(User $user): bool

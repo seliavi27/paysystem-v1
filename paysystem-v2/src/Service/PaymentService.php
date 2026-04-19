@@ -3,34 +3,24 @@ declare(strict_types=1);
 
 namespace PaySystem\Service;
 
-use PaySystem\Enum\PaymentStatus;
 use PaySystem\DTO\CreatePaymentRequest;
 use PaySystem\Entity\Payment;
+use PaySystem\Enum\PaymentStatus;
+use PaySystem\Exception\NotFoundException;
+use PaySystem\Exception\PaymentException;
+use PaySystem\Factory\PaymentMethodFactory;
 use PaySystem\Interface\LogServiceInterface;
-use PaySystem\Interface\PaymentProcessorInterface;
-use PaySystem\Notification\NotificationChannelInterface;
 use PaySystem\Repository\PaymentRepositoryInterface;
-use RuntimeException;
 use Throwable;
 
 class PaymentService implements PaymentServiceInterface
 {
-    private PaymentProcessorInterface $processor;
-    private PaymentRepositoryInterface $repository;
-    private NotificationServiceInterface $notifier;
-    private LogServiceInterface $logger;
-
     public function __construct(
-        PaymentProcessorInterface $processor,
-        PaymentRepositoryInterface $repository,
-        NotificationServiceInterface $notifier,
-        LogServiceInterface $logger
-    )
-    {
-        $this->processor = $processor;
-        $this->repository = $repository;
-        $this->notifier = $notifier;
-        $this->logger = $logger;
+        private PaymentMethodFactory $processorFactory,
+        private PaymentRepositoryInterface $repository,
+        private NotificationServiceInterface $notifier,
+        private LogServiceInterface $logger
+    ) {
     }
 
     public function create(CreatePaymentRequest $request): Payment
@@ -44,6 +34,8 @@ class PaymentService implements PaymentServiceInterface
         );
 
         $this->repository->saveEntity($payment);
+        $this->process($payment);
+
         return $payment;
     }
 
@@ -54,53 +46,48 @@ class PaymentService implements PaymentServiceInterface
 
         try
         {
-            $this->processor->process($payment);
+            $processor = $this->processorFactory->create($payment->method);
+            $processor->process($payment);
             $payment->status = PaymentStatus::COMPLETED;
         }
         catch (Throwable $e)
         {
             $payment->status = PaymentStatus::FAILED;
             $this->logger->error($e->getMessage());
+            $this->repository->update($payment);
             throw $e;
         }
 
         $this->repository->update($payment);
-        $this->logger->info("Payment COMPLETED");
+        $this->logger->info("Payment completed: {$payment->id}");
     }
 
     public function refund(string $id): void
     {
         $payment = $this->repository->findById($id);
 
-        if (!($payment instanceof Payment))
+        if (!$payment instanceof Payment)
         {
-            return;
+            throw new NotFoundException("Payment {$id} not found");
         }
 
         if ($payment->status !== PaymentStatus::COMPLETED)
         {
-            throw new RuntimeException('Only completed payments can be refunded');
+            throw new PaymentException('Only completed payments can be refunded');
         }
 
-        $this->processor->refund($payment);
-
+        $this->processorFactory->create($payment->method)->refund($payment);
         $payment->status = PaymentStatus::REFUNDED;
-
         $this->repository->update($payment);
     }
 
-    /**
-     * @param string $id
-     * @return ?Payment
-     */
     public function show(string $id): ?Payment
     {
         $payment = $this->repository->findById($id);
 
-        if (!($payment instanceof Payment))
+        if (!$payment instanceof Payment)
         {
-            $this->logger->error("Payment not found: {$id}");
-            throw new RuntimeException("Payment with id {$id} not found");
+            throw new NotFoundException("Payment {$id} not found");
         }
 
         return $payment;
@@ -114,7 +101,12 @@ class PaymentService implements PaymentServiceInterface
     public function showAllByStatus(string $userId, string $status): array
     {
         $paymentStatus = PaymentStatus::from($status);
-        $paymentsAll = $this->repository->findAll();
-        return array_filter($paymentsAll, fn($p) => ($p->userId === $userId) && ($p->status === $paymentStatus));
+
+        return array_values(
+            array_filter(
+                $this->repository->findByUserId($userId),
+                fn(Payment $p): bool => $p->status === $paymentStatus
+            )
+        );
     }
 }

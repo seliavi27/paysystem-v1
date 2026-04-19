@@ -3,11 +3,13 @@ declare(strict_types=1);
 
 namespace PaySystem\Controller;
 
-use Exception;
 use PaySystem\DTO\CreatePaymentRequest;
 use PaySystem\DTO\PaymentResponse;
+use PaySystem\Entity\Payment;
 use PaySystem\Enum\CurrencyType;
 use PaySystem\Enum\PaymentMethod;
+use PaySystem\Enum\PaymentStatus;
+use PaySystem\Exception\NotFoundException;
 use PaySystem\Exception\ValidationException;
 use PaySystem\Request;
 use PaySystem\Response;
@@ -16,163 +18,141 @@ use PaySystem\View\TemplateEngine;
 
 class PaymentController extends AbstractController
 {
-    private PaymentServiceInterface $paymentService;
-
     public function __construct(
         TemplateEngine $templateEngine,
-        PaymentServiceInterface $paymentService
+        private readonly PaymentServiceInterface $paymentService
     )
     {
         parent::__construct($templateEngine);
-        $this->paymentService = $paymentService;
     }
+
+    // ===== HTML =====
 
     public function index(Request $request, Response $response): Response
     {
-        $userId = $request->getAttribute('userId');
-        $payments = $this->paymentService->showAllByUserId($userId);
+        $userId = (string)$request->getAttribute('userId');
+        $statusFilter = $request->getQuery('status');
+
+        $payments = $statusFilter
+            ? $this->paymentService->showAllByStatus($userId, (string)$statusFilter)
+            : $this->paymentService->showAllByUserId($userId);
 
         return $this->view('payments/list', [
-            'title'    => 'Платежи',
+            'title' => 'Платежи',
             'payments' => $payments,
+            'statusFilter' => $statusFilter,
+            'statuses' => PaymentStatus::cases(),
         ]);
     }
 
-    public function create(Request $request, Response $response): Response
+    public function createForm(Request $request, Response $response): Response
     {
-        try
-        {
-            $data = $request->getJson();
+        return $this->view('payments/create', [
+            'title' => 'Новый платёж',
+            'currencies' => CurrencyType::cases(),
+            'methods' => PaymentMethod::cases(),
+        ]);
+    }
 
-            $paymentRequest = new CreatePaymentRequest(
-                userId: $data['userId'],
-                amount: (float)$data['amount'],
-                description: $data['description'] ?? '',
-                currency: CurrencyType::from($data['currency'] ?? 'RUB'),
-                method: PaymentMethod::from($data['method'] ?? 'credit_card')
+    public function store(Request $request, Response $response): Response
+    {
+        $userId = (string)$request->getAttribute('userId');
+
+        try {
+            $this->paymentService->create(
+                new CreatePaymentRequest(
+                    userId: $userId,
+                    amount: (float)$request->getPost('amount', 0),
+                    description: (string)$request->getPost('description', ''),
+                    currency: CurrencyType::from((string)$request->getPost('currency', 'RUB')),
+                    method: PaymentMethod::from((string)$request->getPost('method', 'credit_card')),
+                )
             );
 
-            $payment = $this->paymentService->create($paymentRequest);
+            $_SESSION['flash'] = ['success' => 'Платёж успешно создан'];
 
-            return $this->json([
-                'id' => $payment->id,
-                'status' => $payment->status->value,
-                'amount' => $payment->amount,
-            ], 201);
+            return $this->redirect('/payments');
+        } catch (ValidationException $e) {
+            return $this->view('payments/create', [
+                'title' => 'Новый платёж',
+                'currencies' => CurrencyType::cases(),
+                'methods' => PaymentMethod::cases(),
+                'errors' => [$e->getMessage()],
+                'old' => [
+                    'amount' => $request->getPost('amount'),
+                    'description' => $request->getPost('description'),
+                    'currency' => $request->getPost('currency'),
+                    'method' => $request->getPost('method'),
+                ],
+            ]);
+        }
+    }
 
-        }
-        catch (ValidationException $e)
-        {
-            return $this->json(['error' => $e->getMessage()], 422);
-        }
-        catch (Exception $e)
-        {
-            return $this->json(['error' => 'Internal Server Error'], 500);
-        }
+    // ===== JSON API =====
+
+    public function create(Request $request, Response $response): Response
+    {
+        $data = $request->getJson();
+
+        $payment = $this->paymentService->create(
+            new CreatePaymentRequest(
+                userId: (string)($data['userId'] ?? $request->getAttribute('userId')),
+                amount: (float)($data['amount'] ?? 0),
+                description: (string)($data['description'] ?? ''),
+                currency: CurrencyType::from($data['currency'] ?? 'RUB'),
+                method: PaymentMethod::from($data['method'] ?? 'credit_card'),
+            )
+        );
+
+        return $this->json(PaymentResponse::fromEntity($payment)->toArray(), 201);
     }
 
     public function show(Request $request, Response $response): Response
     {
-        $id = $request->getAttribute('id');
-        $payment = $this->paymentService->show($id);
+        $payment = $this->paymentService->show((string)$request->getAttribute('id'));
 
-        if (!$payment)
+        if (!$payment instanceof Payment)
         {
-            return $this->json(['error' => 'Payment not found'], 404);
+            throw new NotFoundException('Payment not found');
         }
 
-        return $this->json([
-            'id' => $payment->id,
-            'status' => $payment->status->value,
-            'amount' => $payment->amount,
-        ]);
+        return $this->json(PaymentResponse::fromEntity($payment)->toArray());
     }
 
     public function showAllByUserId(Request $request, Response $response): Response
     {
-        $userId = $request->getAttribute('userId');
-
-        if (!$userId)
-        {
-            return $this->json(['error' => 'User not authenticated'], 401);
-        }
-
+        $userId = (string)$request->getAttribute('userId');
         $payments = $this->paymentService->showAllByUserId($userId);
-
-
-        if (empty($payments))
-        {
-            return $this->json([
-                'data' => [],
-                'message' => 'No payments found'
-            ], 200);
-        }
-
-        $paymentsArray = array_map(function($payment) {
-            return [
-                'id' => $payment->id,
-                'status' => $payment->status->value,
-                'amount' => $payment->amount,
-                'currency' => $payment->currency->value,
-                'description' => $payment->description,
-                'createdAt' => $payment->createdAt->format('Y-m-d H:i:s'),
-            ];
-        }, $payments);
 
         return $this->json([
             'success' => true,
-            'data' => $paymentsArray,
-            'count' => count($paymentsArray)
+            'count' => count($payments),
+            'data' => array_map(
+                fn(Payment $p) => PaymentResponse::fromEntity($p)->toArray(),
+                $payments
+            ),
         ]);
     }
 
     public function showAllByStatus(Request $request, Response $response): Response
     {
-        $userId = $request->getAttribute('userId');
-        $status = $request->getAttribute('status');
-
-        if (!$userId)
-        {
-            return $this->json(['error' => 'User not authenticated'], 401);
-        }
-
-        if (!$status)
-        {
-            return $this->json(['error' => 'Status invalid'], 403);
-        }
-
+        $userId = (string)$request->getAttribute('userId');
+        $status = (string)$request->getAttribute('status');
         $payments = $this->paymentService->showAllByStatus($userId, $status);
-
-        if (empty($payments))
-        {
-            return $this->json([
-                'data' => [],
-                'message' => 'No payments found'
-            ], 200);
-        }
-
-        $paymentsArray = array_map(function($payment) {
-            return new PaymentResponse(
-                $payment->id,
-                $payment->userId,
-                $payment->amount,
-                $payment->description,
-                $payment->currency->value,
-                $payment->status->value,
-                $payment->createdAt)->toArray();
-        }, $payments);
 
         return $this->json([
             'success' => true,
-            'data' => $paymentsArray,
-            'count' => count($paymentsArray)
+            'count' => count($payments),
+            'data' => array_map(
+                fn(Payment $p) => PaymentResponse::fromEntity($p)->toArray(),
+                $payments
+            ),
         ]);
     }
 
     public function refund(Request $request, Response $response): Response
     {
-        $id = $request->getAttribute('id');
-        $this->paymentService->refund($id);
+        $this->paymentService->refund((string)$request->getAttribute('id'));
 
         return $this->json(['status' => 'refunded']);
     }

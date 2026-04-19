@@ -6,46 +6,39 @@ namespace PaySystem\Service;
 use InvalidArgumentException;
 use PaySystem\DTO\CreateUserRequest;
 use PaySystem\Entity\User;
+use PaySystem\Exception\ValidationException;
 use PaySystem\Repository\UserRepositoryInterface;
 
 class UserService implements UserServiceInterface
 {
-    private UserRepositoryInterface $repository;
-
     public function __construct(
-        UserRepositoryInterface $repository
-    )
-    {
-        $this->repository = $repository;
+        private UserRepositoryInterface $repository
+    ) {
     }
 
     public function create(CreateUserRequest $request): User
     {
+        if ($this->repository->findByEmail($request->email) !== null) {
+            throw new ValidationException('User with this email already exists');
+        }
+
         $user = User::create(
             email: $request->email,
-            password: $request->password,
+            password: User::hashPassword($request->password),
             fullName: $request->fullName,
-            phone: $request->phone
+            phone: $request->phone,
         );
 
         $this->repository->saveEntity($user);
+
         return $user;
     }
 
-    /**
-     * @param string $id
-     * @return ?User
-     */
     public function findById(string $id): ?User
     {
         $user = $this->repository->findById($id);
 
-        if ($user instanceof User)
-        {
-            return $user;
-        }
-
-        return null;
+        return $user instanceof User ? $user : null;
     }
 
     public function findByEmail(string $email): ?User
@@ -55,16 +48,6 @@ class UserService implements UserServiceInterface
 
     public function update(User $user): void
     {
-        if (!filter_var($user->email, FILTER_VALIDATE_EMAIL))
-        {
-            throw new InvalidArgumentException('Invalid email');
-        }
-
-        if (strlen($user->password) < 6)
-        {
-            throw new InvalidArgumentException('Password too short');
-        }
-
         $this->repository->update($user);
     }
 

@@ -75,7 +75,7 @@ class NotificationService implements NotificationServiceInterface
             }
             catch (Throwable $e)
             {
-                log_error(sprintf(
+                error_log(sprintf(
                     '[%s] Notification failed: %s',
                     $channel->getName(),
                     $e->getMessage()

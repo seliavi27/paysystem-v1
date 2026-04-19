@@ -1,6 +1,5 @@
 [
     {
-        "id": "aa65fa62-1ab0-4b69-bc52-335938e10e88",
         "userId": "38f091f3-2f9a-43a6-9c61-037ff57f9dee",
         "amount": 450.21,
         "description": "Pay",
@@ -16,10 +15,10 @@
             "date": "2026-04-05 23:33:07.470456",
             "timezone_type": 3,
             "timezone": "UTC"
-        }
+        },
+        "id": "aa65fa62-1ab0-4b69-bc52-335938e10e88"
     },
     {
-        "id": "953bfb9c-d40c-4dab-9655-a98af468d69d",
         "userId": "38f091f3-2f9a-43a6-9c61-037ff57f9dee",
         "amount": 450.21,
         "description": "Pay",
@@ -35,10 +34,10 @@
             "date": "2026-04-05 23:33:11.450253",
             "timezone_type": 3,
             "timezone": "UTC"
-        }
+        },
+        "id": "953bfb9c-d40c-4dab-9655-a98af468d69d"
     },
     {
-        "id": "0baf85db-21e7-4408-93dd-765873c18369",
         "userId": "38f091f3-2f9a-43a6-9c61-037ff57f9dee",
         "amount": 140.6,
         "description": "Pay",
@@ -54,10 +53,10 @@
             "date": "2026-04-05 23:43:53.621960",
             "timezone_type": 3,
             "timezone": "UTC"
-        }
+        },
+        "id": "0baf85db-21e7-4408-93dd-765873c18369"
     },
     {
-        "id": "baebeda0-77f3-4ef3-a002-2972a30f7ac3",
         "userId": "38f091f3-2f9a-43a6-9c61-037ff57f9dee",
         "amount": 14,
         "description": "Pay",
@@ -73,6 +72,45 @@
             "date": "2026-04-05 23:44:08.241819",
             "timezone_type": 3,
             "timezone": "UTC"
-        }
+        },
+        "id": "baebeda0-77f3-4ef3-a002-2972a30f7ac3"
+    },
+    {
+        "userId": "38f091f3-2f9a-43a6-9c61-037ff57f9dee",
+        "amount": 50,
+        "description": "test",
+        "currency": "RUB",
+        "status": "pending",
+        "method": "credit_card",
+        "createdAt": {
+            "date": "2026-04-19 10:10:48.444391",
+            "timezone_type": 3,
+            "timezone": "UTC"
+        },
+        "updatedAt": {
+            "date": "2026-04-19 10:10:48.444392",
+            "timezone_type": 3,
+            "timezone": "UTC"
+        },
+        "id": "922d2b26-0be6-4138-ad85-0d7aa096a065"
+    },
+    {
+        "userId": "d7771bd3-7d2b-4d0c-8035-0f945b88c0ac",
+        "amount": 50,
+        "description": "еуые еуыееуые еуыееуые еуыееуые еуыееуые еуыееуые еуыееуые еуыееуые еуыееуые еуыееуые еуыееуые еуые",
+        "currency": "USD",
+        "status": "pending",
+        "method": "bank_transfer",
+        "createdAt": {
+            "date": "2026-04-19 10:31:53.483288",
+            "timezone_type": 3,
+            "timezone": "UTC"
+        },
+        "updatedAt": {
+            "date": "2026-04-19 10:31:53.483290",
+            "timezone_type": 3,
+            "timezone": "UTC"
+        },
+        "id": "81bb5bb4-a670-4c65-8045-44148fc08ad8"
     }
 ]

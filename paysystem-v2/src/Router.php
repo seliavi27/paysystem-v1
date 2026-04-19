@@ -30,11 +30,9 @@ class Router
         {
             if ($route->matches($request->method, $request->getPath()))
             {
-                $params = $route->getParams();
-
-                foreach ($params as $key => $value)
+                foreach ($route->getParams() as $key => $value)
                 {
-                    $request->setAttribute($key, (int)$value);
+                    $request->setAttribute($key, $value);
                 }
 
                 return $route->call($request, $response);

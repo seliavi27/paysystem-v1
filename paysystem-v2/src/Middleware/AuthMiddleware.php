@@ -5,61 +5,60 @@ namespace PaySystem\Middleware;
 
 use PaySystem\Request;
 use PaySystem\Response;
-use PaySystem\Service\AuthenticationServiceInterface;
 use PaySystem\Service\JwtTokenServiceInterface;
 
 class AuthMiddleware implements MiddlewareInterface
 {
-    private JwtTokenServiceInterface $jwtTokenService;
+    private const PUBLIC_ROUTES = [
+        '/',
+        '/login',
+        '/register',
+        '/auth/login',
+        '/auth/register',
+        '/users/register',
+    ];
 
     public function __construct(
-        JwtTokenServiceInterface $jwtTokenService
-    )
-    {
-        $this->jwtTokenService = $jwtTokenService;
+        private JwtTokenServiceInterface $jwtTokenService
+    ) {
     }
 
     public function handle(Request $request, Response $response): void
     {
         $path = $request->getPath();
 
-        $publicRoutes = [
-            '/login',
-            '/auth/login',
-            '/auth/register'];
-
-        if (in_array($path, $publicRoutes, true))
+        if (in_array($path, self::PUBLIC_ROUTES, true))
         {
             return;
         }
 
         $token = $_COOKIE['access_token'] ?? null;
+        $payload = $token ? $this->jwtTokenService->decode($token) : null;
 
-        if (!$token || !$this->jwtTokenService->validate($token))
+        if ($payload && isset($payload['user_id'])) {
+            $request->setAttribute('userId', $payload['user_id']);
+
+            return;
+        }
+
+        if ($this->isApiRequest($path))
         {
             $response->setStatusCode(401)
-                ->setJson([
-                    'error' => 'Unauthorized',
-                    'message' => 'Invalid or missing authentication token'
-                ])
+                ->setJson(['error' => 'Unauthorized', 'message' => 'Invalid or missing token'])
                 ->send();
 
-            exit;
+            return;
         }
 
-        $payload = $this->jwtTokenService->decode($token);
-
-        if (!$payload || !isset($payload['user_id']))
-        {
-            $response->setStatusCode(401)
-            ->setJson([
-                'error' => 'Unauthorized'
-            ])
+        $response->setStatusCode(302)
+            ->setHeader('Location', '/login')
             ->send();
+    }
 
-            exit;
-        }
-
-        $request->setAttribute('userId', $payload['user_id']);
+    private function isApiRequest(string $path): bool
+    {
+        return str_starts_with($path, '/api/')
+            || str_starts_with($path, '/auth/')
+            || str_starts_with($path, '/users/');
     }
 }
