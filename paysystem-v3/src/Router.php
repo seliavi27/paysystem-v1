@@ -2,6 +2,8 @@
 declare(strict_types=1);
 
 namespace PaySystem;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class Router
 {
@@ -24,23 +26,26 @@ class Router
 
     public function dispatch(Request $request): Response
     {
-        $response = new Response();
+        $method = $request->getMethod();
+        $path = $request->getPathInfo();
 
         foreach ($this->routes as $route)
         {
-            if ($route->matches($request->method, $request->getPath()))
+            if ($route->matches($method, $path))
             {
                 foreach ($route->getParams() as $key => $value)
                 {
-                    $request->setAttribute($key, $value);
+                    $request->attributes->set($key, $value);
                 }
 
-                return $route->call($request, $response);
+                return $route->call($request);
             }
         }
 
-        return $response
-            ->setStatusCode(404)
-            ->setJson(['error' => 'Not Found']);
+        return new Response(
+            json_encode(['error' => 'Not Found'], JSON_UNESCAPED_UNICODE),
+            404,
+            ['Content-Type' => 'application/json']
+        );
     }
 }

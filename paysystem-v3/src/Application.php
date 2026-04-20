@@ -3,6 +3,9 @@ declare(strict_types=1);
 
 namespace PaySystem;
 
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+
 use PaySystem\Exception\ExceptionHandler;
 use Throwable;
 
@@ -12,30 +15,27 @@ class Application
         private Router $router,
         private ExceptionHandler $exceptionHandler,
         private array $middlewares = []
-    ) {
-    }
+    ) { }
 
-    public function run(): void
+    public function handle(Request $request): Response
     {
-        $request = Request::fromGlobals();
-        $response = new Response();
-
         foreach ($this->middlewares as $middleware)
         {
-            $middleware->handle($request, $response);
+            $earlyResponse = $middleware->handle($request);
 
-            if ($response->isSent())
+            if ($earlyResponse !== null)
             {
-                return;
+                return $earlyResponse;
             }
         }
 
-        try {
-            $response = $this->router->dispatch($request);
-        } catch (Throwable $e) {
-            $response = $this->exceptionHandler->handle($e, $request);
+        try
+        {
+            return $this->router->dispatch($request);
         }
-
-        $response->send();
+        catch (Throwable $e)
+        {
+            return $this->exceptionHandler->handle($e, $request);
+        }
     }
 }

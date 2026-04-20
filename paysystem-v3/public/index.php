@@ -1,12 +1,18 @@
 <?php
 declare(strict_types=1);
 
+use Symfony\Component\HttpFoundation\Request;
+
 $container = require_once __DIR__ . '/../bootstrap.php';
 
 try
 {
+    /** @var PaySystem\Application $app */
     $app = $container['app'];
-    $app->run();
+
+    $request  = Request::createFromGlobals();
+    $response = $app->handle($request);
+    $response->send();
 }
 catch (Exception $e)
 {

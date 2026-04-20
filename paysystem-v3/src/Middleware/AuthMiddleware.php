@@ -3,8 +3,11 @@ declare(strict_types=1);
 
 namespace PaySystem\Middleware;
 
-use PaySystem\Request;
-use PaySystem\Response;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\JsonResponse;
+
 use PaySystem\Service\JwtTokenServiceInterface;
 
 class AuthMiddleware implements MiddlewareInterface
@@ -23,36 +26,33 @@ class AuthMiddleware implements MiddlewareInterface
     ) {
     }
 
-    public function handle(Request $request, Response $response): void
+    public function handle(Request $request, Response $response): ?Response
     {
-        $path = $request->getPath();
+        $path = $request->getPathInfo();
 
         if (in_array($path, self::PUBLIC_ROUTES, true))
         {
-            return;
+            return null;
         }
 
-        $token = $_COOKIE['access_token'] ?? null;
+        $token = $request->cookies->get('access_token');
         $payload = $token ? $this->jwtTokenService->decode($token) : null;
 
-        if ($payload && isset($payload['user_id'])) {
-            $request->setAttribute('userId', $payload['user_id']);
-
-            return;
-        }
-
-        if ($this->isApiRequest($path))
+        if ($payload && isset($payload['user_id']))
         {
-            $response->setStatusCode(401)
-                ->setJson(['error' => 'Unauthorized', 'message' => 'Invalid or missing token'])
-                ->send();
-
-            return;
+            $request->attributes->set('userId', $payload['user_id']);
+            return null;
         }
 
-        $response->setStatusCode(302)
-            ->setHeader('Location', '/login')
-            ->send();
+        if ($this->isApiRequest($request->getPathInfo()))
+        {
+            return new JsonResponse(
+                ['error' => 'Unauthorized', 'message' => 'Invalid or missing token'],
+                Response::HTTP_UNAUTHORIZED
+            );
+        }
+
+        return new RedirectResponse('/login');
     }
 
     private function isApiRequest(string $path): bool

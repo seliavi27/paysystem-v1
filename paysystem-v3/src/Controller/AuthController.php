@@ -3,10 +3,13 @@ declare(strict_types=1);
 
 namespace PaySystem\Controller;
 
+use Symfony\Component\HttpFoundation\Cookie;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Request;
+
 use PaySystem\DTO\CreateUserRequest;
 use PaySystem\Exception\ValidationException;
-use PaySystem\Request;
-use PaySystem\Response;
 use PaySystem\Service\AuthenticationServiceInterface;
 use PaySystem\Service\JwtTokenServiceInterface;
 use PaySystem\Service\UserServiceInterface;
@@ -33,10 +36,10 @@ class AuthController extends AbstractController
         return $this->view('auth/login', ['title' => 'Вход']);
     }
 
-    public function login(Request $request, Response $response): Response
+    public function login(Request $request, SessionInterface $session): Response
     {
-        $email = (string)$request->getPost('email', '');
-        $password = (string)$request->getPost('password', '');
+        $email = (string)$request->request->get('email', '');
+        $password = (string)$request->request->get('password', '');
 
         try
         {
@@ -47,11 +50,11 @@ class AuthController extends AbstractController
                 'fullName' => $user->fullName,
             ]);
 
-            $this->setTokenCookie($token);
-            $_SESSION['flash'] = ['success' => "Добро пожаловать, {$user->fullName}!"];
+            $session->getFlashBag()->add('success', "Добро пожаловать, {$user->fullName}!");
 
-            return $this->redirect('/payments');
-        } catch (Throwable $e)
+            return $this->setTokenCookie($token);
+        }
+        catch (Throwable $e)
         {
             return $this->view('auth/login', [
                 'title' => 'Вход',
@@ -66,27 +69,29 @@ class AuthController extends AbstractController
         return $this->view('auth/register', ['title' => 'Регистрация']);
     }
 
-    public function register(Request $request, Response $response): Response
+    public function register(Request $request, SessionInterface $session): Response
     {
         try {
             $user = $this->userService->create(
                 new CreateUserRequest(
-                    email: (string)$request->getPost('email', ''),
-                    password: (string)$request->getPost('password', ''),
-                    passwordConfirm: (string)$request->getPost('passwordConfirm', ''),
-                    fullName: (string)$request->getPost('fullName', ''),
-                    phone: (string)$request->getPost('phone', ''),
+                    email: (string)$request->request->get('email', ''),
+                    password: (string)$request->request->get('password', ''),
+                    passwordConfirm: (string)$request->request->get('passwordConfirm', ''),
+                    fullName: (string)$request->request->get('fullName', ''),
+                    phone: (string)$request->request->get('phone', ''),
                 )
             );
 
-            $_SESSION['flash'] = ['success' => 'Аккаунт создан. Войдите в систему.'];
+            $session->getFlashBag()->add('success', 'Аккаунт создан. Войдите в систему.');
 
             return $this->redirect('/login');
-        } catch (ValidationException $e) {
+        }
+        catch (ValidationException $e)
+        {
             return $this->view('auth/register', [
                 'title' => 'Регистрация',
                 'errors' => [$e->getMessage()],
-                'old' => $request->getPost('_', []) ?? [],
+                'old' => $request->request->get('_', []) ?? [],
             ]);
         }
     }
@@ -94,29 +99,36 @@ class AuthController extends AbstractController
     public function logout(Request $request, Response $response): Response
     {
         $this->authenticationService->logout();
-        $this->clearTokenCookie();
-
-        return $this->redirect('/login');
+        return $this->clearTokenCookie();
     }
 
-    private function setTokenCookie(string $token): void
+    private function setTokenCookie(string $token): Response
     {
-        setcookie(self::TOKEN_COOKIE, $token, [
-            'expires' => time() + self::TOKEN_TTL,
-            'path' => '/',
-            'httponly' => true,
-            'secure' => false,
-            'samesite' => 'Lax',
-        ]);
+        $response = $this->redirect('/payments');
+
+        $response->headers->setCookie(Cookie::create(
+            name: self::TOKEN_COOKIE,
+            value: $token,
+            expire: time() + self::TOKEN_TTL,
+            path: '/',
+            secure: false,
+            httpOnly: true,
+            sameSite: Cookie::SAMESITE_LAX,
+        ));
+
+        return $response;
     }
 
-    private function clearTokenCookie(): void
+    private function clearTokenCookie(): Response
     {
-        setcookie(self::TOKEN_COOKIE, '', [
-            'expires' => time() - 3600,
-            'path' => '/',
-            'httponly' => true,
-            'samesite' => 'Lax',
-        ]);
+        $response = $this->redirect('/login');
+
+        $response->headers->setCookie(Cookie::create(
+            self::TOKEN_COOKIE,
+            null,
+            1
+        ));
+
+        return $response;
     }
 }

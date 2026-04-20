@@ -3,6 +3,9 @@ declare(strict_types=1);
 
 namespace PaySystem\Controller;
 
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+
 use PaySystem\DTO\CreatePaymentRequest;
 use PaySystem\DTO\PaymentResponse;
 use PaySystem\Entity\Payment;
@@ -11,8 +14,6 @@ use PaySystem\Enum\PaymentMethod;
 use PaySystem\Enum\PaymentStatus;
 use PaySystem\Exception\NotFoundException;
 use PaySystem\Exception\ValidationException;
-use PaySystem\Request;
-use PaySystem\Response;
 use PaySystem\Service\PaymentServiceInterface;
 use PaySystem\View\TemplateEngine;
 
@@ -26,12 +27,10 @@ class PaymentController extends AbstractController
         parent::__construct($templateEngine);
     }
 
-    // ===== HTML =====
-
     public function index(Request $request, Response $response): Response
     {
-        $userId = (string)$request->getAttribute('userId');
-        $statusFilter = $request->getQuery('status');
+        $userId = (string)$request->attributes->get('userId');
+        $statusFilter = $request->query->get('status');
 
         $payments = $statusFilter
             ? $this->paymentService->showAllByStatus($userId, (string)$statusFilter)
@@ -56,47 +55,48 @@ class PaymentController extends AbstractController
 
     public function store(Request $request, Response $response): Response
     {
-        $userId = (string)$request->getAttribute('userId');
+        $userId = (string)$request->attributes->get('userId');
 
-        try {
+        try
+        {
             $this->paymentService->create(
                 new CreatePaymentRequest(
                     userId: $userId,
-                    amount: (float)$request->getPost('amount', 0),
-                    description: (string)$request->getPost('description', ''),
-                    currency: CurrencyType::from((string)$request->getPost('currency', 'RUB')),
-                    method: PaymentMethod::from((string)$request->getPost('method', 'credit_card')),
+                    amount: (float)$request->request->get('amount', 0),
+                    description: (string)$request->request->get('description', ''),
+                    currency: CurrencyType::from((string)$request->request->get('currency', 'RUB')),
+                    method: PaymentMethod::from((string)$request->request->get('method', 'credit_card')),
                 )
             );
 
             $_SESSION['flash'] = ['success' => 'Платёж успешно создан'];
 
             return $this->redirect('/payments');
-        } catch (ValidationException $e) {
+        }
+        catch (ValidationException $e)
+        {
             return $this->view('payments/create', [
                 'title' => 'Новый платёж',
                 'currencies' => CurrencyType::cases(),
                 'methods' => PaymentMethod::cases(),
                 'errors' => [$e->getMessage()],
                 'old' => [
-                    'amount' => $request->getPost('amount'),
-                    'description' => $request->getPost('description'),
-                    'currency' => $request->getPost('currency'),
-                    'method' => $request->getPost('method'),
+                    'amount' => $request->request->get('amount'),
+                    'description' => $request->request->get('description'),
+                    'currency' => $request->request->get('currency'),
+                    'method' => $request->request->get('method'),
                 ],
             ]);
         }
     }
 
-    // ===== JSON API =====
-
     public function create(Request $request, Response $response): Response
     {
-        $data = $request->getJson();
+        $data = $request->toArray();
 
         $payment = $this->paymentService->create(
             new CreatePaymentRequest(
-                userId: (string)($data['userId'] ?? $request->getAttribute('userId')),
+                userId: (string)($data['userId'] ?? $request->attributes->get('userId')),
                 amount: (float)($data['amount'] ?? 0),
                 description: (string)($data['description'] ?? ''),
                 currency: CurrencyType::from($data['currency'] ?? 'RUB'),
@@ -109,7 +109,7 @@ class PaymentController extends AbstractController
 
     public function show(Request $request, Response $response): Response
     {
-        $payment = $this->paymentService->show((string)$request->getAttribute('id'));
+        $payment = $this->paymentService->show((string)$request->attributes->get('id'));
 
         if (!$payment instanceof Payment)
         {
@@ -121,7 +121,7 @@ class PaymentController extends AbstractController
 
     public function showAllByUserId(Request $request, Response $response): Response
     {
-        $userId = (string)$request->getAttribute('userId');
+        $userId = (string)$request->attributes->get('userId');
         $payments = $this->paymentService->showAllByUserId($userId);
 
         return $this->json([
@@ -136,8 +136,8 @@ class PaymentController extends AbstractController
 
     public function showAllByStatus(Request $request, Response $response): Response
     {
-        $userId = (string)$request->getAttribute('userId');
-        $status = (string)$request->getAttribute('status');
+        $userId = (string)$request->attributes->get('userId');
+        $status = (string)$request->attributes->get('status');
         $payments = $this->paymentService->showAllByStatus($userId, $status);
 
         return $this->json([
@@ -152,7 +152,7 @@ class PaymentController extends AbstractController
 
     public function refund(Request $request, Response $response): Response
     {
-        $this->paymentService->refund((string)$request->getAttribute('id'));
+        $this->paymentService->refund((string)$request->attributes->get('id'));
 
         return $this->json(['status' => 'refunded']);
     }

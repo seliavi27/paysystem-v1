@@ -3,7 +3,11 @@ declare(strict_types=1);
 
 namespace PaySystem\Controller;
 
-use PaySystem\Response;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
+
 use PaySystem\View\TemplateEngine;
 
 abstract class AbstractController
@@ -14,41 +18,49 @@ abstract class AbstractController
 
     protected function json(array $data, int $status = 200): Response
     {
-        return (new Response())
-            ->setStatusCode($status)
-            ->setJson($data);
+        return new JsonResponse($data, $status);
     }
 
-    protected function view(string $template, array $data = []): Response
+    protected function view(string $template, array $data = [], ?Request $request = null): Response
     {
         $html = $this->templateEngine->renderWithLayout($template, [
-            ...$this->sharedContext(),
+            ...$this->sharedContext($request),
             ...$data,
         ]);
 
-        return (new Response())
-            ->setHeader('Content-Type', 'text/html; charset=UTF-8')
-            ->setBody($html);
+        return new Response(
+            $html,
+            Response::HTTP_OK,
+            ['Content-Type' => 'text/html; charset=UTF-8']);
     }
 
-    protected function redirect(string $url, int $status = 302): Response
+    protected function redirect(string $url, int $status = Response::HTTP_FOUND): RedirectResponse
     {
-        return (new Response())
-            ->setStatusCode($status)
-            ->setHeader('Location', $url);
+        return new RedirectResponse($url, $status);
     }
 
     /**
      * @return array<string,mixed>
      */
-    private function sharedContext(): array
+    private function sharedContext(?Request $request): array
     {
-        $flash = $_SESSION['flash'] ?? null;
-        unset($_SESSION['flash']);
+        $flash = [];
+        $cookies = [];
+
+        if (!is_null($request))
+        {
+            $session = $request->getSession();
+            $cookies = $request->cookies->has('access_token');
+
+            foreach ($session->getFlashBag()->all() as $type => $messages)
+            {
+                $flash[$type] = $messages[0] ?? null;
+            }
+        }
 
         return [
-            'flash'           => $flash,
-            'isAuthenticated' => !empty($_COOKIE['access_token']),
+            'flash'           => $flash ? : null,
+            'isAuthenticated' => $cookies,
             'errors'          => [],
             'old'             => [],
         ];

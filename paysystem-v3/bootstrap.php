@@ -1,9 +1,13 @@
 <?php
 declare(strict_types=1);
 
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
+
 use Dotenv\Dotenv;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
+
 use PaySystem\Application;
 use PaySystem\Controller\AuthController;
 use PaySystem\Controller\PaymentController;
@@ -27,10 +31,13 @@ use PaySystem\View\TemplateEngine;
 require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/config/config.php';
 
-if (session_status() === PHP_SESSION_NONE)
-{
-    session_start();
-}
+$session = new Session(new NativeSessionStorage());
+$session->start();
+
+//if (session_status() === PHP_SESSION_NONE)
+//{
+//    session_start();
+//}
 
 Dotenv::createImmutable(BASE_PATH)->safeLoad();
 

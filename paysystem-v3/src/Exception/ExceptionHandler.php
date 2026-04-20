@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace PaySystem\Exception;
 
-use PaySystem\Interface\LogServiceInterface;
-use PaySystem\Request;
-use PaySystem\Response;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
+
 use Throwable;
+
+use PaySystem\Interface\LogServiceInterface;
 
 class ExceptionHandler
 {
@@ -30,8 +33,6 @@ class ExceptionHandler
             default => [500, 'Internal Server Error'],
         };
 
-        return (new Response())
-            ->setStatusCode($status)
-            ->setJson(['error' => $message]);
+        return new JsonResponse(['error' => $message], $status);
     }
 }
