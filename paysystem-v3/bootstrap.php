@@ -1,13 +1,9 @@
 <?php
 declare(strict_types=1);
 
-use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
-
 use Dotenv\Dotenv;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
-
 use PaySystem\Application;
 use PaySystem\Controller\AuthController;
 use PaySystem\Controller\PaymentController;
@@ -27,6 +23,8 @@ use PaySystem\Service\PaymentService;
 use PaySystem\Service\UserService;
 use PaySystem\Storage\JsonStorage;
 use PaySystem\View\TemplateEngine;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
 
 require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/config/config.php';

@@ -2,27 +2,31 @@
 declare(strict_types=1);
 
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Exception\ResourceNotFoundException;
+use Symfony\Component\Routing\Matcher\UrlMatcher;
+use Symfony\Component\Routing\RequestContext;
+
+use PaySystem\Infrastructure\RouterFactory;
 
 $container = require_once __DIR__ . '/../bootstrap.php';
 
+$request  = Request::createFromGlobals();
+$routes   = RouterFactory::loadRoutes(__DIR__ . '/../src/Controller');
+$context  = new RequestContext()->fromRequest($request);
+$matcher  = new UrlMatcher($routes, $context);
+
 try
 {
+    $parameters = $matcher->match($request->getPathInfo());
+    $request->attributes->add($parameters);
+
     /** @var PaySystem\Application $app */
-    $app = $container['app'];
-
-    $request  = Request::createFromGlobals();
-    $response = $app->handle($request);
-    $response->send();
+    $response = $container['app']->handle($request);
 }
-catch (Exception $e)
+catch (ResourceNotFoundException)
 {
-    http_response_code(500);
-
-    echo json_encode([
-        'error' => 'Internal Server Error',
-        'message' => $e->getMessage(),
-        'code' => $e->getCode(),
-    ]);
-
-    $container['logger']->error('Application error', ['exception' => (string)$e]);
+    $response = new Response('Not Found', Response::HTTP_NOT_FOUND);
 }
+
+$response->send();

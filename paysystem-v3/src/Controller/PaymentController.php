@@ -5,6 +5,8 @@ namespace PaySystem\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
+use Symfony\Component\Routing\Attribute\Route;
 
 use PaySystem\DTO\CreatePaymentRequest;
 use PaySystem\DTO\PaymentResponse;
@@ -19,6 +21,9 @@ use PaySystem\View\TemplateEngine;
 
 class PaymentController extends AbstractController
 {
+    private const string UUID_REGEX   = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
+    private const string STATUS_REGEX = 'pending|processing|completed|failed|refunded';
+
     public function __construct(
         TemplateEngine $templateEngine,
         private readonly PaymentServiceInterface $paymentService
@@ -27,24 +32,8 @@ class PaymentController extends AbstractController
         parent::__construct($templateEngine);
     }
 
-    public function index(Request $request, Response $response): Response
-    {
-        $userId = (string)$request->attributes->get('userId');
-        $statusFilter = $request->query->get('status');
-
-        $payments = $statusFilter
-            ? $this->paymentService->showAllByStatus($userId, (string)$statusFilter)
-            : $this->paymentService->showAllByUserId($userId);
-
-        return $this->view('payments/list', [
-            'title' => 'Платежи',
-            'payments' => $payments,
-            'statusFilter' => $statusFilter,
-            'statuses' => PaymentStatus::cases(),
-        ]);
-    }
-
-    public function createForm(Request $request, Response $response): Response
+    #[Route('/payments/create', name: 'payments_create_form', methods: ['GET'])]
+    public function createForm(Request $request): Response
     {
         return $this->view('payments/create', [
             'title' => 'Новый платёж',
@@ -53,7 +42,8 @@ class PaymentController extends AbstractController
         ]);
     }
 
-    public function store(Request $request, Response $response): Response
+    #[Route('/payments/store', name: 'payments_store', methods: ['POST'])]
+    public function store(Request $request): Response
     {
         $userId = (string)$request->attributes->get('userId');
 
@@ -90,7 +80,63 @@ class PaymentController extends AbstractController
         }
     }
 
-    public function create(Request $request, Response $response): Response
+    #[Route(
+        '/api/payments/{id}/refund',
+        name: 'api_payments_refund',
+        requirements: ['id' => self::UUID_REGEX],
+        methods: ['POST']
+    )]
+    public function refund(string $id): Response
+    {
+        $this->paymentService->refund($id);
+
+        return $this->json(['status' => 'refunded']);
+    }
+
+    #[Route(
+        '/api/payments/status/{status}',
+        name: 'api_payments_by_status',
+        requirements: ['status' => self::STATUS_REGEX],
+        methods: ['GET']
+    )]
+    public function showAllByStatus(Request $request, #[MapQueryParameter] ?string $status = null): Response
+    {
+        $userId = (string)$request->attributes->get('userId');
+        $payments = $this->paymentService->showAllByStatus($userId, $status);
+
+        return $this->json([
+            'success' => true,
+            'count' => count($payments),
+            'data' => array_map(
+                fn(Payment $p) => PaymentResponse::fromEntity($p)->toArray(),
+                $payments
+            ),
+        ]);
+    }
+
+    /**
+     * @throws NotFoundException
+     */
+    #[Route(
+        '/api/payments/{id}',
+        name: 'api_payments_show',
+        requirements: ['id' => self::UUID_REGEX],
+        methods: ['GET']
+    )]
+    public function show(string $id): Response
+    {
+        $payment = $this->paymentService->show($id);
+
+        if (!$payment instanceof Payment)
+        {
+            throw new NotFoundException('Payment not found');
+        }
+
+        return $this->json(PaymentResponse::fromEntity($payment)->toArray());
+    }
+
+    #[Route('/api/payments', name: 'api_payments_create', methods: ['POST'])]
+    public function create(Request $request): Response
     {
         $data = $request->toArray();
 
@@ -107,19 +153,8 @@ class PaymentController extends AbstractController
         return $this->json(PaymentResponse::fromEntity($payment)->toArray(), 201);
     }
 
-    public function show(Request $request, Response $response): Response
-    {
-        $payment = $this->paymentService->show((string)$request->attributes->get('id'));
-
-        if (!$payment instanceof Payment)
-        {
-            throw new NotFoundException('Payment not found');
-        }
-
-        return $this->json(PaymentResponse::fromEntity($payment)->toArray());
-    }
-
-    public function showAllByUserId(Request $request, Response $response): Response
+    #[Route('/api/payments', name: 'api_payments_list', methods: ['GET'])]
+    public function showAllByUserId(Request $request): Response
     {
         $userId = (string)$request->attributes->get('userId');
         $payments = $this->paymentService->showAllByUserId($userId);
@@ -134,26 +169,21 @@ class PaymentController extends AbstractController
         ]);
     }
 
-    public function showAllByStatus(Request $request, Response $response): Response
+    #[Route('/payments', name: 'payments_index', methods: ['GET'])]
+    public function index(Request $request): Response
     {
         $userId = (string)$request->attributes->get('userId');
-        $status = (string)$request->attributes->get('status');
-        $payments = $this->paymentService->showAllByStatus($userId, $status);
+        $statusFilter = $request->query->get('status');
 
-        return $this->json([
-            'success' => true,
-            'count' => count($payments),
-            'data' => array_map(
-                fn(Payment $p) => PaymentResponse::fromEntity($p)->toArray(),
-                $payments
-            ),
+        $payments = $statusFilter
+            ? $this->paymentService->showAllByStatus($userId, (string)$statusFilter)
+            : $this->paymentService->showAllByUserId($userId);
+
+        return $this->view('payments/list', [
+            'title' => 'Платежи',
+            'payments' => $payments,
+            'statusFilter' => $statusFilter,
+            'statuses' => PaymentStatus::cases(),
         ]);
-    }
-
-    public function refund(Request $request, Response $response): Response
-    {
-        $this->paymentService->refund((string)$request->attributes->get('id'));
-
-        return $this->json(['status' => 'refunded']);
     }
 }

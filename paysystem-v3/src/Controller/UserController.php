@@ -3,11 +3,12 @@ declare(strict_types=1);
 
 namespace PaySystem\Controller;
 
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+
 use PaySystem\DTO\CreateUserRequest;
 use PaySystem\Exception\NotFoundException;
 use PaySystem\Exception\ValidationException;
-use PaySystem\Request;
-use PaySystem\Response;
 use PaySystem\Service\PaymentServiceInterface;
 use PaySystem\Service\UserServiceInterface;
 use PaySystem\View\TemplateEngine;
@@ -23,11 +24,9 @@ class UserController extends AbstractController
         parent::__construct($templateEngine);
     }
 
-    // ===== HTML =====
-
-    public function profile(Request $request, Response $response): Response
+    public function profile(Request $request): Response
     {
-        $userId = (string)$request->getAttribute('userId');
+        $userId = (string)$request->attributes->get('userId');
         $user   = $this->userService->findById($userId);
 
         if ($user === null)
@@ -45,18 +44,18 @@ class UserController extends AbstractController
         ]);
     }
 
-    // ===== JSON API =====
-
-    public function create(Request $request, Response $response): Response
+    public function create(Request $request): Response
     {
         try
         {
+            $requestArray = $request->toArray();
+
             $user = $this->userService->create(new CreateUserRequest(
-                email:           (string)($request->getJson()['email'] ?? ''),
-                password:        (string)($request->getJson()['password'] ?? ''),
-                passwordConfirm: (string)($request->getJson()['passwordConfirm'] ?? ''),
-                fullName:        (string)($request->getJson()['fullName'] ?? ''),
-                phone:           (string)($request->getJson()['phone'] ?? ''),
+                email:           (string)($request->$requestArray['email'] ?? ''),
+                password:        (string)($request->$requestArray['password'] ?? ''),
+                passwordConfirm: (string)($request->$requestArray['passwordConfirm'] ?? ''),
+                fullName:        (string)($request->$requestArray['fullName'] ?? ''),
+                phone:           (string)($request->$requestArray['phone'] ?? ''),
             ));
 
             return $this->json([
@@ -71,9 +70,10 @@ class UserController extends AbstractController
         }
     }
 
-    public function show(Request $request, Response $response): Response
+    public function show(Request $request): Response
     {
-        $user = $this->userService->findById((string)$request->getAttribute('id'));
+        $user = $this->userService->findById(
+            (string)$request->attributes->get('id'));
 
         if ($user === null)
         {

@@ -7,6 +7,9 @@ use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Throwable;
 
 use PaySystem\DTO\CreateUserRequest;
 use PaySystem\Exception\ValidationException;
@@ -14,7 +17,6 @@ use PaySystem\Service\AuthenticationServiceInterface;
 use PaySystem\Service\JwtTokenServiceInterface;
 use PaySystem\Service\UserServiceInterface;
 use PaySystem\View\TemplateEngine;
-use Throwable;
 
 class AuthController extends AbstractController
 {
@@ -25,17 +27,20 @@ class AuthController extends AbstractController
         protected readonly TemplateEngine $templateEngine,
         private readonly AuthenticationServiceInterface $authenticationService,
         private readonly JwtTokenServiceInterface $jwtTokenService,
-        private readonly UserServiceInterface $userService
+        private readonly UserServiceInterface $userService,
+        private UrlGeneratorInterface $urlGenerator
     )
     {
         parent::__construct($templateEngine);
     }
 
+    #[Route('/login', name: 'login_form', methods: ['GET'])]
     public function loginForm(Request $request, Response $response): Response
     {
         return $this->view('auth/login', ['title' => 'Вход']);
     }
 
+    #[Route('/auth/login', name: 'auth_login', methods: ['POST'])]
     public function login(Request $request, SessionInterface $session): Response
     {
         $email = (string)$request->request->get('email', '');
@@ -64,11 +69,13 @@ class AuthController extends AbstractController
         }
     }
 
+    #[Route('/register', name: 'register_form', methods: ['GET'])]
     public function registerForm(Request $request, Response $response): Response
     {
         return $this->view('auth/register', ['title' => 'Регистрация']);
     }
 
+    #[Route('/auth/register', name: 'auth_register', methods: ['POST'])]
     public function register(Request $request, SessionInterface $session): Response
     {
         try {
@@ -96,6 +103,7 @@ class AuthController extends AbstractController
         }
     }
 
+    #[Route('/logout', name: 'logout', methods: ['GET'])]
     public function logout(Request $request, Response $response): Response
     {
         $this->authenticationService->logout();
@@ -104,7 +112,7 @@ class AuthController extends AbstractController
 
     private function setTokenCookie(string $token): Response
     {
-        $response = $this->redirect('/payments');
+        $response = $this->redirect($this->urlGenerator->generate('payments_index'));
 
         $response->headers->setCookie(Cookie::create(
             name: self::TOKEN_COOKIE,
@@ -121,7 +129,7 @@ class AuthController extends AbstractController
 
     private function clearTokenCookie(): Response
     {
-        $response = $this->redirect('/login');
+        $response = $this->redirect($this->urlGenerator->generate('login_form'));
 
         $response->headers->setCookie(Cookie::create(
             self::TOKEN_COOKIE,
