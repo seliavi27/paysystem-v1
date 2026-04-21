@@ -3,94 +3,115 @@ declare(strict_types=1);
 
 namespace PaySystem\Repository;
 
+use Doctrine\DBAL\Connection;
 use PaySystem\Entity\Payment;
 use PaySystem\Enum\PaymentStatus;
 use PaySystem\Storage\StorageInterface;
 
 class PaymentRepository implements PaymentRepositoryInterface
 {
-    private StorageInterface $storage;
+//    private StorageInterface $storage;
+//
+//    public function __construct(StorageInterface $storage)
+//    {
+//        $this->storage = $storage;
+//    }
 
-    public function __construct(StorageInterface $storage)
+    private Connection $connection;
+
+    public function __construct(Connection $connection)
     {
-        $this->storage = $storage;
-    }
-
-    public function saveEntity(object $entity): bool
-    {
-        $payments = $this->load();
-        $payments[] = $entity;
-        return $this->save($payments);
-    }
-
-    public function update(Payment $payment): bool
-    {
-        $payments = $this->load();
-
-        if (!isset($payment->id))
-        {
-            return false;
-        }
-
-        foreach ($payments as $p)
-        {
-            if (isset($payment->id) && $p->id === $payment->id)
-            {
-                unset($p);
-            }
-        }
-
-        return $this->save($payments);
-    }
-
-    public function delete(string $id): bool
-    {
-        $payments = $this->load();
-
-        foreach ($payments as $payment)
-        {
-            if (isset($payment->id) && $payment->id === $id)
-            {
-                unset($payment);
-            }
-        }
-
-        return $this->save($payments);
-    }
-
-    public function findById(string $id): ?object
-    {
-        $payments = $this->load();
-        return array_find($payments, fn($payment) => isset($payment->id) && $payment->id === $id);
-    }
-
-    public function findByUserId(string $userId): array
-    {
-        $payments = $this->findAll();
-        return array_filter($payments, fn($p) => $p->userId === $userId);
-    }
-
-    public function findByStatus(PaymentStatus $status): array
-    {
-        $payments = $this->findAll();
-        return array_filter($payments, fn($p) => $p->status === $status);
+        $this->connection = $connection;
     }
 
     public function findAll(): array
     {
-        return $this->load();
+        return $this->connection->createQueryBuilder()
+            ->select('*') ->from('payments')
+            ->executeQuery()
+            ->fetchAllAssociative();
     }
 
-    private function load(): array
+    public function findById(string $id): ?Payment
     {
-        return array_map(
-            fn($item) => Payment::fromArray($item),
-            $this->storage->load()
-        );
+        $row = $this->connection->createQueryBuilder()
+            ->select('*')->from('payments')
+            ->where('id = :id')
+            ->setParameter('id', $id)
+            ->executeQuery()
+            ->fetchAssociative();
+
+        return $row ? $this->hydrate($row) : null;
     }
 
-    private function save(array $data): bool
+    public function findByUserId(string $userId): array
     {
-        return $this->storage->save($data);
+        $rows = $this->connection->createQueryBuilder()
+            ->select('*')->from('payments')
+            ->where('user_id = :uid')
+            ->orderBy('created_at', 'DESC')
+            ->setParameter('uid', $userId)
+            ->executeQuery()
+            ->fetchAllAssociative();
+
+        return array_map(fn(array $r) => $this->hydrate($r), $rows);
+    }
+
+    public function findByStatus(PaymentStatus $status): array
+    {
+        $rows = $this->connection->createQueryBuilder()
+            ->select('*')->from('payments')
+            ->where('status = :s')
+            ->setParameter('s', $status->value)
+            ->executeQuery()
+            ->fetchAllAssociative();
+
+        return array_map(fn(array $r) => $this->hydrate($r), $rows);
+    }
+
+    public function saveEntity(object $entity): bool
+    {
+        /** @var Payment $entity */
+        $this->connection->insert('payments', [
+            'id'          => $entity->id,
+            'user_id'     => $entity->userId,
+            'amount'      => $entity->amount,
+            'description' => $entity->description,
+            'currency'    => $entity->currency->value,
+            'status'      => $entity->status->value,
+            'method'      => $entity->method->value,
+            'created_at'  => $entity->createdAt->format('Y-m-d H:i:s.u O'),
+            'updated_at'  => $entity->updatedAt->format('Y-m-d H:i:s.u O'),
+        ]);
+        return true;
+    }
+
+    public function update(Payment $payment): bool
+    {
+        return $this->connection->update('payments', [
+                'status'     => $payment->status->value,
+                'amount'     => $payment->amount,
+                'updated_at' => (new \DateTime())->format('Y-m-d H:i:s.u O'),
+            ], ['id' => $payment->id]) > 0;
+    }
+
+    public function delete(string $id): bool
+    {
+        return $this->connection->delete('payments', ['id' => $id]) > 0;
+    }
+
+    private function hydrate(array $row): Payment
+    {
+        return Payment::fromArray([
+            'id'          => $row['id'],
+            'userId'      => $row['user_id'],
+            'amount'      => (float)$row['amount'],
+            'description' => $row['description'],
+            'currency'    => $row['currency'],
+            'status'      => $row['status'],
+            'method'      => $row['method'],
+            'createdAt'   => $row['created_at'],
+            'updatedAt'   => $row['updated_at'],
+        ]);
     }
 }

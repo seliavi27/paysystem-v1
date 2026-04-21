@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace PaySystem\Service;
 
+use Doctrine\DBAL\Connection;
 use PaySystem\DTO\CreatePaymentRequest;
 use PaySystem\Entity\Payment;
 use PaySystem\Enum\PaymentStatus;
@@ -19,7 +20,8 @@ class PaymentService implements PaymentServiceInterface
         private PaymentMethodFactory $processorFactory,
         private PaymentRepositoryInterface $repository,
         private NotificationServiceInterface $notifier,
-        private LogServiceInterface $logger
+        private LogServiceInterface $logger,
+        private Connection $connection
     ) {
     }
 
@@ -41,25 +43,16 @@ class PaymentService implements PaymentServiceInterface
 
     public function process(Payment $payment): void
     {
-        $payment->status = PaymentStatus::PROCESSING;
-        $this->repository->update($payment);
+        $this->connection->transactional(function () use ($payment) {
+            $payment->status = PaymentStatus::PROCESSING;
+            $this->repository->update($payment);
 
-        try
-        {
             $processor = $this->processorFactory->create($payment->method);
             $processor->process($payment);
-            $payment->status = PaymentStatus::COMPLETED;
-        }
-        catch (Throwable $e)
-        {
-            $payment->status = PaymentStatus::FAILED;
-            $this->logger->error($e->getMessage());
-            $this->repository->update($payment);
-            throw $e;
-        }
 
-        $this->repository->update($payment);
-        $this->logger->info("Payment completed: {$payment->id}");
+            $payment->status = PaymentStatus::COMPLETED;
+            $this->repository->update($payment);
+        });
     }
 
     public function refund(string $id): void
