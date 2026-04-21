@@ -3,6 +3,9 @@ declare(strict_types=1);
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\ORMSetup;
 use Dotenv\Dotenv;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
@@ -53,10 +56,15 @@ $logService = new LogService([$logger]);
 $notificationService = new NotificationService([$logger]);
 
 // ===== Repositories =====
+$ormConfig = ORMSetup::createAttributeMetadataConfiguration(
+    paths: [__DIR__ . '/src/Entity'],
+    isDevMode: ($_ENV['APP_ENV'] ?? 'dev') === 'dev',
+);
+
 $connection = DriverManager::getConnection([
-    'driver' => 'pdo_pgsql',           // ← явно указываем драйвер
-    'url' => $_ENV['DATABASE_URL'] ?? 'postgresql://paysystem_user:paysystem_pass@localhost:5432/paysystem_dev',
-]);
+    'url' => $_ENV['DATABASE_URL']],
+    $ormConfig);
+$entityManager = new EntityManager($connection, $ormConfig);
 
 //$connection = DriverManager::getConnection([
 //    'driver' => 'pdo_pgsql',
@@ -154,5 +162,6 @@ return [
     'logger' => $logger,
     'paymentService' => $paymentService,
     'userService' => $userService,
+    EntityManagerInterface::class => $entityManager,
     Connection::class => $connection,
 ];

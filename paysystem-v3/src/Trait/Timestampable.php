@@ -3,19 +3,22 @@ declare(strict_types=1);
 
 namespace PaySystem\Trait;
 
+use Doctrine\ORM\Mapping as ORM;
 use DateTime;
 
 trait Timestampable
 {
+    #[ORM\Column(name: 'created_at', type: 'datetimetz_immutable')]
     public DateTime $createdAt
-        {
-            get => $this->createdAt;
-        }
+    {
+        get => $this->createdAt;
+    }
 
+    #[ORM\Column(name: 'updated_at', type: 'datetimetz_immutable')]
     public DateTime $updatedAt
-        {
-            get => $this->updatedAt;
-        }
+    {
+        get => $this->updatedAt;
+    }
 
     protected function initializeTimestamps(): void
     {

@@ -4,7 +4,11 @@ declare(strict_types=1);
 namespace PaySystem\Entity;
 
 //use Cassandra\Uuid;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
 use DateTime;
+
 use PaySystem\Trait\HasUuid;
 use PaySystem\Trait\Loggable;
 use PaySystem\Enum\PaymentMethod;
@@ -12,59 +16,61 @@ use PaySystem\Enum\PaymentStatus;
 use PaySystem\Enum\CurrencyType;
 use PaySystem\Trait\Timestampable;
 
+#[ORM\Entity(repositoryClass: \PaySystem\Repository\PaymentRepository::class)]
+#[ORM\Table(name: 'payments')]
+#[ORM\Index(name: 'idx_payments_user_status', columns: ['user_id', 'status'])]
+#[ORM\Index(name: 'idx_payments_status', columns: ['status'])]
 class Payment
 {
     use Timestampable, Loggable, HasUuid;
 
-    public string $userId
-        {
-            get {
-                return $this->userId;
-            }
-            set {
-                $this->userId = $value;
-            }
-        }
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'payments')]
+    #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
+    public User $user
+    {
+        get => $this->user;
+    }
 
+//    public string $userId
+//    {
+//        get => $this->userId;
+//        set => $this->userId = $value;
+//    }
+
+    #[ORM\Column(type: 'decimal', precision: 15, scale: 2)]
     public float $amount
-        {
-            get => $this->amount;
-        }
+    {
+        get => $this->amount;
+    }
 
+    #[ORM\Column(type: 'text', options: ['default' => ''])]
     public string $description
-        {
-            get => $this->description;
-        }
+    {
+        get => $this->description;
+    }
 
+    #[ORM\Column(type: 'string', length: 3, enumType: CurrencyType::class)]
     public CurrencyType $currency
-        {
-            get {
-                return $this->currency;
-            }
-        }
+    {
+        get => $this->currency;
+    }
 
+    #[ORM\Column(type: 'string', length: 16, enumType: PaymentStatus::class)]
     public PaymentStatus $status
-        {
-            get {
-                return $this->status;
-            }
-            set {
-                $this->status = $value;
-            }
-        }
+    {
+        get => $this->status;
+        set => $this->status = $value;
+    }
 
+    #[ORM\Column(type: 'string', length: 32, enumType: PaymentMethod::class)]
     public PaymentMethod $method
-        {
-            get {
-                return $this->method;
-            }
-            set {
-                $this->method = $value;
-            }
-        }
+    {
+        get => $this->method;
+        set => $this->method = $value;
+    }
 
     public function __construct(
-        string         $userId,
+        User           $user,
         float          $amount,
         string         $description,
         CurrencyType   $currency,
@@ -75,7 +81,7 @@ class Payment
         ?DateTime      $updatedAt = null
     )
     {
-        $this->userId = $userId;
+        $this->user = $user;
         $this->amount = $amount;
         $this->description = $description;
         $this->currency = $currency;
@@ -87,7 +93,7 @@ class Payment
     }
 
     public static function create(
-        string        $userId,
+        User          $user,
         float         $amount,
         string        $description,
         CurrencyType  $currency,
@@ -95,7 +101,7 @@ class Payment
     ): self
     {
         return new self(
-            $userId,
+            $user,
             $amount,
             $description,
             $currency,
@@ -105,48 +111,6 @@ class Payment
             new DateTime(),
             new DateTime()
         );
-    }
-
-    public static function fromArray(array $data): self
-    {
-        $createdAt = $data['createdAt'];
-
-        if (is_array($createdAt)) {
-            $createdAt = $createdAt['date'];
-        }
-
-        $updatedAt = $data['updatedAt'];
-
-        if (is_array($updatedAt)) {
-            $updatedAt = $updatedAt['date'];
-        }
-
-        return new self(
-            $data['userId'],
-            (float)$data['amount'],
-            $data['description'],
-            CurrencyType::from($data['currency']),
-            PaymentMethod::from($data['method']),
-            $data['id'],
-            PaymentStatus::from($data['status']),
-            new DateTime($createdAt),
-            new DateTime($updatedAt)
-        );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'id' => $this->id,
-            'userId' => $this->userId,
-            'amount' => $this->amount,
-            'description' => $this->description,
-            'currency' => $this->currency,
-            'status' => $this->status,
-            'method' => $this->method,
-            'createdAt' => $this->createdAt,
-            'updatedAt' => $this->updatedAt
-        ];
     }
 
     public function __toString(): string
@@ -159,6 +123,49 @@ class Payment
             $this->status->value
         );
     }
+
+
+//    public static function fromArray(array $data): self
+//    {
+//        $createdAt = $data['createdAt'];
+//
+//        if (is_array($createdAt)) {
+//            $createdAt = $createdAt['date'];
+//        }
+//
+//        $updatedAt = $data['updatedAt'];
+//
+//        if (is_array($updatedAt)) {
+//            $updatedAt = $updatedAt['date'];
+//        }
+//
+//        return new self(
+//            $data['userId'],
+//            (float)$data['amount'],
+//            $data['description'],
+//            CurrencyType::from($data['currency']),
+//            PaymentMethod::from($data['method']),
+//            $data['id'],
+//            PaymentStatus::from($data['status']),
+//            new DateTime($createdAt),
+//            new DateTime($updatedAt)
+//        );
+//    }
+//
+//    public function toArray(): array
+//    {
+//        return [
+//            'id' => $this->id,
+//            'userId' => $this->userId,
+//            'amount' => $this->amount,
+//            'description' => $this->description,
+//            'currency' => $this->currency,
+//            'status' => $this->status,
+//            'method' => $this->method,
+//            'createdAt' => $this->createdAt,
+//            'updatedAt' => $this->updatedAt
+//        ];
+//    }
 
 //    public function __serialize(): array
 //    {
