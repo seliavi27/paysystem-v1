@@ -13,8 +13,7 @@ class UserService implements UserServiceInterface
 {
     public function __construct(
         private UserRepositoryInterface $repository
-    ) {
-    }
+    ) { }
 
     public function create(CreateUserRequest $request): User
     {

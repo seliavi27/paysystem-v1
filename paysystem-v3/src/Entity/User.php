@@ -3,72 +3,75 @@ declare(strict_types=1);
 
 namespace PaySystem\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
 use DateTime;
-use PaySystem\Trait\HasUuid;
 use InvalidArgumentException;
-use PaySystem\Trait\Timestampable;
 use RuntimeException;
-use PaySystem\Validator\UserValidator;
 
+use PaySystem\Trait\HasUuid;
+use PaySystem\Trait\Timestampable;
+use PaySystem\Repository\UserRepository;
+
+#[ORM\Entity(repositoryClass: UserRepository::class)]
+#[ORM\Table(name: 'users')]
 class User
 {
     use Timestampable, HasUuid;
 
+    #[ORM\Column(type: 'string', length: 255, unique: true)]
     public string $email
     {
-        get {
-            return $this->email;
-        }
-        set {
-//            if (!UserValidator::validateEmailFormat($value)) {
-//                throw new InvalidArgumentException('Invalid email format');
-//            }
-
-            $this->email = $value;
-        }
+        get => $this->email;
+        set => $this->email = $value;
     }
 
+    #[ORM\Column(type: 'string', length: 255)]
     public string $password
     {
-        get {
-            return $this->password;
-        }
-        set {
-//            if (!empty($value) && !UserValidator::validatePasswordStrength($value)) {
-//                throw new InvalidArgumentException('Invalid password format');
-//            }
-
-            $this->password = $value;
-        }
+        get => $this->password;
+        set => $this->password = $value;
     }
 
+    #[ORM\Column(name: 'full_name', type: 'string', length: 255)]
     public string $fullName
     {
         get => $this->fullName;
         set => $this->fullName = $value;
     }
 
+    #[ORM\Column(type: 'string', length: 32, options: ['default' => ''])]
     public string $phone
     {
         get => $this->phone;
         set => $this->phone = $value;
     }
 
+    #[ORM\Column(type: 'decimal', precision: 15, scale: 2, options: ['default' => 0])]
     public float $balance
     {
         get => $this->balance;
         set => $this->balance = $value;
     }
 
+    /** @var Collection<int, Payment> */
+    #[ORM\OneToMany(targetEntity: Payment::class, mappedBy: 'user', cascade: ['persist'])]
+    public Collection $payments
+    {
+        get => $this->payments;
+    }
+
     public function __construct(
-        string    $email,
-        string    $password,
-        string    $fullName,
-        string    $phone,
-        ?string   $id = null,
-        ?DateTime $createdAt = null,
-        ?DateTime $updatedAt = null,
-        ?float    $balance = null
+        string      $email,
+        string      $password,
+        string      $fullName,
+        string      $phone,
+        ?string     $id = null,
+        ?DateTime   $createdAt = null,
+        ?DateTime   $updatedAt = null,
+        ?float      $balance = null,
+        ?Collection $payments = null
     )
     {
         $this->email = $email;
@@ -79,6 +82,7 @@ class User
         $this->createdAt = $createdAt;
         $this->updatedAt = $updatedAt;
         $this->balance = $balance;
+        $this->payments = $payments;
     }
 
     public static function create(
@@ -97,51 +101,52 @@ class User
             self::generateUuid(),
             new DateTime(),
             new DateTime(),
-            0
+            0,
+            new ArrayCollection()
         );
     }
 
-    public function toArray(): array
-    {
-        return [
-            'email' => $this->email,
-            'password' => $this->password,
-            'fullName' => $this->fullName,
-            'phone' => $this->phone,
-            'id' => $this->id,
-            'createdAt' => $this->createdAt,
-            'updatedAt' => $this->updatedAt,
-            'balance' => $this->balance,
-        ];
-    }
-
-    public static function fromArray(array $data): self
-    {
-        $createdAt = $data['createdAt'];
-
-        if (is_array($createdAt))
-        {
-            $createdAt = $createdAt['date'];
-        }
-
-        $updatedAt = $data['updatedAt'];
-
-        if (is_array($updatedAt))
-        {
-            $updatedAt = $updatedAt['date'];
-        }
-
-        return new self(
-            $data['email'],
-            $data['password'],
-            $data['fullName'],
-            $data['phone'],
-            $data['id'],
-            new DateTime($createdAt),
-            new DateTime($updatedAt),
-            (float)$data['balance'],
-        );
-    }
+//    public function toArray(): array
+//    {
+//        return [
+//            'email' => $this->email,
+//            'password' => $this->password,
+//            'fullName' => $this->fullName,
+//            'phone' => $this->phone,
+//            'id' => $this->id,
+//            'createdAt' => $this->createdAt,
+//            'updatedAt' => $this->updatedAt,
+//            'balance' => $this->balance,
+//        ];
+//    }
+//
+//    public static function fromArray(array $data): self
+//    {
+//        $createdAt = $data['createdAt'];
+//
+//        if (is_array($createdAt))
+//        {
+//            $createdAt = $createdAt['date'];
+//        }
+//
+//        $updatedAt = $data['updatedAt'];
+//
+//        if (is_array($updatedAt))
+//        {
+//            $updatedAt = $updatedAt['date'];
+//        }
+//
+//        return new self(
+//            $data['email'],
+//            $data['password'],
+//            $data['fullName'],
+//            $data['phone'],
+//            $data['id'],
+//            new DateTime($createdAt),
+//            new DateTime($updatedAt),
+//            (float)$data['balance'],
+//        );
+//    }
 
     public function __toString(): string
     {

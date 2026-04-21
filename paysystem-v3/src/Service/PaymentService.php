@@ -16,32 +16,37 @@ use PaySystem\Factory\PaymentMethodFactory;
 use PaySystem\Interface\LogServiceInterface;
 use PaySystem\Repository\PaymentRepositoryInterface;
 use PaySystem\Repository\TransactionRepositoryInterface;
+use PaySystem\Repository\UserRepositoryInterface;
 
 class PaymentService implements PaymentServiceInterface
 {
     public function __construct(
         private PaymentMethodFactory $processorFactory,
-        private PaymentRepositoryInterface $repository,
+        private PaymentRepositoryInterface $paymentRepository,
+        private UserRepositoryInterface $userRepository,
         private TransactionRepositoryInterface $transactionRepository,
         private NotificationServiceInterface $notifier,
         private LogServiceInterface $logger,
-        private Connection $connection
+        private Connection $connection,
     ) {
     }
 
     public function create(CreatePaymentRequest $request): Payment
     {
+        $user = $this->userRepository->findById($request->userId)
+            ?? throw new NotFoundException("User {$request->userId} not found");
+
         $payment = Payment::create(
-            userId: $request->userId,
+            user: $user,
             amount: $request->amount,
             description: $request->description,
             currency: $request->currency,
             method: $request->method,
         );
 
-        $this->repository->saveEntity($payment);
-        $this->process($payment);
+        $this->paymentRepository->saveEntity($payment);
 
+        $this->process($payment);
         return $payment;
     }
 
@@ -49,16 +54,16 @@ class PaymentService implements PaymentServiceInterface
     {
         $this->connection->transactional(function () use ($payment) {
             $payment->status = PaymentStatus::PROCESSING;
-            $this->repository->update($payment);
+            $this->paymentRepository->update($payment);
 
             $processor = $this->processorFactory->create($payment->method);
             $processor->process($payment);
 
             $payment->status = PaymentStatus::COMPLETED;
-            $this->repository->update($payment);
+            $this->paymentRepository->update($payment);
 
             $this->transactionRepository->saveEntity(new Transaction(
-                userId:      $payment->userId,
+                userId:      $payment->user->id,
                 paymentId:   $payment->id,
                 type:        TransactionType::EXPENSE,
                 currency:    $payment->currency,
@@ -71,7 +76,7 @@ class PaymentService implements PaymentServiceInterface
 
     public function refund(string $id): void
     {
-        $payment = $this->repository->findById($id);
+        $payment = $this->paymentRepository->findById($id);
 
         if (!$payment instanceof Payment)
         {
@@ -86,10 +91,10 @@ class PaymentService implements PaymentServiceInterface
         $this->connection->transactional(function () use ($payment) {
             $this->processorFactory->create($payment->method)->refund($payment);
             $payment->status = PaymentStatus::REFUNDED;
-            $this->repository->update($payment);
+            $this->paymentRepository->update($payment);
 
             $this->transactionRepository->saveEntity(new Transaction(
-                userId:      $payment->userId,
+                userId:      $payment->user->id,
                 paymentId:   $payment->id,
                 type:        TransactionType::REFUND,
                 currency:    $payment->currency,
@@ -102,7 +107,7 @@ class PaymentService implements PaymentServiceInterface
 
     public function show(string $id): ?Payment
     {
-        $payment = $this->repository->findById($id);
+        $payment = $this->paymentRepository->findById($id);
 
         if (!$payment instanceof Payment)
         {
@@ -114,7 +119,7 @@ class PaymentService implements PaymentServiceInterface
 
     public function showAllByUserId(string $userId): array
     {
-        return $this->repository->findByUserId($userId);
+        return $this->paymentRepository->findByUserId($userId);
     }
 
     public function showAllByStatus(string $userId, string $status): array
@@ -123,7 +128,7 @@ class PaymentService implements PaymentServiceInterface
 
         return array_values(
             array_filter(
-                $this->repository->findByUserId($userId),
+                $this->paymentRepository->findByUserId($userId),
                 fn(Payment $p): bool => $p->status === $paymentStatus
             )
         );

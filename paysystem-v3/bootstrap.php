@@ -4,6 +4,9 @@ declare(strict_types=1);
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Tools\DsnParser;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\ORMSetup;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
 use Symfony\Component\HttpKernel\Controller\ArgumentResolver;
@@ -20,14 +23,14 @@ use PaySystem\Application;
 use PaySystem\Controller\AuthController;
 use PaySystem\Controller\PaymentController;
 use PaySystem\Controller\UserController;
+use PaySystem\Entity\Payment;
+use PaySystem\Entity\User;
 use PaySystem\Exception\ExceptionHandler;
 use PaySystem\Factory\PaymentMethodFactory;
 use PaySystem\Infrastructure\RouterFactory;
 use PaySystem\Middleware\AuthMiddleware;
 use PaySystem\Middleware\LoggingMiddleware;
-use PaySystem\Repository\PaymentRepository;
 use PaySystem\Repository\TransactionRepository;
-use PaySystem\Repository\UserRepository;
 use PaySystem\Service\AuthenticationService;
 use PaySystem\Service\JwtTokenService;
 use PaySystem\Service\LogService;
@@ -62,9 +65,18 @@ if (empty($_ENV['DATABASE_URL'])) {
 $dsnParser  = new DsnParser(['postgres' => 'pdo_pgsql', 'postgresql' => 'pdo_pgsql']);
 $connection = DriverManager::getConnection($dsnParser->parse($_ENV['DATABASE_URL']));
 
+$ormConfig = ORMSetup::createAttributeMetadataConfiguration(
+    paths: [__DIR__ . '/src/Entity'],
+    isDevMode: ($_ENV['APP_ENV'] ?? 'dev') === 'dev',
+);
+$entityManager = new EntityManager($connection, $ormConfig);
+
 // ===== Repositories =====
-$userRepository        = new UserRepository($connection);
-$paymentRepository     = new PaymentRepository($connection);
+/** @var \PaySystem\Repository\UserRepository $userRepository */
+$userRepository    = $entityManager->getRepository(User::class);
+/** @var \PaySystem\Repository\PaymentRepository $paymentRepository */
+$paymentRepository = $entityManager->getRepository(Payment::class);
+// TransactionRepository пока остаётся на DBAL — Антон не переводил в task-4 (см. step 5).
 $transactionRepository = new TransactionRepository($connection);
 
 // ===== Domain services =====
@@ -80,6 +92,7 @@ $paymentFactory = new PaymentMethodFactory(
 $paymentService = new PaymentService(
     $paymentFactory,
     $paymentRepository,
+    $userRepository,
     $transactionRepository,
     $notificationService,
     $logService,
@@ -127,16 +140,17 @@ $app = new Application(
 );
 
 return [
-    'app'                 => $app,
-    'logger'              => $logger,
-    'session'             => $session,
-    'routes'              => $routes,
-    'requestContext'      => $context,
-    'urlGenerator'        => $urlGenerator,
-    'controllers'         => [
+    'app'                         => $app,
+    'logger'                      => $logger,
+    'session'                     => $session,
+    'routes'                      => $routes,
+    'requestContext'              => $context,
+    'urlGenerator'                => $urlGenerator,
+    'controllers'                 => [
         AuthController::class    => $authController,
         PaymentController::class => $paymentController,
         UserController::class    => $userController,
     ],
-    Connection::class     => $connection,
+    Connection::class             => $connection,
+    EntityManagerInterface::class => $entityManager,
 ];
