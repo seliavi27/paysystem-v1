@@ -1,0 +1,119 @@
+parameters:
+  kernel.project_dir: '%env(default::string:KERNEL_PROJECT_DIR)%'
+  app.templates_dir: '%kernel.project_dir%/templates'
+  app.jwt.secret: '%env(JWT_SECRET)%'
+  app.jwt.algorithm: '%env(default:string:JWT_ALGORITHM)%'
+  app.jwt.ttl: '%env(int:JWT_TTL)%'
+
+services:
+  _defaults:
+    autowire: true           # автоматически внедрять по type-hint
+    autoconfigure: true      # автоматически вешать теги по интерфейсам
+    public: false            # приватные по умолчанию
+
+  # Автозагрузка всех классов из src/, кроме «не-сервисов»
+  PaySystem\:
+    resource: '../src/'
+    exclude:
+      - '../src/Entity/'
+      - '../src/DTO/'
+      - '../src/Enum/'
+      - '../src/Exception/{*Exception.php}'
+      - '../src/Trait/'
+
+  # Публичные сервисы, которые index.php достаёт из контейнера напрямую
+  PaySystem\Application:
+    public: true
+
+  # === БД ===
+  Doctrine\DBAL\Connection:
+    factory: ['@PaySystem\Infrastructure\DoctrineFactory', 'createConnection']
+    public: true
+
+  Doctrine\ORM\EntityManagerInterface:
+    factory: ['@PaySystem\Infrastructure\DoctrineFactory', 'createEntityManager']
+    public: true
+
+  PaySystem\Infrastructure\DoctrineFactory:
+    arguments:
+      $databaseUrl: '%env(DATABASE_URL)%'
+
+  # Репозитории Doctrine нельзя autowire — они требуют ClassMetadata
+  PaySystem\Repository\UserRepository:
+    factory: ['@Doctrine\ORM\EntityManagerInterface', 'getRepository']
+    arguments: [PaySystem\Entity\User]
+
+  PaySystem\Repository\PaymentRepository:
+    factory: ['@Doctrine\ORM\EntityManagerInterface', 'getRepository']
+    arguments: [PaySystem\Entity\Payment]
+
+  PaySystem\Repository\TransactionRepository:
+    factory: ['@Doctrine\ORM\EntityManagerInterface', 'getRepository']
+    arguments: [PaySystem\Entity\Transaction]
+
+  # === Алиасы интерфейсов ===
+  PaySystem\Repository\UserRepositoryInterface: '@PaySystem\Repository\UserRepository'
+  PaySystem\Repository\PaymentRepositoryInterface: '@PaySystem\Repository\PaymentRepository'
+  PaySystem\Repository\TransactionRepositoryInterface: '@PaySystem\Repository\TransactionRepository'
+  PaySystem\Service\UserServiceInterface: '@PaySystem\Service\UserService'
+  PaySystem\Service\PaymentServiceInterface: '@PaySystem\Service\PaymentService'
+  PaySystem\Service\AuthenticationServiceInterface: '@PaySystem\Service\AuthenticationService'
+  PaySystem\Service\JwtTokenServiceInterface: '@PaySystem\Service\JwtTokenService'
+  PaySystem\Interface\LogServiceInterface: '@PaySystem\Service\LogService'
+
+  # === JWT ===
+  PaySystem\Service\JwtTokenService:
+    arguments:
+      $secretKey: '%app.jwt.secret%'
+      $algorithm: '%app.jwt.algorithm%'
+      $ttl: '%app.jwt.ttl%'
+
+  # === TemplateEngine ===
+  PaySystem\View\TemplateEngine:
+    arguments:
+      $templatesPath: '%app.templates_dir%'
+
+  # === Logger / Monolog ===
+  Psr\Log\LoggerInterface:
+    factory: ['@PaySystem\Infrastructure\MonologFactory', 'create']
+
+  # === Теги ===
+  _instanceof:
+    PaySystem\Processor\PaymentProcessorInterface:
+      tags: ['payment.processor']
+    PaySystem\Strategy\CommissionStrategy:
+      tags: ['commission.strategy']
+    PaySystem\Notification\NotificationChannelInterface:
+      tags: ['notification.channel']
+    PaySystem\Middleware\MiddlewareInterface:
+      tags: ['middleware']
+    PaySystem\Listener\EventListenerInterface:
+      tags: ['event.listener']
+    Symfony\Component\Console\Command\Command:
+      tags: ['console.command']
+
+
+  # === Processor ===
+  PaySystem\Processor\StripeProcessor:
+    arguments:
+      $apiKey: '%env(STRIPE_API_KEY)%'
+      $webhookSecret: '%env(STRIPE_WEBHOOK_KEY)%'
+
+  PaySystem\Processor\MollieProcessor:
+    arguments:
+      $apiKey: '%env(MOLLIE_API_KEY)%'
+      $webhookSecret: '%env(MOLLIE_WEBHOOK_KEY)%'
+
+  PaySystem\Processor\FlutterwaveProcessor:
+    arguments:
+      $apiKey: '%env(FLUTTERWAVE_API_KEY)%'
+      $webhookSecret: '%env(FLUTTERWAVE_WEBHOOK_KEY)%'
+
+
+  PaySystem\Middleware\LoggingMiddleware:
+    tags:
+      - { name: 'middleware', priority: 100 }
+
+  PaySystem\Middleware\AuthMiddleware:
+    tags:
+      - { name: 'middleware', priority: 50 }

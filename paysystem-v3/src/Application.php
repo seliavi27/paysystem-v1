@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace PaySystem;
 
+use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Controller\ArgumentResolver;
@@ -17,6 +18,7 @@ class Application
         private ControllerResolver $controllerResolver,
         private ArgumentResolver   $argumentResolver,
         private ExceptionHandler   $exceptionHandler,
+        #[AutowireIterator('middleware', defaultPriorityMethod: 'priority')]
         private array              $middlewares = [],
     ) { }
 

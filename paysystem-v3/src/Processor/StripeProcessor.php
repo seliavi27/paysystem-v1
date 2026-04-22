@@ -3,12 +3,18 @@ declare(strict_types=1);
 
 namespace PaySystem\Processor;
 
+use PaySystem\Enum\PaymentMethod;
 use PaySystem\Enum\PaymentStatus;
 use PaySystem\Entity\Payment;
 use RuntimeException;
 
 class StripeProcessor extends AbstractPaymentProcessor
 {
+    public function supportedMethod(): PaymentMethod
+    {
+        return PaymentMethod::CREDIT_CARD;
+    }
+
     public function process(Payment $payment): void
     {
         $this->validateApiKey();

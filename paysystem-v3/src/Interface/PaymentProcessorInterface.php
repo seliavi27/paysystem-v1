@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace PaySystem\Interface;
 
 use PaySystem\Entity\Payment;
+use PaySystem\Enum\PaymentMethod;
 
 interface PaymentProcessorInterface
 {
@@ -14,4 +15,5 @@ interface PaymentProcessorInterface
     public function getStatus(Payment $payment): string;
 
     public function getName(): string;
+    public function supportedMethod(): PaymentMethod;
 }

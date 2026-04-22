@@ -1,6 +1,9 @@
 <?php
 declare(strict_types=1);
 
+use PaySystem\Application;
+use PaySystem\Infrastructure\ContainerFactory;
+use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
@@ -9,22 +12,19 @@ use Symfony\Component\Routing\RequestContext;
 
 use PaySystem\Infrastructure\RouterFactory;
 
-$container = require_once __DIR__ . '/../bootstrap.php';
-
-$request  = Request::createFromGlobals();
-$routes   = RouterFactory::loadRoutes(__DIR__ . '/../src/Controller');
-$context  = new RequestContext()->fromRequest($request);
-$matcher  = new UrlMatcher($routes, $context);
+require __DIR__ . '/../vendor/autoload.php';
 
 try
 {
-    $parameters = $matcher->match($request->getPathInfo());
-    $request->attributes->add($parameters);
+    $container = ContainerFactory::build(
+        projectDir: dirname(__DIR__),
+        isDebug: ($_SERVER['APP_DEBUG'] ?? '0') === '1',
+    );
 
-    /** @var PaySystem\Application $app */
-    $response = $container['app']->handle($request);
+    $request  = Request::createFromGlobals();
+    $response = $container->get(Application::class)->handle($request);
 }
-catch (ResourceNotFoundException)
+catch (ServiceNotFoundException | ServiceNotFoundException | ResourceNotFoundException)
 {
     $response = new Response('Not Found', Response::HTTP_NOT_FOUND);
 }
