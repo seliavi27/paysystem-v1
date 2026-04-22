@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Вход — PaySystem{% endblock %}
+
+{% block content %}
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-5">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h3 class="card-title text-center mb-4">Вход</h3>
+
+                    {% include 'components/errors.html.twig' %}
+
+                    <form method="POST" action="{{ path('auth_login') }}">
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" name="email" class="form-control"
+                                   value="{{ old.email|default('') }}" required autofocus>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Пароль</label>
+                            <input type="password" name="password" class="form-control" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Войти</button>
+                    </form>
+                    <div class="text-center mt-3">
+                        <a href="{{ path('auth_register_form') }}">Нет аккаунта? Зарегистрироваться</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

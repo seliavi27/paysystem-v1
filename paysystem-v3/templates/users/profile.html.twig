@@ -4,26 +4,26 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-start mb-3">
                     <div>
-                        <h3 class="card-title mb-1"><?= $view->e($user->fullName) ?></h3>
-                        <div class="text-muted"><?= $view->e($user->email) ?></div>
+                        <h3 class="card-title mb-1">{{ user.fullName }}</h3>
+                        <div class="text-muted">{{ user.email }}</div>
                     </div>
-                    <span class="badge bg-light text-dark">ID: <code><?= $view->e($user->id) ?></code></span>
+                    <span class="badge bg-light text-dark">ID: <code>{{ user.id }}</code></span>
                 </div>
 
                 <hr>
 
                 <dl class="row mb-0">
                     <dt class="col-sm-4 text-muted">Телефон</dt>
-                    <dd class="col-sm-8"><?= $view->e($user->phone ?: '—') ?></dd>
+                    <dd class="col-sm-8">{{ user.phone ?: '—' }}</dd>
 
                     <dt class="col-sm-4 text-muted">Баланс</dt>
-                    <dd class="col-sm-8"><?= number_format($user->balance, 2) ?> ₽</dd>
+                    <dd class="col-sm-8">{{ user.balance|number_format(2, '.', ' ') }} ₽</dd>
 
                     <dt class="col-sm-4 text-muted">Зарегистрирован</dt>
-                    <dd class="col-sm-8"><?= $view->e($user->createdAt->format('d.m.Y H:i')) ?></dd>
+                    <dd class="col-sm-8">{{ user.createdAt|date('d.m.Y H:i') }}</dd>
 
                     <dt class="col-sm-4 text-muted">Обновлён</dt>
-                    <dd class="col-sm-8"><?= $view->e($user->updatedAt->format('d.m.Y H:i')) ?></dd>
+                    <dd class="col-sm-8">{{ user.updatedAt|date('d.m.Y H:i') }}</dd>
                 </dl>
             </div>
         </div>
@@ -33,7 +33,7 @@
                 <div class="card shadow-sm h-100">
                     <div class="card-body text-center">
                         <div class="text-muted small text-uppercase">Всего платежей</div>
-                        <div class="display-6"><?= $view->e($paymentsCount) ?></div>
+                        <div class="display-6">{{ paymentsCount }}</div>
                     </div>
                 </div>
             </div>
@@ -41,7 +41,7 @@
                 <div class="card shadow-sm h-100">
                     <div class="card-body text-center">
                         <div class="text-muted small text-uppercase">Сумма платежей</div>
-                        <div class="display-6"><?= number_format($paymentsSum, 2) ?></div>
+                        <div class="display-6">{{ paymentsSum|number_format(2, '.', ' ') }}</div>
                     </div>
                 </div>
             </div>

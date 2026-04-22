@@ -1,0 +1,16 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="{{ path('payments_index') }}">PaySystem</a>
+        <div class="d-flex">
+            {% if isAuthenticated %}
+                <a href="{{ path('payments_index') }}" class="btn btn-outline-light me-2">Платежи</a>
+                <a href="{{ path('payments_create_form') }}" class="btn btn-light me-2">Новый платёж</a>
+                <a href="{{ path('user_profile') }}" class="btn btn-outline-light me-2">Профиль</a>
+                <a href="{{ path('auth_logout') }}" class="btn btn-outline-light">Выйти</a>
+            {% else %}
+                <a href="{{ path('auth_login_form') }}" class="btn btn-outline-light me-2">Вход</a>
+                <a href="{{ path('auth_register_form') }}" class="btn btn-light">Регистрация</a>
+            {% endif %}
+        </div>
+    </div>
+</nav>

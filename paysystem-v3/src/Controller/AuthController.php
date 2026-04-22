@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace PaySystem\Controller;
 
 use Symfony\Component\HttpFoundation\Cookie;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,7 +17,7 @@ use PaySystem\Exception\ValidationException;
 use PaySystem\Service\AuthenticationServiceInterface;
 use PaySystem\Service\JwtTokenServiceInterface;
 use PaySystem\Service\UserServiceInterface;
-use PaySystem\View\TemplateEngine;
+use Twig\Environment;
 
 class AuthController extends AbstractController
 {
@@ -24,14 +25,15 @@ class AuthController extends AbstractController
     private const TOKEN_TTL = 3600;
 
     public function __construct(
-        protected readonly TemplateEngine $templateEngine,
+        protected readonly RequestStack $requestStack,
+        protected readonly Environment $twig,
         private readonly AuthenticationServiceInterface $authenticationService,
         private readonly JwtTokenServiceInterface $jwtTokenService,
         private readonly UserServiceInterface $userService,
         private UrlGeneratorInterface $urlGenerator
     )
     {
-        parent::__construct($templateEngine);
+        parent::__construct($requestStack, $twig);
     }
 
     #[Route('/login', name: 'login_form', methods: ['GET'])]

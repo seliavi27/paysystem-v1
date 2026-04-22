@@ -18,6 +18,7 @@ final class ContainerFactory
         if (!$isDebug && file_exists($cacheFile))
         {
             require_once $cacheFile;
+            // TODO пока не понятно откуда его брать
             return new CachedContainer();
         }
 
