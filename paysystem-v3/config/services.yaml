@@ -21,9 +21,27 @@ services:
       - '../src/Exception/{*Exception.php}'
       - '../src/Trait/'
 
+#  PaySystem\Exception\ExceptionHandler:
+#      public: true
+
+  Symfony\Component\HttpKernel\Controller\ControllerResolver:
+    public: true
+
+  Symfony\Component\HttpKernel\Controller\ArgumentResolver:
+    public: true
+    arguments:
+      $argumentMetadataFactory: '@Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadataFactory'
+
+  Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadataFactory:
+    public: true
+
   # Публичные сервисы, которые index.php достаёт из контейнера напрямую
   PaySystem\Application:
     public: true
+    arguments:
+      $controllerResolver: '@Symfony\Component\HttpKernel\Controller\ControllerResolver'
+      $argumentResolver: '@Symfony\Component\HttpKernel\Controller\ArgumentResolver'
+      $exceptionHandler: '@PaySystem\Exception\ExceptionHandler'
 
   # === БД ===
   Doctrine\DBAL\Connection:
@@ -61,21 +79,20 @@ services:
   PaySystem\Service\JwtTokenServiceInterface: '@PaySystem\Service\JwtTokenService'
   PaySystem\Interface\LogServiceInterface: '@PaySystem\Service\LogService'
 
+  # === Command ===
+  PaySystem\Command\:
+    resource: '../src/Command'
+    tags: ['console.command']
+
+  PaySystem\Command\CreateUserCommand:
+    tags: [ 'console.command' ]
+
   # === JWT ===
   PaySystem\Service\JwtTokenService:
     arguments:
       $secretKey: '%app.jwt.secret%'
       $algorithm: '%app.jwt.algorithm%'
       $ttl: '%app.jwt.ttl%'
-
-  # === TemplateEngine ===
-  PaySystem\View\TemplateEngine:
-    arguments:
-      $templatesPath: '%app.templates_dir%'
-
-  # === Logger / Monolog ===
-  Psr\Log\LoggerInterface:
-    factory: ['@PaySystem\Infrastructure\MonologFactory', 'create']
 
   # === Теги ===
   _instanceof:
@@ -135,3 +152,5 @@ services:
       - [addGlobal, ['isAuthenticated', 'false']]
       - [addGlobal, ['errors', []]]
       - [addGlobal, ['old', []]]
+
+

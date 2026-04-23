@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\Interface;
+namespace PaySystem\Processor;
 
 use PaySystem\Entity\Payment;
 use PaySystem\Enum\PaymentMethod;

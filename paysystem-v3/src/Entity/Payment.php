@@ -123,7 +123,26 @@ class Payment
             $this->status->value
         );
     }
-
+    public function markCompleted(): void
+    {
+        $this->status = PaymentStatus::COMPLETED;
+        $this->updatedAt = new DateTime();
+    }
+    public function markFailed(): void
+    {
+        $this->status = PaymentStatus::FAILED;
+        $this->updatedAt = new DateTime();
+    }
+    public function markRefunded(): void
+    {
+        $this->status = PaymentStatus::REFUNDED;
+        $this->updatedAt = new DateTime();
+    }
+    public function markProcessing(): void
+    {
+        $this->status = PaymentStatus::PROCESSING;
+        $this->updatedAt = new DateTime();
+    }
 
 //    public static function fromArray(array $data): self
 //    {

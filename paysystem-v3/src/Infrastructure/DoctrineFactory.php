@@ -25,13 +25,16 @@ final class DoctrineFactory
             $this->createConnection(),
             ORMSetup::createAttributeMetadataConfiguration(
                 paths: [dirname(__DIR__) . '/Entity'],
-                isDevMode: ($_ENV['APP_ENV'] ?? 'dev') === 'dev',
+                isDevMode: ($_ENV['APP_ENV'] ?? 'dev') === 'dev'
             ),
         );
     }
 
     public function createConnection(): Connection
     {
-        return $this->connection ??= DriverManager::getConnection(['url' => $this->databaseUrl]);
+        return $this->connection ??= DriverManager::getConnection([
+            //'driver' => 'pdo_pgsql',
+            'url' => $this->databaseUrl
+        ]);
     }
 }

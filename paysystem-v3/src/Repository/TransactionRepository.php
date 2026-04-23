@@ -56,4 +56,10 @@ class TransactionRepository implements TransactionRepositoryInterface
         $this->saveToFile();
         return true;
     }
+
+    public function saveEntity(object $entity): bool
+    {
+        // TODO: Implement saveEntity() method.
+        return false;
+    }
 }

@@ -5,7 +5,6 @@ namespace PaySystem\Repository;
 
 use DateTime;
 use Doctrine\ORM\EntityRepository;
-use Doctrine\DBAL\Connection;
 
 use PaySystem\Entity\Payment;
 use PaySystem\Enum\PaymentStatus;
@@ -20,11 +19,6 @@ class PaymentRepository extends EntityRepository implements PaymentRepositoryInt
 
     public function findByUserId(string $userId): array
     {
-//        return $this->findBy(
-//            ['userId' => $userId],
-//            ['createdAt' => 'DESC']
-//        );
-
         return $this->createQueryBuilder('p')
             ->andWhere('IDENTITY(p.user) = :uid')
             ->orderBy('p.createdAt', 'DESC')
@@ -88,5 +82,15 @@ class PaymentRepository extends EntityRepository implements PaymentRepositoryInt
             return true;
         }
         return false;
+    }
+
+    public function findSince(DateTime $since): array
+    {
+        return $this->createQueryBuilder('p')
+            ->where('p.createdAt >= :since')
+            ->setParameter('since', $since)
+            ->orderBy('p.createdAt', 'ASC')
+            ->getQuery()
+            ->getResult();
     }
 }

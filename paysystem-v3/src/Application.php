@@ -7,7 +7,9 @@ use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Controller\ArgumentResolver;
+use Symfony\Component\HttpKernel\Controller\ArgumentResolverInterface;
 use Symfony\Component\HttpKernel\Controller\ControllerResolver;
+use Symfony\Component\HttpKernel\Controller\ControllerResolverInterface;
 use Throwable;
 
 use PaySystem\Exception\ExceptionHandler;
@@ -19,16 +21,16 @@ class Application
         private ArgumentResolver   $argumentResolver,
         private ExceptionHandler   $exceptionHandler,
         #[AutowireIterator('middleware', defaultPriorityMethod: 'priority')]
-        private array              $middlewares = [],
+        private array $middlewares = [],
     ) { }
 
     public function handle(Request $request): Response
     {
         foreach ($this->middlewares as $middleware)
         {
-            if (($early = $middleware->handle($request)) !== null)
+            if (($response = $middleware->handle($request)) !== null)
             {
-                return $early;
+                return $response;
             }
         }
 
