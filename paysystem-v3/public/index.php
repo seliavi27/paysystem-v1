@@ -1,32 +1,10 @@
 <?php
 declare(strict_types=1);
 
-use App\Application;
-use App\Infrastructure\ContainerFactory;
-use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Exception\ResourceNotFoundException;
-use Symfony\Component\Routing\Matcher\UrlMatcher;
-use Symfony\Component\Routing\RequestContext;
+use App\Kernel;
 
-use App\Infrastructure\RouterFactory;
+require_once dirname(__DIR__).'/vendor/autoload_runtime.php';
 
-require __DIR__ . '/../vendor/autoload.php';
-
-try
-{
-    $container = ContainerFactory::build(
-        projectDir: dirname(__DIR__),
-        isDebug: ($_SERVER['APP_DEBUG'] ?? '0') === '1',
-    );
-
-    $request  = Request::createFromGlobals();
-    $response = $container->get(Application::class)->handle($request);
-}
-catch (ServiceNotFoundException | ServiceNotFoundException | ResourceNotFoundException)
-{
-    $response = new Response('Not Found', Response::HTTP_NOT_FOUND);
-}
-
-$response->send();
+return function (array $context) {
+    return new Kernel($context['APP_ENV'], (bool)$context['APP_DEBUG']);
+};

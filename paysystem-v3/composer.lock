@@ -4,7 +4,7 @@
     "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
     "This file is @generated automatically"
   ],
-  "content-hash": "92813d09db98300ca06a6c32464e173f",
+  "content-hash": "4c72fd0f4d8b4f3c8a8bef91aec58d12",
   "packages": [
     {
       "name": "doctrine/collections",
@@ -4180,6 +4180,89 @@
       ],
       "support": {
         "source": "https://github.com/symfony/routing/tree/v8.0.8"
+      },
+      "funding": [
+        {
+          "url": "https://symfony.com/sponsor",
+          "type": "custom"
+        },
+        {
+          "url": "https://github.com/fabpot",
+          "type": "github"
+        },
+        {
+          "url": "https://github.com/nicolas-grekas",
+          "type": "github"
+        },
+        {
+          "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+          "type": "tidelift"
+        }
+      ],
+      "time": "2026-03-30T15:14:47+00:00"
+    },
+    {
+      "name": "symfony/runtime",
+      "version": "v8.0.8",
+      "source": {
+        "type": "git",
+        "url": "https://github.com/symfony/runtime.git",
+        "reference": "30884f00e017a26100fcd9aa281082ebf9a87dce"
+      },
+      "dist": {
+        "type": "zip",
+        "url": "https://api.github.com/repos/symfony/runtime/zipball/30884f00e017a26100fcd9aa281082ebf9a87dce",
+        "reference": "30884f00e017a26100fcd9aa281082ebf9a87dce",
+        "shasum": ""
+      },
+      "require": {
+        "composer-plugin-api": "^1.0|^2.0",
+        "php": ">=8.4"
+      },
+      "conflict": {
+        "symfony/error-handler": "<7.4"
+      },
+      "require-dev": {
+        "composer/composer": "^2.6",
+        "symfony/console": "^7.4|^8.0",
+        "symfony/dotenv": "^7.4|^8.0",
+        "symfony/http-foundation": "^7.4|^8.0",
+        "symfony/http-kernel": "^7.4|^8.0"
+      },
+      "type": "composer-plugin",
+      "extra": {
+        "class": "Symfony\\Component\\Runtime\\Internal\\ComposerPlugin"
+      },
+      "autoload": {
+        "psr-4": {
+          "Symfony\\Component\\Runtime\\": "",
+          "Symfony\\Runtime\\Symfony\\Component\\": "Internal/"
+        },
+        "exclude-from-classmap": [
+          "/Tests/"
+        ]
+      },
+      "notification-url": "https://packagist.org/downloads/",
+      "license": [
+        "MIT"
+      ],
+      "authors": [
+        {
+          "name": "Nicolas Grekas",
+          "email": "p@tchwork.com"
+        },
+        {
+          "name": "Symfony Community",
+          "homepage": "https://symfony.com/contributors"
+        }
+      ],
+      "description": "Enables decoupling PHP applications from global state",
+      "homepage": "https://symfony.com",
+      "keywords": [
+        "runtime"
+      ],
+      "support": {
+        "source": "https://github.com/symfony/runtime/tree/v8.0.8"
       },
       "funding": [
         {
