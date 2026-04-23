@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\Entity;
+namespace App\Entity;
 
 //use Cassandra\Uuid;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -9,14 +9,14 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use DateTime;
 
-use PaySystem\Trait\HasUuid;
-use PaySystem\Trait\Loggable;
-use PaySystem\Enum\PaymentMethod;
-use PaySystem\Enum\PaymentStatus;
-use PaySystem\Enum\CurrencyType;
-use PaySystem\Trait\Timestampable;
+use App\Trait\HasUuid;
+use App\Trait\Loggable;
+use App\Enum\PaymentMethod;
+use App\Enum\PaymentStatus;
+use App\Enum\CurrencyType;
+use App\Trait\Timestampable;
 
-#[ORM\Entity(repositoryClass: \PaySystem\Repository\PaymentRepository::class)]
+#[ORM\Entity(repositoryClass: \App\Repository\PaymentRepository::class)]
 #[ORM\Table(name: 'payments')]
 #[ORM\Index(name: 'idx_payments_user_status', columns: ['user_id', 'status'])]
 #[ORM\Index(name: 'idx_payments_status', columns: ['status'])]

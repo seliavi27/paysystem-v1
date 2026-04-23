@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\DTO;
+namespace App\DTO;
 
-use PaySystem\Exception\ValidationException;
-use PaySystem\Validator\UserValidator;
+use App\Exception\ValidationException;
+use App\Validator\UserValidator;
 
 final readonly class CreateUserRequest
 {

@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\Command;
+namespace App\Command;
 
-use PaySystem\DTO\CreateUserRequest;
-use PaySystem\Service\UserServiceInterface;
+use App\DTO\CreateUserRequest;
+use App\Service\UserServiceInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;

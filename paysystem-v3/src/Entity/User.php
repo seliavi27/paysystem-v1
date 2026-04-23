@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\Entity;
+namespace App\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -10,9 +10,9 @@ use DateTime;
 use InvalidArgumentException;
 use RuntimeException;
 
-use PaySystem\Trait\HasUuid;
-use PaySystem\Trait\Timestampable;
-use PaySystem\Repository\UserRepository;
+use App\Trait\HasUuid;
+use App\Trait\Timestampable;
+use App\Repository\UserRepository;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: 'users')]

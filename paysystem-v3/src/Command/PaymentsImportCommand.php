@@ -1,12 +1,12 @@
 <?php
-namespace PaySystem\Command;
+namespace App\Command;
 
 use Doctrine\ORM\EntityManagerInterface;
-use PaySystem\Entity\Payment;
-use PaySystem\Entity\User;
-use PaySystem\Enum\CurrencyType;
-use PaySystem\Enum\PaymentMethod;
-use PaySystem\Enum\PaymentStatus;
+use App\Entity\Payment;
+use App\Entity\User;
+use App\Enum\CurrencyType;
+use App\Enum\PaymentMethod;
+use App\Enum\PaymentStatus;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;

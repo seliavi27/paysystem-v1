@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\Repository;
+namespace App\Repository;
 
 use DateTime;
 use Doctrine\ORM\EntityRepository;
 
-use PaySystem\Entity\Payment;
-use PaySystem\Enum\PaymentStatus;
-use PaySystem\Storage\StorageInterface;
+use App\Entity\Payment;
+use App\Enum\PaymentStatus;
+use App\Storage\StorageInterface;
 
 class PaymentRepository extends EntityRepository implements PaymentRepositoryInterface
 {

@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\Processor;
+namespace App\Processor;
 
-use PaySystem\Enum\PaymentMethod;
-use PaySystem\Enum\PaymentStatus;
-use PaySystem\Entity\Payment;
+use App\Enum\PaymentMethod;
+use App\Enum\PaymentStatus;
+use App\Entity\Payment;
 use RuntimeException;
 
 class MollieProcessor extends AbstractPaymentProcessor

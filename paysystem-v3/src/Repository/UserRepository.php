@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\Repository;
+namespace App\Repository;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityRepository;
 use DateTime;
 
-use PaySystem\Entity\User;
-use PaySystem\Storage\StorageInterface;
+use App\Entity\User;
+use App\Storage\StorageInterface;
 
 /**
  * @extends EntityRepository<User>

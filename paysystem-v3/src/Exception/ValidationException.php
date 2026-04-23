@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\Exception;
+namespace App\Exception;
 
 use Exception;
 

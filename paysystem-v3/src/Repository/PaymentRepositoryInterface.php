@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\Repository;
+namespace App\Repository;
 
 use DateTime;
-use PaySystem\Entity\Payment;
-use PaySystem\Enum\PaymentStatus;
+use App\Entity\Payment;
+use App\Enum\PaymentStatus;
 
 interface PaymentRepositoryInterface extends RepositoryInterface
 {

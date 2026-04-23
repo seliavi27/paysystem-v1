@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\Enum;
+namespace App\Enum;
 
 enum PaymentMethod: string
 {

@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\Processor;
+namespace App\Processor;
 
 use InvalidArgumentException;
-use PaySystem\Entity\Payment;
-use PaySystem\Strategy\CommissionStrategy;
+use App\Entity\Payment;
+use App\Strategy\CommissionStrategy;
 
 abstract class AbstractPaymentProcessor implements PaymentProcessorInterface
 {

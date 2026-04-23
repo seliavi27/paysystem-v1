@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\Event;
+namespace App\Event;
 
-use PaySystem\Entity\Payment;
+use App\Entity\Payment;
 
 class PaymentFailedEvent implements EventInterface
 {

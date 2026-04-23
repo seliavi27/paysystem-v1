@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\Service;
+namespace App\Service;
 
-use PaySystem\DTO\CreateUserRequest;
-use PaySystem\Entity\User;
+use App\DTO\CreateUserRequest;
+use App\Entity\User;
 
 interface UserServiceInterface
 {

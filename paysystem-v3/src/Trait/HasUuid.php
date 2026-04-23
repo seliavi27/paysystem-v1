@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\Trait;
+namespace App\Trait;
 
 use Doctrine\ORM\Mapping as ORM;
 

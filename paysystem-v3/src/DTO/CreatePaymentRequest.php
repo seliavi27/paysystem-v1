@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\DTO;
+namespace App\DTO;
 
-use PaySystem\Enum\CurrencyType;
+use App\Enum\CurrencyType;
 use InvalidArgumentException;
-use PaySystem\Enum\PaymentMethod;
+use App\Enum\PaymentMethod;
 
 final readonly class CreatePaymentRequest
 {

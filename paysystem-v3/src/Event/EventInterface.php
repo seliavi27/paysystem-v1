@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\Event;
+namespace App\Event;
 interface EventInterface
 {
     public function getName(): string;

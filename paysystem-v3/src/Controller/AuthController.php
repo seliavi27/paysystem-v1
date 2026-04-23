@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\Controller;
+namespace App\Controller;
 
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -12,11 +12,11 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Throwable;
 
-use PaySystem\DTO\CreateUserRequest;
-use PaySystem\Exception\ValidationException;
-use PaySystem\Service\AuthenticationServiceInterface;
-use PaySystem\Service\JwtTokenServiceInterface;
-use PaySystem\Service\UserServiceInterface;
+use App\DTO\CreateUserRequest;
+use App\Exception\ValidationException;
+use App\Service\AuthenticationServiceInterface;
+use App\Service\JwtTokenServiceInterface;
+use App\Service\UserServiceInterface;
 use Twig\Environment;
 
 class AuthController extends AbstractController

@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\DTO;
+namespace App\DTO;
 
 use DateTime;
-use PaySystem\Entity\Payment;
-use PaySystem\Enum\CurrencyType;
-use PaySystem\Enum\PaymentStatus;
+use App\Entity\Payment;
+use App\Enum\CurrencyType;
+use App\Enum\PaymentStatus;
 
 final readonly class PaymentResponse
 {

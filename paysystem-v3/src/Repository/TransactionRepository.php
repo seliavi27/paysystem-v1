@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\Repository;
+namespace App\Repository;
 
-use PaySystem\Entity\Transaction;
+use App\Entity\Transaction;
 
 class TransactionRepository implements TransactionRepositoryInterface
 {

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\Strategy;
+namespace App\Strategy;
 
 class TieredFeeStrategy implements CommissionStrategy
 {

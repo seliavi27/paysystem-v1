@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\DTO;
+namespace App\DTO;
 
-use PaySystem\Entity\User;
+use App\Entity\User;
 use DateTime;
-use PaySystem\Trait\HasUuid;
-use PaySystem\Trait\Timestampable;
+use App\Trait\HasUuid;
+use App\Trait\Timestampable;
 
 final class UserResponse
 {

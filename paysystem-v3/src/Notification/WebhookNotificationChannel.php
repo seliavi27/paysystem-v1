@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\Notification;
+namespace App\Notification;
 
-use PaySystem\Entity\User;
+use App\Entity\User;
 
 class WebhookNotificationChannel implements NotificationChannelInterface
 {

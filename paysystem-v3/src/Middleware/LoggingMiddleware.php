@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\Middleware;
+namespace App\Middleware;
 
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-use PaySystem\Interface\LogServiceInterface;
+use App\Interface\LogServiceInterface;
 
 class LoggingMiddleware implements MiddlewareInterface
 {

@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\Interface;
+namespace App\Interface;
 
-use PaySystem\Entity\Payment;
+use App\Entity\Payment;
 
 interface RefundableInterface
 {

@@ -11,5 +11,5 @@ doctrine:
       PaySystem:
         type: attribute
         dir: '%kernel.project_dir%/src/Entity'
-        prefix: 'PaySystem\Entity'
+        prefix: 'App\Entity'
         alias: PaySystem

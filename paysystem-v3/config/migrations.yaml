@@ -1,6 +1,6 @@
 table_storage:
   table_name: doctrine_migration_versions
 migrations_paths:
-  'PaySystem\Migrations': './migrations'
+  'App\Migrations': './migrations'
 all_or_nothing: true
 transactional: true

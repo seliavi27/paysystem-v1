@@ -1,17 +1,17 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\Controller;
+namespace App\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 
-use PaySystem\DTO\CreateUserRequest;
-use PaySystem\Exception\NotFoundException;
-use PaySystem\Exception\ValidationException;
-use PaySystem\Service\PaymentServiceInterface;
-use PaySystem\Service\UserServiceInterface;
+use App\DTO\CreateUserRequest;
+use App\Exception\NotFoundException;
+use App\Exception\ValidationException;
+use App\Service\PaymentServiceInterface;
+use App\Service\UserServiceInterface;
 use Twig\Environment;
 
 class UserController extends AbstractController

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace PaySystem\Exception;
+namespace App\Exception;
 
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Symfony\Component\HttpFoundation\Request;
@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 
 use Throwable;
 
-use PaySystem\Interface\LogServiceInterface;
+use App\Interface\LogServiceInterface;
 
 class ExceptionHandler
 {

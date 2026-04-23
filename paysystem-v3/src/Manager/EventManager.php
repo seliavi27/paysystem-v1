@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\Manager;
+namespace App\Manager;
 
-use PaySystem\Event\EventInterface;
-use PaySystem\Listener\EventListenerInterface;
+use App\Event\EventInterface;
+use App\Listener\EventListenerInterface;
 
 class EventManager
 {

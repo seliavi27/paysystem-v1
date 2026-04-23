@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\Listener;
+namespace App\Listener;
 
-use PaySystem\Event\EventInterface;
-use PaySystem\Interface\LogServiceInterface;
+use App\Event\EventInterface;
+use App\Interface\LogServiceInterface;
 
 class LogListener implements EventListenerInterface
 {

@@ -1,10 +1,10 @@
 <?php
 
-namespace PaySystem\Service;
+namespace App\Service;
 
-use PaySystem\Entity\Payment;
-use PaySystem\Entity\User;
-use PaySystem\Notification\NotificationChannelInterface;
+use App\Entity\Payment;
+use App\Entity\User;
+use App\Notification\NotificationChannelInterface;
 
 interface NotificationServiceInterface
 {

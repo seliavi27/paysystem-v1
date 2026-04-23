@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\Service;
+namespace App\Service;
 
-use PaySystem\Entity\User;
-use PaySystem\Exception\AuthenticationException;
-use PaySystem\Exception\ValidationException;
+use App\Entity\User;
+use App\Exception\AuthenticationException;
+use App\Exception\ValidationException;
 
 class AuthenticationService implements AuthenticationServiceInterface
 {

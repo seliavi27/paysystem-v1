@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\Controller;
+namespace App\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -9,15 +9,15 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
 
-use PaySystem\DTO\CreatePaymentRequest;
-use PaySystem\DTO\PaymentResponse;
-use PaySystem\Entity\Payment;
-use PaySystem\Enum\CurrencyType;
-use PaySystem\Enum\PaymentMethod;
-use PaySystem\Enum\PaymentStatus;
-use PaySystem\Exception\NotFoundException;
-use PaySystem\Exception\ValidationException;
-use PaySystem\Service\PaymentServiceInterface;
+use App\DTO\CreatePaymentRequest;
+use App\DTO\PaymentResponse;
+use App\Entity\Payment;
+use App\Enum\CurrencyType;
+use App\Enum\PaymentMethod;
+use App\Enum\PaymentStatus;
+use App\Exception\NotFoundException;
+use App\Exception\ValidationException;
+use App\Service\PaymentServiceInterface;
 use Twig\Environment;
 
 class PaymentController extends AbstractController

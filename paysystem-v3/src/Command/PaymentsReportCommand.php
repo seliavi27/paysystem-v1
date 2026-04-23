@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\Command;
+namespace App\Command;
 
 use DateTime;
-use PaySystem\Enum\PaymentStatus;
-use PaySystem\Repository\PaymentRepositoryInterface;
+use App\Enum\PaymentStatus;
+use App\Repository\PaymentRepositoryInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;

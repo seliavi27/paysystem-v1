@@ -12,7 +12,7 @@ services:
     public: false            # приватные по умолчанию
 
   # Автозагрузка всех классов из src/, кроме «не-сервисов»
-  PaySystem\:
+  App\:
     resource: '../src/'
     exclude:
       - '../src/Entity/'
@@ -21,7 +21,7 @@ services:
       - '../src/Exception/{*Exception.php}'
       - '../src/Trait/'
 
-#  PaySystem\Exception\ExceptionHandler:
+#  App\Exception\ExceptionHandler:
 #      public: true
 
   Symfony\Component\HttpKernel\Controller\ControllerResolver:
@@ -36,59 +36,59 @@ services:
     public: true
 
   # Публичные сервисы, которые index.php достаёт из контейнера напрямую
-  PaySystem\Application:
+  App\Application:
     public: true
     arguments:
       $controllerResolver: '@Symfony\Component\HttpKernel\Controller\ControllerResolver'
       $argumentResolver: '@Symfony\Component\HttpKernel\Controller\ArgumentResolver'
-      $exceptionHandler: '@PaySystem\Exception\ExceptionHandler'
+      $exceptionHandler: '@App\Exception\ExceptionHandler'
 
   # === БД ===
   Doctrine\DBAL\Connection:
-    factory: ['@PaySystem\Infrastructure\DoctrineFactory', 'createConnection']
+    factory: ['@App\Infrastructure\DoctrineFactory', 'createConnection']
     public: true
 
   Doctrine\ORM\EntityManagerInterface:
-    factory: ['@PaySystem\Infrastructure\DoctrineFactory', 'createEntityManager']
+    factory: ['@App\Infrastructure\DoctrineFactory', 'createEntityManager']
     public: true
 
-  PaySystem\Infrastructure\DoctrineFactory:
+  App\Infrastructure\DoctrineFactory:
     arguments:
       $databaseUrl: '%env(DATABASE_URL)%'
 
   # Репозитории Doctrine нельзя autowire — они требуют ClassMetadata
-  PaySystem\Repository\UserRepository:
+  App\Repository\UserRepository:
     factory: ['@Doctrine\ORM\EntityManagerInterface', 'getRepository']
-    arguments: [PaySystem\Entity\User]
+    arguments: [App\Entity\User]
 
-  PaySystem\Repository\PaymentRepository:
+  App\Repository\PaymentRepository:
     factory: ['@Doctrine\ORM\EntityManagerInterface', 'getRepository']
-    arguments: [PaySystem\Entity\Payment]
+    arguments: [App\Entity\Payment]
 
-  PaySystem\Repository\TransactionRepository:
+  App\Repository\TransactionRepository:
     factory: ['@Doctrine\ORM\EntityManagerInterface', 'getRepository']
-    arguments: [PaySystem\Entity\Transaction]
+    arguments: [App\Entity\Transaction]
 
   # === Алиасы интерфейсов ===
-  PaySystem\Repository\UserRepositoryInterface: '@PaySystem\Repository\UserRepository'
-  PaySystem\Repository\PaymentRepositoryInterface: '@PaySystem\Repository\PaymentRepository'
-  PaySystem\Repository\TransactionRepositoryInterface: '@PaySystem\Repository\TransactionRepository'
-  PaySystem\Service\UserServiceInterface: '@PaySystem\Service\UserService'
-  PaySystem\Service\PaymentServiceInterface: '@PaySystem\Service\PaymentService'
-  PaySystem\Service\AuthenticationServiceInterface: '@PaySystem\Service\AuthenticationService'
-  PaySystem\Service\JwtTokenServiceInterface: '@PaySystem\Service\JwtTokenService'
-  PaySystem\Interface\LogServiceInterface: '@PaySystem\Service\LogService'
+  App\Repository\UserRepositoryInterface: '@App\Repository\UserRepository'
+  App\Repository\PaymentRepositoryInterface: '@App\Repository\PaymentRepository'
+  App\Repository\TransactionRepositoryInterface: '@App\Repository\TransactionRepository'
+  App\Service\UserServiceInterface: '@App\Service\UserService'
+  App\Service\PaymentServiceInterface: '@App\Service\PaymentService'
+  App\Service\AuthenticationServiceInterface: '@App\Service\AuthenticationService'
+  App\Service\JwtTokenServiceInterface: '@App\Service\JwtTokenService'
+  App\Interface\LogServiceInterface: '@App\Service\LogService'
 
   # === Command ===
-  PaySystem\Command\:
+  App\Command\:
     resource: '../src/Command'
     tags: ['console.command']
 
-  PaySystem\Command\CreateUserCommand:
+  App\Command\CreateUserCommand:
     tags: [ 'console.command' ]
 
   # === JWT ===
-  PaySystem\Service\JwtTokenService:
+  App\Service\JwtTokenService:
     arguments:
       $secretKey: '%app.jwt.secret%'
       $algorithm: '%app.jwt.algorithm%'
@@ -96,41 +96,41 @@ services:
 
   # === Теги ===
   _instanceof:
-    PaySystem\Processor\PaymentProcessorInterface:
+    App\Processor\PaymentProcessorInterface:
       tags: ['payment.processor']
-    PaySystem\Strategy\CommissionStrategy:
+    App\Strategy\CommissionStrategy:
       tags: ['commission.strategy']
-    PaySystem\Notification\NotificationChannelInterface:
+    App\Notification\NotificationChannelInterface:
       tags: ['notification.channel']
-    PaySystem\Middleware\MiddlewareInterface:
+    App\Middleware\MiddlewareInterface:
       tags: ['middleware']
-    PaySystem\Listener\EventListenerInterface:
+    App\Listener\EventListenerInterface:
       tags: ['event.listener']
     Symfony\Component\Console\Command\Command:
       tags: ['console.command']
 
   # === Processor ===
-  PaySystem\Processor\StripeProcessor:
+  App\Processor\StripeProcessor:
     arguments:
       $apiKey: '%env(STRIPE_API_KEY)%'
       $webhookSecret: '%env(STRIPE_WEBHOOK_KEY)%'
 
-  PaySystem\Processor\MollieProcessor:
+  App\Processor\MollieProcessor:
     arguments:
       $apiKey: '%env(MOLLIE_API_KEY)%'
       $webhookSecret: '%env(MOLLIE_WEBHOOK_KEY)%'
 
-  PaySystem\Processor\FlutterwaveProcessor:
+  App\Processor\FlutterwaveProcessor:
     arguments:
       $apiKey: '%env(FLUTTERWAVE_API_KEY)%'
       $webhookSecret: '%env(FLUTTERWAVE_WEBHOOK_KEY)%'
 
 
-  PaySystem\Middleware\LoggingMiddleware:
+  App\Middleware\LoggingMiddleware:
     tags:
       - { name: 'middleware', priority: 100 }
 
-  PaySystem\Middleware\AuthMiddleware:
+  App\Middleware\AuthMiddleware:
     tags:
       - { name: 'middleware', priority: 50 }
 
@@ -147,7 +147,7 @@ services:
         auto_reload: '%env(bool:APP_DEBUG)%'
         strict_variables: true
     calls:
-      - [addExtension, ['@PaySystem\View\Twig\AppExtension']]
+      - [addExtension, ['@App\View\Twig\AppExtension']]
       - [addGlobal, ['flash', null]]           # fallback-значения, переопределяются в AbstractController
       - [addGlobal, ['isAuthenticated', 'false']]
       - [addGlobal, ['errors', []]]
