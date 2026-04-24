@@ -1,8 +1,8 @@
 parameters:
-  kernel.project_dir: '%env(default::string:KERNEL_PROJECT_DIR)%'
   app.templates_dir: '%kernel.project_dir%/templates'
   app.jwt.secret: '%env(JWT_SECRET)%'
-  app.jwt.algorithm: '%env(default:string:JWT_ALGORITHM)%'
+  env(fallback_algo): 'HS256'
+  app.jwt.algorithm: '%env(JWT_ALGORITHM)%'
   app.jwt.ttl: '%env(int:JWT_TTL)%'
 
 services:
@@ -35,22 +35,16 @@ services:
   Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadataFactory:
     public: true
 
-  # Публичные сервисы, которые index.php достаёт из контейнера напрямую
-  App\Application:
-    public: true
-    arguments:
-      $controllerResolver: '@Symfony\Component\HttpKernel\Controller\ControllerResolver'
-      $argumentResolver: '@Symfony\Component\HttpKernel\Controller\ArgumentResolver'
-      $exceptionHandler: '@App\Exception\ExceptionHandler'
-
   # === БД ===
   Doctrine\DBAL\Connection:
     factory: ['@App\Infrastructure\DoctrineFactory', 'createConnection']
     public: true
+    lazy: false  # Прямо запрещаем делать этот сервис ленивым
 
   Doctrine\ORM\EntityManagerInterface:
     factory: ['@App\Infrastructure\DoctrineFactory', 'createEntityManager']
     public: true
+    lazy: false  # Прямо запрещаем делать этот сервис ленивым
 
   App\Infrastructure\DoctrineFactory:
     arguments:
@@ -102,8 +96,6 @@ services:
       tags: ['commission.strategy']
     App\Notification\NotificationChannelInterface:
       tags: ['notification.channel']
-    App\Middleware\MiddlewareInterface:
-      tags: ['middleware']
     App\Listener\EventListenerInterface:
       tags: ['event.listener']
     Symfony\Component\Console\Command\Command:
@@ -125,15 +117,6 @@ services:
       $apiKey: '%env(FLUTTERWAVE_API_KEY)%'
       $webhookSecret: '%env(FLUTTERWAVE_WEBHOOK_KEY)%'
 
-
-  App\Middleware\LoggingMiddleware:
-    tags:
-      - { name: 'middleware', priority: 100 }
-
-  App\Middleware\AuthMiddleware:
-    tags:
-      - { name: 'middleware', priority: 50 }
-
   # === Twig ===
   Twig\Loader\FilesystemLoader:
     arguments:
@@ -147,7 +130,6 @@ services:
         auto_reload: '%env(bool:APP_DEBUG)%'
         strict_variables: true
     calls:
-      - [addExtension, ['@App\View\Twig\AppExtension']]
       - [addGlobal, ['flash', null]]           # fallback-значения, переопределяются в AbstractController
       - [addGlobal, ['isAuthenticated', 'false']]
       - [addGlobal, ['errors', []]]

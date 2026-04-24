@@ -12,6 +12,7 @@ use App\Exception\NotFoundException;
 use App\Exception\ValidationException;
 use App\Service\PaymentServiceInterface;
 use App\Service\UserServiceInterface;
+use Symfony\Component\Routing\Attribute\Route;
 use Twig\Environment;
 
 class UserController extends AbstractController
@@ -46,6 +47,7 @@ class UserController extends AbstractController
         ]);
     }
 
+    #[Route('/users/register', methods: ['POST'])]
     public function create(Request $request): Response
     {
         try

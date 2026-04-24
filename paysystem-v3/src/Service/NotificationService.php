@@ -14,7 +14,7 @@ class NotificationService implements NotificationServiceInterface
     private array $channels;
 
     public function __construct(
-        array $channels
+        array $channels = []
     )
     {
         $this->channels = $channels;

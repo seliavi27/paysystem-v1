@@ -14,27 +14,37 @@ final class DoctrineFactory
     private ?EntityManagerInterface $em = null;
     private ?Connection $connection = null;
 
-    public function __construct(private string $databaseUrl)
+    public function __construct(
+        private string $databaseUrl)
     {
 
     }
 
-    public function createEntityManager(): EntityManagerInterface
+    public function createEntityManager(Connection $connection): EntityManagerInterface
     {
-        return $this->em ??= new EntityManager(
-            $this->createConnection(),
-            ORMSetup::createAttributeMetadataConfiguration(
-                paths: [dirname(__DIR__) . '/Entity'],
-                isDevMode: ($_ENV['APP_ENV'] ?? 'dev') === 'dev'
-            ),
+//        return $this->em ??= new EntityManager(
+//            $this->createConnection(),
+//            ORMSetup::createAttributeMetadataConfiguration(
+//                paths: [dirname(__DIR__) . '/Entity'],
+//                isDevMode: ($_ENV['APP_ENV'] ?? 'dev') === 'dev'
+//            ),
+//        );
+
+        $config = ORMSetup::createAttributeMetadataConfiguration(
+            [__DIR__ . '/../Entity'], // Путь к твоим сущностям
+            true // Режим разработки
         );
+
+        return new EntityManager($connection, $config);
     }
 
     public function createConnection(): Connection
     {
-        return $this->connection ??= DriverManager::getConnection([
-            //'driver' => 'pdo_pgsql',
-            'url' => $this->databaseUrl
-        ]);
+        $connectionParams = [
+            'url' => $this->databaseUrl,
+            'driver' => 'pdo_pgsql',
+        ];
+
+        return DriverManager::getConnection($connectionParams);
     }
 }

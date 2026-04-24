@@ -20,7 +20,7 @@ use App\Exception\ValidationException;
 use App\Service\PaymentServiceInterface;
 use Twig\Environment;
 
-class PaymentController extends AbstractController
+final class PaymentController extends AbstractController
 {
     private const string UUID_REGEX   = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
     private const string STATUS_REGEX = 'pending|processing|completed|failed|refunded';
