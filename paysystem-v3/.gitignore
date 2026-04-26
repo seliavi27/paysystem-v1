@@ -1,0 +1,27 @@
+# Data
+public/uploads/*
+
+# Environment
+.env
+.env.*.local
+
+# Composer
+vendor/
+
+# Logs
+var/logs/*
+!var/logs/.gitkeep
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# PHP
+.phpunit.result.cache
+.phpunit.cache
