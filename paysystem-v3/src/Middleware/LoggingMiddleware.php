@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace PaySystem\Middleware;
 
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -17,14 +16,13 @@ class LoggingMiddleware implements MiddlewareInterface
     {
     }
 
-    public function handle(Request $request, Response $response): ?Response
+    public function handle(Request $request): ?Response
     {
         $this->logger->info('Incoming request', [
             'method' => $request->getMethod(),
             'path' => $request->getPathInfo(),
         ]);
 
-        //return new RedirectResponse('/payments');
         return null;
     }
 }

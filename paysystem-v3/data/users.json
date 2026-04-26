@@ -54,18 +54,72 @@
         "balance": 0
     },
     {
-        "email": "vlad@mail.com",
-        "password": "$2y$12$blqUo0IePge0DCukQRvvuOdLzzIMIBbB6lM3vkS7but194VEJPGMK",
-        "fullName": "Vlad Laikov",
-        "phone": "+375255055712",
-        "id": "d7771bd3-7d2b-4d0c-8035-0f945b88c0ac",
+        "email": "smoke1777194302@test.io",
+        "password": "$2y$12$YmeAskYlUaZCJgNqb9kYwewRa8uWRR5KljBLOK3wkpZJ7EfJEDNOG",
+        "fullName": "Smoke Test",
+        "phone": "+10000000000",
+        "id": "239e2560-6814-4176-988d-557ad54f1284",
         "createdAt": {
-            "date": "2026-04-19 10:31:03.312691",
+            "date": "2026-04-26 09:05:02.995913",
             "timezone_type": 3,
             "timezone": "UTC"
         },
         "updatedAt": {
-            "date": "2026-04-19 10:31:03.312696",
+            "date": "2026-04-26 09:05:02.995915",
+            "timezone_type": 3,
+            "timezone": "UTC"
+        },
+        "balance": 0
+    },
+    {
+        "email": "smoke1777194317@test.io",
+        "password": "$2y$12$cF5OkcvNHQQ0UlIf0Yj69u951L3HRz7sZGbECLt6E3FArPcT5QlP.",
+        "fullName": "Smoke Test",
+        "phone": "+10000000000",
+        "id": "22df8cd4-764b-455d-9d76-456ee760f074",
+        "createdAt": {
+            "date": "2026-04-26 09:05:17.561217",
+            "timezone_type": 3,
+            "timezone": "UTC"
+        },
+        "updatedAt": {
+            "date": "2026-04-26 09:05:17.561219",
+            "timezone_type": 3,
+            "timezone": "UTC"
+        },
+        "balance": 0
+    },
+    {
+        "email": "vlad@mail.com",
+        "password": "$2y$12$zczo\/Vs\/M3RxLaJthbPltuiM17GYj\/Li7o1AyhnQhAvVtB8eJCY5m",
+        "fullName": "Vlad Laikov",
+        "phone": "+375255055712",
+        "id": "f2c7a1a0-ebd7-432c-bc31-f79272d4c5a3",
+        "createdAt": {
+            "date": "2026-04-26 09:14:21.187880",
+            "timezone_type": 3,
+            "timezone": "UTC"
+        },
+        "updatedAt": {
+            "date": "2026-04-26 09:14:21.187884",
+            "timezone_type": 3,
+            "timezone": "UTC"
+        },
+        "balance": 0
+    },
+    {
+        "email": "trace1777195040@x.io",
+        "password": "$2y$12$BHo3\/uCJRksUiG7F4BuHjegPkD.XFHk3G3wE4U9VEUdapKFXxARce",
+        "fullName": "Trace User",
+        "phone": "+10000000000",
+        "id": "850c4236-2a73-4c97-ab45-6db890a00323",
+        "createdAt": {
+            "date": "2026-04-26 09:17:21.345689",
+            "timezone_type": 3,
+            "timezone": "UTC"
+        },
+        "updatedAt": {
+            "date": "2026-04-26 09:17:21.345692",
             "timezone_type": 3,
             "timezone": "UTC"
         },

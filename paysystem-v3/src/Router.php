@@ -2,6 +2,8 @@
 declare(strict_types=1);
 
 namespace PaySystem;
+
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -42,10 +44,6 @@ class Router
             }
         }
 
-        return new Response(
-            json_encode(['error' => 'Not Found'], JSON_UNESCAPED_UNICODE),
-            404,
-            ['Content-Type' => 'application/json']
-        );
+        return new JsonResponse(['error' => 'Not Found'], Response::HTTP_NOT_FOUND);
     }
 }

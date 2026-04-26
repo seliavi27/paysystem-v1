@@ -3,11 +3,12 @@ declare(strict_types=1);
 
 namespace PaySystem\Controller;
 
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+
 use PaySystem\DTO\CreateUserRequest;
 use PaySystem\Exception\NotFoundException;
 use PaySystem\Exception\ValidationException;
-use PaySystem\Request;
-use PaySystem\Response;
 use PaySystem\Service\PaymentServiceInterface;
 use PaySystem\Service\UserServiceInterface;
 use PaySystem\View\TemplateEngine;
@@ -25,9 +26,9 @@ class UserController extends AbstractController
 
     // ===== HTML =====
 
-    public function profile(Request $request, Response $response): Response
+    public function profile(Request $request): Response
     {
-        $userId = (string)$request->getAttribute('userId');
+        $userId = (string)$request->attributes->get('userId');
         $user   = $this->userService->findById($userId);
 
         if ($user === null)
@@ -37,7 +38,7 @@ class UserController extends AbstractController
 
         $payments = $this->paymentService->showAllByUserId($userId);
 
-        return $this->view('users/profile', [
+        return $this->view($request, 'users/profile', [
             'title'        => 'Профиль',
             'user'         => $user,
             'paymentsCount'=> count($payments),
@@ -47,33 +48,35 @@ class UserController extends AbstractController
 
     // ===== JSON API =====
 
-    public function create(Request $request, Response $response): Response
+    public function create(Request $request): Response
     {
         try
         {
+            $data = $request->toArray();
+
             $user = $this->userService->create(new CreateUserRequest(
-                email:           (string)($request->getJson()['email'] ?? ''),
-                password:        (string)($request->getJson()['password'] ?? ''),
-                passwordConfirm: (string)($request->getJson()['passwordConfirm'] ?? ''),
-                fullName:        (string)($request->getJson()['fullName'] ?? ''),
-                phone:           (string)($request->getJson()['phone'] ?? ''),
+                email:           (string)($data['email'] ?? ''),
+                password:        (string)($data['password'] ?? ''),
+                passwordConfirm: (string)($data['passwordConfirm'] ?? ''),
+                fullName:        (string)($data['fullName'] ?? ''),
+                phone:           (string)($data['phone'] ?? ''),
             ));
 
             return $this->json([
                 'id'       => $user->id,
                 'email'    => $user->email,
                 'fullName' => $user->fullName,
-            ], 201);
+            ], Response::HTTP_CREATED);
         }
         catch (ValidationException $e)
         {
-            return $this->json(['error' => $e->getMessage()], 422);
+            return $this->json(['error' => $e->getMessage()], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
     }
 
-    public function show(Request $request, Response $response): Response
+    public function show(Request $request): Response
     {
-        $user = $this->userService->findById((string)$request->getAttribute('id'));
+        $user = $this->userService->findById((string)$request->attributes->get('id'));
 
         if ($user === null)
         {

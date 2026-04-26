@@ -34,11 +34,6 @@ require_once __DIR__ . '/config/config.php';
 $session = new Session(new NativeSessionStorage());
 $session->start();
 
-//if (session_status() === PHP_SESSION_NONE)
-//{
-//    session_start();
-//}
-
 Dotenv::createImmutable(BASE_PATH)->safeLoad();
 
 // ===== Logger =====
@@ -88,33 +83,34 @@ $authController = new AuthController(
     $authenticationService,
     $jwtTokenService,
     $userService,
+    $session,
 );
 
 // ===== Router =====
 $router = new Router();
 
 // HTML
-$router->get('/', fn($req, $res) => $authController->loginForm($req, $res));
-$router->get('/login', fn($req, $res) => $authController->loginForm($req, $res));
-$router->post('/auth/login', fn($req, $res) => $authController->login($req, $res));
-$router->get('/register', fn($req, $res) => $authController->registerForm($req, $res));
-$router->post('/auth/register', fn($req, $res) => $authController->register($req, $res));
-$router->get('/logout', fn($req, $res) => $authController->logout($req, $res));
+$router->get('/',                fn($req) => $authController->loginForm($req));
+$router->get('/login',           fn($req) => $authController->loginForm($req));
+$router->post('/auth/login',     fn($req) => $authController->login($req));
+$router->get('/register',        fn($req) => $authController->registerForm($req));
+$router->post('/auth/register',  fn($req) => $authController->register($req));
+$router->get('/logout',          fn($req) => $authController->logout($req));
 
-$router->get('/profile',         fn($req, $res) => $userController->profile($req, $res));
+$router->get('/profile',         fn($req) => $userController->profile($req));
 
-$router->get('/payments', fn($req, $res) => $paymentController->index($req, $res));
-$router->get('/payments/create', fn($req, $res) => $paymentController->createForm($req, $res));
-$router->post('/payments/store', fn($req, $res) => $paymentController->store($req, $res));
+$router->get('/payments',        fn($req) => $paymentController->index($req));
+$router->get('/payments/create', fn($req) => $paymentController->createForm($req));
+$router->post('/payments/store', fn($req) => $paymentController->store($req));
 
 // JSON API
-$router->post('/api/payments', fn($req, $res) => $paymentController->create($req, $res));
-$router->get('/api/payments', fn($req, $res) => $paymentController->showAllByUserId($req, $res));
-$router->get('/api/payments/status/{status}', fn($req, $res) => $paymentController->showAllByStatus($req, $res));
-$router->get('/api/payments/{id}', fn($req, $res) => $paymentController->show($req, $res));
-$router->post('/api/payments/{id}/refund', fn($req, $res) => $paymentController->refund($req, $res));
-$router->post('/users/register', fn($req, $res) => $userController->create($req, $res));
-$router->get('/users/{id}', fn($req, $res) => $userController->show($req, $res));
+$router->post('/api/payments',                    fn($req) => $paymentController->create($req));
+$router->get('/api/payments',                     fn($req) => $paymentController->showAllByUserId($req));
+$router->get('/api/payments/status/{status}',     fn($req) => $paymentController->showAllByStatus($req));
+$router->get('/api/payments/{id}',                fn($req) => $paymentController->show($req));
+$router->post('/api/payments/{id}/refund',        fn($req) => $paymentController->refund($req));
+$router->post('/users/register',                  fn($req) => $userController->create($req));
+$router->get('/users/{id}',                       fn($req) => $userController->show($req));
 
 // ===== Application =====
 $app = new Application(
@@ -129,6 +125,7 @@ $app = new Application(
 return [
     'app' => $app,
     'logger' => $logger,
+    'session' => $session,
     'paymentService' => $paymentService,
     'userService' => $userService,
 ];

@@ -27,7 +27,7 @@ class PaymentController extends AbstractController
         parent::__construct($templateEngine);
     }
 
-    public function index(Request $request, Response $response): Response
+    public function index(Request $request): Response
     {
         $userId = (string)$request->attributes->get('userId');
         $statusFilter = $request->query->get('status');
@@ -36,7 +36,7 @@ class PaymentController extends AbstractController
             ? $this->paymentService->showAllByStatus($userId, (string)$statusFilter)
             : $this->paymentService->showAllByUserId($userId);
 
-        return $this->view('payments/list', [
+        return $this->view($request, 'payments/list', [
             'title' => 'Платежи',
             'payments' => $payments,
             'statusFilter' => $statusFilter,
@@ -44,16 +44,16 @@ class PaymentController extends AbstractController
         ]);
     }
 
-    public function createForm(Request $request, Response $response): Response
+    public function createForm(Request $request): Response
     {
-        return $this->view('payments/create', [
+        return $this->view($request, 'payments/create', [
             'title' => 'Новый платёж',
             'currencies' => CurrencyType::cases(),
             'methods' => PaymentMethod::cases(),
         ]);
     }
 
-    public function store(Request $request, Response $response): Response
+    public function store(Request $request): Response
     {
         $userId = (string)$request->attributes->get('userId');
 
@@ -69,13 +69,13 @@ class PaymentController extends AbstractController
                 )
             );
 
-            $_SESSION['flash'] = ['success' => 'Платёж успешно создан'];
+            $request->getSession()->getFlashBag()->add('success', 'Платёж успешно создан');
 
             return $this->redirect('/payments');
         }
         catch (ValidationException $e)
         {
-            return $this->view('payments/create', [
+            return $this->view($request, 'payments/create', [
                 'title' => 'Новый платёж',
                 'currencies' => CurrencyType::cases(),
                 'methods' => PaymentMethod::cases(),
@@ -90,7 +90,7 @@ class PaymentController extends AbstractController
         }
     }
 
-    public function create(Request $request, Response $response): Response
+    public function create(Request $request): Response
     {
         $data = $request->toArray();
 
@@ -104,10 +104,10 @@ class PaymentController extends AbstractController
             )
         );
 
-        return $this->json(PaymentResponse::fromEntity($payment)->toArray(), 201);
+        return $this->json(PaymentResponse::fromEntity($payment)->toArray(), Response::HTTP_CREATED);
     }
 
-    public function show(Request $request, Response $response): Response
+    public function show(Request $request): Response
     {
         $payment = $this->paymentService->show((string)$request->attributes->get('id'));
 
@@ -119,7 +119,7 @@ class PaymentController extends AbstractController
         return $this->json(PaymentResponse::fromEntity($payment)->toArray());
     }
 
-    public function showAllByUserId(Request $request, Response $response): Response
+    public function showAllByUserId(Request $request): Response
     {
         $userId = (string)$request->attributes->get('userId');
         $payments = $this->paymentService->showAllByUserId($userId);
@@ -134,7 +134,7 @@ class PaymentController extends AbstractController
         ]);
     }
 
-    public function showAllByStatus(Request $request, Response $response): Response
+    public function showAllByStatus(Request $request): Response
     {
         $userId = (string)$request->attributes->get('userId');
         $status = (string)$request->attributes->get('status');
@@ -150,7 +150,7 @@ class PaymentController extends AbstractController
         ]);
     }
 
-    public function refund(Request $request, Response $response): Response
+    public function refund(Request $request): Response
     {
         $this->paymentService->refund((string)$request->attributes->get('id'));
 

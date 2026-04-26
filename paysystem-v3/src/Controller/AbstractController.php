@@ -3,10 +3,10 @@ declare(strict_types=1);
 
 namespace PaySystem\Controller;
 
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\JsonResponse;
 
 use PaySystem\View\TemplateEngine;
 
@@ -16,12 +16,12 @@ abstract class AbstractController
         private readonly TemplateEngine $templateEngine
     ) {}
 
-    protected function json(array $data, int $status = 200): Response
+    protected function json(array $data, int $status = Response::HTTP_OK): JsonResponse
     {
         return new JsonResponse($data, $status);
     }
 
-    protected function view(string $template, array $data = [], ?Request $request = null): Response
+    protected function view(Request $request, string $template, array $data = []): Response
     {
         $html = $this->templateEngine->renderWithLayout($template, [
             ...$this->sharedContext($request),
@@ -31,7 +31,8 @@ abstract class AbstractController
         return new Response(
             $html,
             Response::HTTP_OK,
-            ['Content-Type' => 'text/html; charset=UTF-8']);
+            ['Content-Type' => 'text/html; charset=UTF-8']
+        );
     }
 
     protected function redirect(string $url, int $status = Response::HTTP_FOUND): RedirectResponse
@@ -42,25 +43,19 @@ abstract class AbstractController
     /**
      * @return array<string,mixed>
      */
-    private function sharedContext(?Request $request): array
+    private function sharedContext(Request $request): array
     {
+        $session = $request->getSession();
+
         $flash = [];
-        $cookies = [];
-
-        if (!is_null($request))
+        foreach ($session->getFlashBag()->all() as $type => $messages)
         {
-            $session = $request->getSession();
-            $cookies = $request->cookies->has('access_token');
-
-            foreach ($session->getFlashBag()->all() as $type => $messages)
-            {
-                $flash[$type] = $messages[0] ?? null;
-            }
+            $flash[$type] = $messages[0] ?? null;
         }
 
         return [
-            'flash'           => $flash ? : null,
-            'isAuthenticated' => $cookies,
+            'flash'           => $flash ?: null,
+            'isAuthenticated' => $request->cookies->has('access_token'),
             'errors'          => [],
             'old'             => [],
         ];

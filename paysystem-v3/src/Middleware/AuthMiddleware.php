@@ -26,7 +26,7 @@ class AuthMiddleware implements MiddlewareInterface
     ) {
     }
 
-    public function handle(Request $request, Response $response): ?Response
+    public function handle(Request $request): ?Response
     {
         $path = $request->getPathInfo();
 

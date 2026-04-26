@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace PaySystem;
 
 use Closure;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class Route
 {
@@ -40,8 +42,8 @@ class Route
         );
     }
 
-    public function call(Request $request, Response $response): Response
+    public function call(Request $request): Response
     {
-        return call_user_func($this->handler, $request, $response);
+        return ($this->handler)($request);
     }
 }
