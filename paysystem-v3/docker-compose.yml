@@ -1,0 +1,26 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: paysystem_db
+    environment:
+      POSTGRES_USER: paysystem_user
+      POSTGRES_PASSWORD: paysystem_pass
+      POSTGRES_DB: paysystem_dev
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U paysystem_user -d paysystem_dev"]
+      interval: 5s
+      retries: 5
+
+  adminer:
+    image: adminer
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:

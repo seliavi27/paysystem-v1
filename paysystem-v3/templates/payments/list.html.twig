@@ -1,0 +1,54 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Платежи{% endblock %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Платежи</h1>
+        <a href="{{ path('payments_create_form') }}" class="btn btn-primary">Создать платёж</a>
+    </div>
+
+    <form method="GET" action="{{ path('payments_index') }}" class="mb-4">
+        <div class="input-group" style="max-width: 360px;">
+            <select name="status" class="form-select">
+                <option value="">Все статусы</option>
+                {% for status in statuses %}
+                    <option value="{{ status.value }}" {{ statusFilter == status.value ? 'selected' : '' }}>
+                        {{ status.getLabel() }}
+                    </option>
+                {% endfor %}
+            </select>
+            <button class="btn btn-outline-secondary" type="submit">Фильтр</button>
+        </div>
+    </form>
+
+    {% if payments is empty %}
+        <div class="alert alert-info">Платежей пока нет.</div>
+    {% else %}
+        <div class="card shadow-sm">
+            <table class="table table-striped mb-0 align-middle">
+                <thead class="table-light">
+                <tr><th>ID</th><th>Сумма</th><th>Валюта</th><th>Статус</th><th>Дата</th></tr>
+                </thead>
+                <tbody>
+                {% for payment in payments %}
+                    {% set badge = {
+                        'completed':  'bg-success',
+                        'pending':    'bg-warning text-dark',
+                        'processing': 'bg-info text-dark',
+                        'failed':     'bg-danger',
+                        'refunded':   'bg-secondary',
+                    }[payment.status.value] ?? 'bg-light text-dark' %}
+                    <tr>
+                        <td><code>{{ payment.id }}</code></td>
+                        <td>{{ payment.amount|number_format(2, '.', ' ') }}</td>
+                        <td>{{ payment.currency.getLabel() }}</td>
+                        <td><span class="badge {{ badge }}">{{ payment.status.getLabel() }}</span></td>
+                        <td>{{ payment.createdAt|date('d.m.Y H:i') }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,55 @@
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h3 class="card-title mb-4">Новый платёж</h3>
+
+                {{ include('components/errors.html.twig', { 'errors': errors }) }}
+
+                <form method="POST" action="/payments/store">
+                    <div class="mb-3">
+                        <label class="form-label">Сумма</label>
+                        <input type="number" name="amount" step="0.01" min="0"
+                               class="form-control"
+                               value="{{ old.amount ?? '' }}"
+                               required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Валюта</label>
+                        <select name="currency" class="form-select">
+                            {% for currency in currencies %}
+                                <option value="{{ currency.value }}"
+                                        {{ (old.currency ?? 'RUB') == currency.value ? 'selected' : '' }}>
+                                    {{ currency.label }} {# Twig сам вызовет getLabel() #}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Метод оплаты</label>
+                        <select name="method" class="form-select">
+                            {% for method in methods %}
+                                <option value="{{ method.value }}"
+                                        {{ (old.method ?? 'credit_card') == method.value ? 'selected' : '' }}>
+                                    {{ method.label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Описание</label>
+                        <textarea name="description" class="form-control" rows="3">{{ old.description ?? '' }}</textarea>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="/payments" class="btn btn-outline-secondary">Отмена</a>
+                        <button type="submit" class="btn btn-success">Создать</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

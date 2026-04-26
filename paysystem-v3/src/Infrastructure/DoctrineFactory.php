@@ -1,0 +1,50 @@
+<?php
+declare(strict_types=1);
+
+namespace App\Infrastructure;
+
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\DriverManager;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\ORMSetup;
+
+final class DoctrineFactory
+{
+    private ?EntityManagerInterface $em = null;
+    private ?Connection $connection = null;
+
+    public function __construct(
+        private string $databaseUrl)
+    {
+
+    }
+
+    public function createEntityManager(Connection $connection): EntityManagerInterface
+    {
+//        return $this->em ??= new EntityManager(
+//            $this->createConnection(),
+//            ORMSetup::createAttributeMetadataConfiguration(
+//                paths: [dirname(__DIR__) . '/Entity'],
+//                isDevMode: ($_ENV['APP_ENV'] ?? 'dev') === 'dev'
+//            ),
+//        );
+
+        $config = ORMSetup::createAttributeMetadataConfiguration(
+            [__DIR__ . '/../Entity'], // Путь к твоим сущностям
+            true // Режим разработки
+        );
+
+        return new EntityManager($connection, $config);
+    }
+
+    public function createConnection(): Connection
+    {
+        $connectionParams = [
+            'url' => $this->databaseUrl,
+            'driver' => 'pdo_pgsql',
+        ];
+
+        return DriverManager::getConnection($connectionParams);
+    }
+}

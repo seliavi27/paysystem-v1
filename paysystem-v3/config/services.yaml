@@ -1,0 +1,138 @@
+parameters:
+  app.templates_dir: '%kernel.project_dir%/templates'
+  app.jwt.secret: '%env(JWT_SECRET)%'
+  env(fallback_algo): 'HS256'
+  app.jwt.algorithm: '%env(JWT_ALGORITHM)%'
+  app.jwt.ttl: '%env(int:JWT_TTL)%'
+
+services:
+  _defaults:
+    autowire: true           # автоматически внедрять по type-hint
+    autoconfigure: true      # автоматически вешать теги по интерфейсам
+    public: false            # приватные по умолчанию
+
+  # Автозагрузка всех классов из src/, кроме «не-сервисов»
+  App\:
+    resource: '../src/'
+    exclude:
+      - '../src/Entity/'
+      - '../src/DTO/'
+      - '../src/Enum/'
+      - '../src/Exception/{*Exception.php}'
+      - '../src/Trait/'
+
+#  App\Exception\ExceptionHandler:
+#      public: true
+
+  Symfony\Component\HttpKernel\Controller\ControllerResolver:
+    public: true
+
+  Symfony\Component\HttpKernel\Controller\ArgumentResolver:
+    public: true
+    arguments:
+      $argumentMetadataFactory: '@Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadataFactory'
+
+  Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadataFactory:
+    public: true
+
+  # === БД ===
+  Doctrine\DBAL\Connection:
+    factory: ['@App\Infrastructure\DoctrineFactory', 'createConnection']
+    public: true
+    lazy: false  # Прямо запрещаем делать этот сервис ленивым
+
+  Doctrine\ORM\EntityManagerInterface:
+    factory: ['@App\Infrastructure\DoctrineFactory', 'createEntityManager']
+    public: true
+    lazy: false  # Прямо запрещаем делать этот сервис ленивым
+
+  App\Infrastructure\DoctrineFactory:
+    arguments:
+      $databaseUrl: '%env(DATABASE_URL)%'
+
+  # Репозитории Doctrine нельзя autowire — они требуют ClassMetadata
+  App\Repository\UserRepository:
+    factory: ['@Doctrine\ORM\EntityManagerInterface', 'getRepository']
+    arguments: [App\Entity\User]
+
+  App\Repository\PaymentRepository:
+    factory: ['@Doctrine\ORM\EntityManagerInterface', 'getRepository']
+    arguments: [App\Entity\Payment]
+
+  App\Repository\TransactionRepository:
+    factory: ['@Doctrine\ORM\EntityManagerInterface', 'getRepository']
+    arguments: [App\Entity\Transaction]
+
+  # === Алиасы интерфейсов ===
+  App\Repository\UserRepositoryInterface: '@App\Repository\UserRepository'
+  App\Repository\PaymentRepositoryInterface: '@App\Repository\PaymentRepository'
+  App\Repository\TransactionRepositoryInterface: '@App\Repository\TransactionRepository'
+  App\Service\UserServiceInterface: '@App\Service\UserService'
+  App\Service\PaymentServiceInterface: '@App\Service\PaymentService'
+  App\Service\AuthenticationServiceInterface: '@App\Service\AuthenticationService'
+  App\Service\JwtTokenServiceInterface: '@App\Service\JwtTokenService'
+  App\Interface\LogServiceInterface: '@App\Service\LogService'
+
+  # === Command ===
+  App\Command\:
+    resource: '../src/Command'
+    tags: ['console.command']
+
+  App\Command\CreateUserCommand:
+    tags: [ 'console.command' ]
+
+  # === JWT ===
+  App\Service\JwtTokenService:
+    arguments:
+      $secretKey: '%app.jwt.secret%'
+      $algorithm: '%app.jwt.algorithm%'
+      $ttl: '%app.jwt.ttl%'
+
+  # === Теги ===
+  _instanceof:
+    App\Processor\PaymentProcessorInterface:
+      tags: ['payment.processor']
+    App\Strategy\CommissionStrategy:
+      tags: ['commission.strategy']
+    App\Notification\NotificationChannelInterface:
+      tags: ['notification.channel']
+    App\Listener\EventListenerInterface:
+      tags: ['event.listener']
+    Symfony\Component\Console\Command\Command:
+      tags: ['console.command']
+
+  # === Processor ===
+  App\Processor\StripeProcessor:
+    arguments:
+      $apiKey: '%env(STRIPE_API_KEY)%'
+      $webhookSecret: '%env(STRIPE_WEBHOOK_KEY)%'
+
+  App\Processor\MollieProcessor:
+    arguments:
+      $apiKey: '%env(MOLLIE_API_KEY)%'
+      $webhookSecret: '%env(MOLLIE_WEBHOOK_KEY)%'
+
+  App\Processor\FlutterwaveProcessor:
+    arguments:
+      $apiKey: '%env(FLUTTERWAVE_API_KEY)%'
+      $webhookSecret: '%env(FLUTTERWAVE_WEBHOOK_KEY)%'
+
+  # === Twig ===
+  Twig\Loader\FilesystemLoader:
+    arguments:
+      $paths: ['%app.templates_dir%']
+
+  Twig\Environment:
+    arguments:
+      $loader: '@Twig\Loader\FilesystemLoader'
+      $options:
+        cache: '%kernel.project_dir%/var/cache/twig'
+        auto_reload: '%env(bool:APP_DEBUG)%'
+        strict_variables: true
+    calls:
+      - [addGlobal, ['flash', null]]           # fallback-значения, переопределяются в AbstractController
+      - [addGlobal, ['isAuthenticated', 'false']]
+      - [addGlobal, ['errors', []]]
+      - [addGlobal, ['old', []]]
+
+
