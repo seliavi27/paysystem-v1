@@ -5,33 +5,36 @@ namespace PaySystem;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Controller\ArgumentResolver;
+use Symfony\Component\HttpKernel\Controller\ControllerResolver;
+use Throwable;
 
 use PaySystem\Exception\ExceptionHandler;
-use Throwable;
 
 class Application
 {
     public function __construct(
-        private Router $router,
-        private ExceptionHandler $exceptionHandler,
-        private array $middlewares = []
+        private ControllerResolver $controllerResolver,
+        private ArgumentResolver   $argumentResolver,
+        private ExceptionHandler   $exceptionHandler,
+        private array              $middlewares = [],
     ) { }
 
     public function handle(Request $request): Response
     {
         foreach ($this->middlewares as $middleware)
         {
-            $earlyResponse = $middleware->handle($request);
-
-            if ($earlyResponse !== null)
+            if (($early = $middleware->handle($request)) !== null)
             {
-                return $earlyResponse;
+                return $early;
             }
         }
 
         try
         {
-            return $this->router->dispatch($request);
+            $controller = $this->controllerResolver->getController($request);
+            $arguments  = $this->argumentResolver->getArguments($request, $controller);
+            return $controller(...$arguments);
         }
         catch (Throwable $e)
         {

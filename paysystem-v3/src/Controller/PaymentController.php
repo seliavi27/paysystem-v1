@@ -5,6 +5,8 @@ namespace PaySystem\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 use PaySystem\DTO\CreatePaymentRequest;
 use PaySystem\DTO\PaymentResponse;
@@ -19,14 +21,21 @@ use PaySystem\View\TemplateEngine;
 
 class PaymentController extends AbstractController
 {
+    private const string UUID_REGEX   = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
+    private const string STATUS_REGEX = 'pending|processing|completed|failed|refunded';
+
     public function __construct(
         TemplateEngine $templateEngine,
-        private readonly PaymentServiceInterface $paymentService
+        private readonly PaymentServiceInterface $paymentService,
+        private readonly UrlGeneratorInterface $urlGenerator,
     )
     {
         parent::__construct($templateEngine);
     }
 
+    // ===== HTML =====
+
+    #[Route('/payments', name: 'payments_index', methods: ['GET'])]
     public function index(Request $request): Response
     {
         $userId = (string)$request->attributes->get('userId');
@@ -37,22 +46,24 @@ class PaymentController extends AbstractController
             : $this->paymentService->showAllByUserId($userId);
 
         return $this->view($request, 'payments/list', [
-            'title' => 'Платежи',
-            'payments' => $payments,
+            'title'        => 'Платежи',
+            'payments'     => $payments,
             'statusFilter' => $statusFilter,
-            'statuses' => PaymentStatus::cases(),
+            'statuses'     => PaymentStatus::cases(),
         ]);
     }
 
+    #[Route('/payments/create', name: 'payments_create_form', methods: ['GET'])]
     public function createForm(Request $request): Response
     {
         return $this->view($request, 'payments/create', [
-            'title' => 'Новый платёж',
+            'title'      => 'Новый платёж',
             'currencies' => CurrencyType::cases(),
-            'methods' => PaymentMethod::cases(),
+            'methods'    => PaymentMethod::cases(),
         ]);
     }
 
+    #[Route('/payments/store', name: 'payments_store', methods: ['POST'])]
     public function store(Request $request): Response
     {
         $userId = (string)$request->attributes->get('userId');
@@ -71,25 +82,28 @@ class PaymentController extends AbstractController
 
             $request->getSession()->getFlashBag()->add('success', 'Платёж успешно создан');
 
-            return $this->redirect('/payments');
+            return $this->redirect($this->urlGenerator->generate('payments_index'));
         }
         catch (ValidationException $e)
         {
             return $this->view($request, 'payments/create', [
-                'title' => 'Новый платёж',
+                'title'      => 'Новый платёж',
                 'currencies' => CurrencyType::cases(),
-                'methods' => PaymentMethod::cases(),
-                'errors' => [$e->getMessage()],
-                'old' => [
-                    'amount' => $request->request->get('amount'),
+                'methods'    => PaymentMethod::cases(),
+                'errors'     => [$e->getMessage()],
+                'old'        => [
+                    'amount'      => $request->request->get('amount'),
                     'description' => $request->request->get('description'),
-                    'currency' => $request->request->get('currency'),
-                    'method' => $request->request->get('method'),
+                    'currency'    => $request->request->get('currency'),
+                    'method'      => $request->request->get('method'),
                 ],
             ]);
         }
     }
 
+    // ===== JSON API =====
+
+    #[Route('/api/payments', name: 'api_payments_create', methods: ['POST'])]
     public function create(Request $request): Response
     {
         $data = $request->toArray();
@@ -107,9 +121,52 @@ class PaymentController extends AbstractController
         return $this->json(PaymentResponse::fromEntity($payment)->toArray(), Response::HTTP_CREATED);
     }
 
-    public function show(Request $request): Response
+    #[Route('/api/payments', name: 'api_payments_list', methods: ['GET'])]
+    public function showAllByUserId(Request $request): Response
     {
-        $payment = $this->paymentService->show((string)$request->attributes->get('id'));
+        $userId = (string)$request->attributes->get('userId');
+        $payments = $this->paymentService->showAllByUserId($userId);
+
+        return $this->json([
+            'success' => true,
+            'count'   => count($payments),
+            'data'    => array_map(
+                fn(Payment $p) => PaymentResponse::fromEntity($p)->toArray(),
+                $payments
+            ),
+        ]);
+    }
+
+    #[Route(
+        '/api/payments/status/{status}',
+        name: 'api_payments_by_status',
+        requirements: ['status' => self::STATUS_REGEX],
+        methods: ['GET']
+    )]
+    public function showAllByStatus(Request $request, string $status): Response
+    {
+        $userId = (string)$request->attributes->get('userId');
+        $payments = $this->paymentService->showAllByStatus($userId, $status);
+
+        return $this->json([
+            'success' => true,
+            'count'   => count($payments),
+            'data'    => array_map(
+                fn(Payment $p) => PaymentResponse::fromEntity($p)->toArray(),
+                $payments
+            ),
+        ]);
+    }
+
+    #[Route(
+        '/api/payments/{id}',
+        name: 'api_payments_show',
+        requirements: ['id' => self::UUID_REGEX],
+        methods: ['GET']
+    )]
+    public function show(string $id): Response
+    {
+        $payment = $this->paymentService->show($id);
 
         if (!$payment instanceof Payment)
         {
@@ -119,40 +176,15 @@ class PaymentController extends AbstractController
         return $this->json(PaymentResponse::fromEntity($payment)->toArray());
     }
 
-    public function showAllByUserId(Request $request): Response
+    #[Route(
+        '/api/payments/{id}/refund',
+        name: 'api_payments_refund',
+        requirements: ['id' => self::UUID_REGEX],
+        methods: ['POST']
+    )]
+    public function refund(string $id): Response
     {
-        $userId = (string)$request->attributes->get('userId');
-        $payments = $this->paymentService->showAllByUserId($userId);
-
-        return $this->json([
-            'success' => true,
-            'count' => count($payments),
-            'data' => array_map(
-                fn(Payment $p) => PaymentResponse::fromEntity($p)->toArray(),
-                $payments
-            ),
-        ]);
-    }
-
-    public function showAllByStatus(Request $request): Response
-    {
-        $userId = (string)$request->attributes->get('userId');
-        $status = (string)$request->attributes->get('status');
-        $payments = $this->paymentService->showAllByStatus($userId, $status);
-
-        return $this->json([
-            'success' => true,
-            'count' => count($payments),
-            'data' => array_map(
-                fn(Payment $p) => PaymentResponse::fromEntity($p)->toArray(),
-                $payments
-            ),
-        ]);
-    }
-
-    public function refund(Request $request): Response
-    {
-        $this->paymentService->refund((string)$request->attributes->get('id'));
+        $this->paymentService->refund($id);
 
         return $this->json(['status' => 'refunded']);
     }

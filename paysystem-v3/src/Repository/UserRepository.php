@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace PaySystem\Repository;
 
-use InvalidArgumentException;
 use PaySystem\Entity\User;
 use PaySystem\Storage\StorageInterface;
 

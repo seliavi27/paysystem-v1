@@ -5,7 +5,7 @@
          colors="true"
          cacheDirectory=".phpunit.cache">
     <testsuites>
-        <testsuite name="HttpFoundation">
+        <testsuite name="Routing">
             <directory>tests</directory>
         </testsuite>
     </testsuites>

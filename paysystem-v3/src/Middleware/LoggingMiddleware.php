@@ -21,6 +21,7 @@ class LoggingMiddleware implements MiddlewareInterface
         $this->logger->info('Incoming request', [
             'method' => $request->getMethod(),
             'path' => $request->getPathInfo(),
+            'route' => (string)$request->attributes->get('_route', ''),
         ]);
 
         return null;

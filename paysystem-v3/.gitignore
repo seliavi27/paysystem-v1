@@ -24,4 +24,8 @@ Thumbs.db
 
 # PHP
 .phpunit.result.cache
-.phpunit.cache
+.phpunit.cache/
+
+# Symfony cache
+var/cache/*
+!var/cache/.gitkeep
