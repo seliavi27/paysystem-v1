@@ -3,52 +3,58 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use Exception;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Routing\Attribute\Route;
+use Twig\Environment;
 
 use App\DTO\CreateUserRequest;
 use App\Exception\NotFoundException;
 use App\Exception\ValidationException;
 use App\Service\PaymentServiceInterface;
 use App\Service\UserServiceInterface;
-use Symfony\Component\Routing\Attribute\Route;
-use Twig\Environment;
 
 class UserController extends AbstractController
 {
+    private const string UUID_REGEX   = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
+
     public function __construct(
-        protected readonly RequestStack $requestStack,
-        protected readonly Environment $twig,
         private readonly UserServiceInterface $userService,
         private readonly PaymentServiceInterface $paymentService,
     )
     {
-        parent::__construct($requestStack, $twig);
+
     }
 
-    public function profile(Request $request): Response
+    /**
+     * @throws NotFoundException
+     */
+    #[Route('/profile', name: 'user_profile', methods: ['GET'])]
+    public function profile(): Response
     {
-        $userId = (string)$request->attributes->get('userId');
-        $user   = $this->userService->findById($userId);
+        $user = $this->getUser();
 
         if ($user === null)
         {
             throw new NotFoundException('User not found');
         }
 
-        $payments = $this->paymentService->showAllByUserId($userId);
+        $payments = $this->paymentService->showAllByUserId($user->getUserIdentifier());
 
-        return $this->view('users/profile', [
-            'title'        => 'Профиль',
-            'user'         => $user,
-            'paymentsCount'=> count($payments),
-            'paymentsSum'  => array_sum(array_map(fn($p) => $p->amount, $payments)),
+        return $this->render('users/profile.html.twig', [
+            'title'         => 'Профиль',
+            'user'          => $user,
+            'paymentsCount' => count($payments),
+            'paymentsSum'   => array_sum(array_map(fn($p) => $p->getAmount(), $payments)),
         ]);
     }
 
-    #[Route('/users/register', methods: ['POST'])]
-    public function create(Request $request): Response
+    #[Route('/api/users/register', name: 'api_user_register', methods: ['POST'])]
+    public function create(Request $request): JsonResponse
     {
         try
         {
@@ -68,16 +74,19 @@ class UserController extends AbstractController
                 'fullName' => $user->fullName,
             ], 201);
         }
-        catch (ValidationException $e)
+        catch (Exception $e)
         {
             return $this->json(['error' => $e->getMessage()], 422);
         }
     }
-
-    public function show(Request $request): Response
+    #[Route(
+        '/api/users/{id}',
+        name: 'api_user_show',
+        requirements: ['id' => self::UUID_REGEX],
+        methods: ['GET'])]
+    public function show(string $id): Response
     {
-        $user = $this->userService->findById(
-            (string)$request->attributes->get('id'));
+        $user = $this->userService->findById($id);
 
         if ($user === null)
         {
