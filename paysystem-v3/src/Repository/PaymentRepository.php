@@ -6,23 +6,12 @@ namespace PaySystem\Repository;
 use Doctrine\DBAL\Connection;
 use PaySystem\Entity\Payment;
 use PaySystem\Enum\PaymentStatus;
-use PaySystem\Storage\StorageInterface;
 
 class PaymentRepository implements PaymentRepositoryInterface
 {
-//    private StorageInterface $storage;
-//
-//    public function __construct(StorageInterface $storage)
-//    {
-//        $this->storage = $storage;
-//    }
-
-    private Connection $connection;
-
-    public function __construct(Connection $connection)
-    {
-        $this->connection = $connection;
-    }
+    public function __construct(
+        private Connection $connection
+    ) {}
 
     public function findAll(): array
     {

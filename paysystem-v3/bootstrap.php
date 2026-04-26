@@ -3,46 +3,44 @@ declare(strict_types=1);
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
+use Symfony\Component\HttpKernel\Controller\ArgumentResolver;
+use Symfony\Component\HttpKernel\Controller\ControllerResolver;
+use Symfony\Component\Routing\Generator\UrlGenerator;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Routing\RequestContext;
+
 use Dotenv\Dotenv;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
+
 use PaySystem\Application;
 use PaySystem\Controller\AuthController;
 use PaySystem\Controller\PaymentController;
 use PaySystem\Controller\UserController;
 use PaySystem\Exception\ExceptionHandler;
 use PaySystem\Factory\PaymentMethodFactory;
+use PaySystem\Infrastructure\RouterFactory;
 use PaySystem\Middleware\AuthMiddleware;
 use PaySystem\Middleware\LoggingMiddleware;
 use PaySystem\Repository\PaymentRepository;
 use PaySystem\Repository\UserRepository;
-use PaySystem\Router;
 use PaySystem\Service\AuthenticationService;
 use PaySystem\Service\JwtTokenService;
 use PaySystem\Service\LogService;
 use PaySystem\Service\NotificationService;
 use PaySystem\Service\PaymentService;
 use PaySystem\Service\UserService;
-use PaySystem\Storage\JsonStorage;
 use PaySystem\View\TemplateEngine;
-use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
-use Symfony\Component\Routing\Generator\UrlGenerator;
-use Symfony\Component\Routing\RequestContext;
-use Symfony\Component\Routing\RouteCollection;
 
 require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/config/config.php';
 
+Dotenv::createImmutable(BASE_PATH)->safeLoad();
+
 $session = new Session(new NativeSessionStorage());
 $session->start();
-
-//if (session_status() === PHP_SESSION_NONE)
-//{
-//    session_start();
-//}
-
-Dotenv::createImmutable(BASE_PATH)->safeLoad();
 
 // ===== Logger =====
 $logger = new Logger('paysystem');
@@ -52,21 +50,25 @@ $logger->pushHandler(new StreamHandler($_ENV['ERRORS_LOG'] ?? ERRORS_LOG, Logger
 $logService = new LogService([$logger]);
 $notificationService = new NotificationService([$logger]);
 
+// ===== Database =====
+if (!empty($_ENV['DATABASE_URL'])) {
+    $connection = DriverManager::getConnection([
+        'driver' => 'pdo_pgsql',
+        'url'    => $_ENV['DATABASE_URL'],
+    ]);
+} else {
+    $connection = DriverManager::getConnection([
+        'driver'   => 'pdo_pgsql',
+        'host'     => '127.0.0.1',
+        'port'     => 5432,
+        'dbname'   => 'paysystem_dev',
+        'user'     => 'paysystem_user',
+        'password' => 'paysystem_pass',
+        'charset'  => 'utf8',
+    ]);
+}
+
 // ===== Repositories =====
-$connection = DriverManager::getConnection([
-    'driver' => 'pdo_pgsql',           // ← явно указываем драйвер
-    'url' => $_ENV['DATABASE_URL'] ?? 'postgresql://paysystem_user:paysystem_pass@localhost:5432/paysystem_dev',
-]);
-
-//$connection = DriverManager::getConnection([
-//    'driver' => 'pdo_pgsql',
-//    'host' => '127.0.0.1',
-//    'port' => 5432,
-//    'dbname' => 'paysystem_dev',
-//    'user' => 'paysystem_user',
-//    'password' => 'paysystem_pass',
-//]);
-
 $userRepository    = new UserRepository($connection);
 $paymentRepository = new PaymentRepository($connection);
 
@@ -85,7 +87,7 @@ $paymentService = new PaymentService(
     $paymentRepository,
     $notificationService,
     $logService,
-    $connection
+    $connection,
 );
 
 $userService = new UserService($userRepository);
@@ -96,63 +98,49 @@ $jwtTokenService = new JwtTokenService(
     (int)($_ENV['JWT_TTL'] ?? 3600),
 );
 
-// ===== View + controllers =====
-$routes = new RouteCollection();
+// ===== Routing =====
+$routes  = RouterFactory::loadRoutes(__DIR__ . '/src/Controller');
 $context = new RequestContext();
+
+/** @var UrlGeneratorInterface $urlGenerator */
 $urlGenerator = new UrlGenerator($routes, $context);
+
+// ===== View + controllers =====
 $templateEngine = new TemplateEngine(TEMPLATES_PATH);
 
-$paymentController = new PaymentController($templateEngine, $paymentService);
-$userController = new UserController($templateEngine, $userService, $paymentService);
-$authController = new AuthController(
+$paymentController = new PaymentController($templateEngine, $paymentService, $urlGenerator);
+$userController    = new UserController($templateEngine, $userService, $paymentService);
+$authController    = new AuthController(
     $templateEngine,
     $authenticationService,
     $jwtTokenService,
     $userService,
-    $urlGenerator
+    $session,
+    $urlGenerator,
 );
 
-//// ===== Router =====
-//$router = new Router();
-//
-//// HTML
-//$router->get('/', fn($req, $res) => $authController->loginForm($req, $res));
-//$router->get('/login', fn($req, $res) => $authController->loginForm($req, $res));
-//$router->post('/auth/login', fn($req, $res) => $authController->login($req, $res));
-//$router->get('/register', fn($req, $res) => $authController->registerForm($req, $res));
-//$router->post('/auth/register', fn($req, $res) => $authController->register($req, $res));
-//$router->get('/logout', fn($req, $res) => $authController->logout($req, $res));
-//
-//$router->get('/profile',         fn($req, $res) => $userController->profile($req, $res));
-//
-//$router->get('/payments', fn($req, $res) => $paymentController->index($req, $res));
-//$router->get('/payments/create', fn($req, $res) => $paymentController->createForm($req, $res));
-//$router->post('/payments/store', fn($req, $res) => $paymentController->store($req, $res));
-//
-//// JSON API
-//$router->post('/api/payments', fn($req, $res) => $paymentController->create($req, $res));
-//$router->get('/api/payments', fn($req, $res) => $paymentController->showAllByUserId($req, $res));
-//$router->get('/api/payments/status/{status}', fn($req, $res) => $paymentController->showAllByStatus($req, $res));
-//$router->get('/api/payments/{id}', fn($req, $res) => $paymentController->show($req, $res));
-//$router->post('/api/payments/{id}/refund', fn($req, $res) => $paymentController->refund($req, $res));
-//$router->post('/users/register', fn($req, $res) => $userController->create($req, $res));
-//$router->get('/users/{id}', fn($req, $res) => $userController->show($req, $res));
-
 // ===== Application =====
-//$app = new Application(
-//    router: $router,
-//    exceptionHandler: new ExceptionHandler($logService),
-//    middlewares: [
-//        new LoggingMiddleware($logService),
-//        new AuthMiddleware($jwtTokenService),
-//    ],
-//);
-
+$app = new Application(
+    controllerResolver: new ControllerResolver(),
+    argumentResolver:   new ArgumentResolver(),
+    exceptionHandler:   new ExceptionHandler($logService),
+    middlewares: [
+        new LoggingMiddleware($logService),
+        new AuthMiddleware($jwtTokenService),
+    ],
+);
 
 return [
-//    'app' => $app,
-    'logger' => $logger,
-    'paymentService' => $paymentService,
-    'userService' => $userService,
-    Connection::class => $connection,
+    'app'                 => $app,
+    'logger'              => $logger,
+    'session'             => $session,
+    'routes'              => $routes,
+    'requestContext'      => $context,
+    'urlGenerator'        => $urlGenerator,
+    'controllers'         => [
+        AuthController::class    => $authController,
+        PaymentController::class => $paymentController,
+        UserController::class    => $userController,
+    ],
+    Connection::class     => $connection,
 ];

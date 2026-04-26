@@ -6,23 +6,12 @@ namespace PaySystem\Repository;
 use DateTime;
 use Doctrine\DBAL\Connection;
 use PaySystem\Entity\User;
-use PaySystem\Storage\StorageInterface;
 
 class UserRepository implements UserRepositoryInterface
 {
-//    private StorageInterface $storage;
-//
-//    public function __construct(StorageInterface $storage)
-//    {
-//        $this->storage = $storage;
-//    }
-
-    private Connection $connection;
-
-    public function __construct(Connection $connection)
-    {
-        $this->connection = $connection;
-    }
+    public function __construct(
+        private Connection $connection
+    ) {}
 
     public function findAll(): array
     {
