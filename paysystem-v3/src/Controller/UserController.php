@@ -5,6 +5,7 @@ namespace PaySystem\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
 
 use PaySystem\DTO\CreateUserRequest;
 use PaySystem\Exception\NotFoundException;
@@ -15,6 +16,8 @@ use PaySystem\View\TemplateEngine;
 
 class UserController extends AbstractController
 {
+    private const string UUID_REGEX = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
+
     public function __construct(
         TemplateEngine                           $templateEngine,
         private readonly UserServiceInterface    $userService,
@@ -24,6 +27,9 @@ class UserController extends AbstractController
         parent::__construct($templateEngine);
     }
 
+    // ===== HTML =====
+
+    #[Route('/profile', name: 'profile', methods: ['GET'])]
     public function profile(Request $request): Response
     {
         $userId = (string)$request->attributes->get('userId');
@@ -36,44 +42,52 @@ class UserController extends AbstractController
 
         $payments = $this->paymentService->showAllByUserId($userId);
 
-        return $this->view('users/profile', [
-            'title'        => 'Профиль',
-            'user'         => $user,
-            'paymentsCount'=> count($payments),
-            'paymentsSum'  => array_sum(array_map(fn($p) => $p->amount, $payments)),
+        return $this->view($request, 'users/profile', [
+            'title'         => 'Профиль',
+            'user'          => $user,
+            'paymentsCount' => count($payments),
+            'paymentsSum'   => array_sum(array_map(fn($p) => $p->amount, $payments)),
         ]);
     }
 
+    // ===== JSON API =====
+
+    #[Route('/users/register', name: 'users_register', methods: ['POST'])]
     public function create(Request $request): Response
     {
         try
         {
-            $requestArray = $request->toArray();
+            $data = $request->toArray();
 
             $user = $this->userService->create(new CreateUserRequest(
-                email:           (string)($request->$requestArray['email'] ?? ''),
-                password:        (string)($request->$requestArray['password'] ?? ''),
-                passwordConfirm: (string)($request->$requestArray['passwordConfirm'] ?? ''),
-                fullName:        (string)($request->$requestArray['fullName'] ?? ''),
-                phone:           (string)($request->$requestArray['phone'] ?? ''),
+                email:           (string)($data['email'] ?? ''),
+                password:        (string)($data['password'] ?? ''),
+                passwordConfirm: (string)($data['passwordConfirm'] ?? ''),
+                fullName:        (string)($data['fullName'] ?? ''),
+                phone:           (string)($data['phone'] ?? ''),
             ));
 
             return $this->json([
                 'id'       => $user->id,
                 'email'    => $user->email,
                 'fullName' => $user->fullName,
-            ], 201);
+            ], Response::HTTP_CREATED);
         }
         catch (ValidationException $e)
         {
-            return $this->json(['error' => $e->getMessage()], 422);
+            return $this->json(['error' => $e->getMessage()], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
     }
 
-    public function show(Request $request): Response
+    #[Route(
+        '/users/{id}',
+        name: 'users_show',
+        requirements: ['id' => self::UUID_REGEX],
+        methods: ['GET']
+    )]
+    public function show(string $id): Response
     {
-        $user = $this->userService->findById(
-            (string)$request->attributes->get('id'));
+        $user = $this->userService->findById($id);
 
         if ($user === null)
         {

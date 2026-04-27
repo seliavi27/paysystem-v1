@@ -3,17 +3,20 @@ declare(strict_types=1);
 
 namespace PaySystem\Service;
 
+use DateTime;
 use Doctrine\DBAL\Connection;
 use PaySystem\DTO\CreatePaymentRequest;
 use PaySystem\Entity\Payment;
+use PaySystem\Entity\Transaction;
 use PaySystem\Enum\PaymentStatus;
+use PaySystem\Enum\TransactionType;
 use PaySystem\Exception\NotFoundException;
 use PaySystem\Exception\PaymentException;
 use PaySystem\Factory\PaymentMethodFactory;
 use PaySystem\Interface\LogServiceInterface;
 use PaySystem\Repository\PaymentRepositoryInterface;
+use PaySystem\Repository\TransactionRepositoryInterface;
 use PaySystem\Repository\UserRepositoryInterface;
-use Throwable;
 
 class PaymentService implements PaymentServiceInterface
 {
@@ -21,9 +24,10 @@ class PaymentService implements PaymentServiceInterface
         private PaymentMethodFactory $processorFactory,
         private PaymentRepositoryInterface $paymentRepository,
         private UserRepositoryInterface $userRepository,
+        private TransactionRepositoryInterface $transactionRepository,
         private NotificationServiceInterface $notifier,
         private LogServiceInterface $logger,
-        private Connection $connection
+        private Connection $connection,
     ) {
     }
 
@@ -57,6 +61,16 @@ class PaymentService implements PaymentServiceInterface
 
             $payment->status = PaymentStatus::COMPLETED;
             $this->paymentRepository->update($payment);
+
+            $this->transactionRepository->saveEntity(new Transaction(
+                userId:      $payment->user->id,
+                paymentId:   $payment->id,
+                type:        TransactionType::EXPENSE,
+                currency:    $payment->currency,
+                amount:      $payment->amount,
+                description: 'Payment processed',
+                timestamp:   new DateTime(),
+            ));
         });
     }
 
@@ -74,9 +88,21 @@ class PaymentService implements PaymentServiceInterface
             throw new PaymentException('Only completed payments can be refunded');
         }
 
-        $this->processorFactory->create($payment->method)->refund($payment);
-        $payment->status = PaymentStatus::REFUNDED;
-        $this->paymentRepository->update($payment);
+        $this->connection->transactional(function () use ($payment) {
+            $this->processorFactory->create($payment->method)->refund($payment);
+            $payment->status = PaymentStatus::REFUNDED;
+            $this->paymentRepository->update($payment);
+
+            $this->transactionRepository->saveEntity(new Transaction(
+                userId:      $payment->user->id,
+                paymentId:   $payment->id,
+                type:        TransactionType::REFUND,
+                currency:    $payment->currency,
+                amount:      $payment->amount,
+                description: 'Payment refunded',
+                timestamp:   new DateTime(),
+            ));
+        });
     }
 
     public function show(string $id): ?Payment

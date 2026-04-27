@@ -3,12 +3,9 @@ declare(strict_types=1);
 
 namespace PaySystem\Repository;
 
-use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityRepository;
-use DateTime;
 
 use PaySystem\Entity\User;
-use PaySystem\Storage\StorageInterface;
 
 /**
  * @extends EntityRepository<User>
@@ -28,14 +25,15 @@ class UserRepository extends EntityRepository implements UserRepositoryInterface
     public function saveEntity(object $entity): bool
     {
         /** @var User $entity */
-        $this->getEntityManager()->persist($entity);
-        $this->getEntityManager()->flush();
+        $em = $this->getEntityManager();
+        $em->persist($entity);
+        $em->flush();
         return true;
     }
 
     public function update(User $user): bool
     {
-        $user->updatedAt = new DateTime();
+        $user->touch();
         $this->getEntityManager()->flush();
         return true;
     }
@@ -43,14 +41,13 @@ class UserRepository extends EntityRepository implements UserRepositoryInterface
     public function delete(string $id): bool
     {
         $user = $this->find($id);
-
-        if ($user)
-        {
-            $this->getEntityManager()->remove($user);
-            $this->getEntityManager()->flush();
-            return true;
+        if ($user === null) {
+            return false;
         }
 
-        return false;
+        $em = $this->getEntityManager();
+        $em->remove($user);
+        $em->flush();
+        return true;
     }
 }

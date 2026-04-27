@@ -3,13 +3,10 @@ declare(strict_types=1);
 
 namespace PaySystem\Repository;
 
-use DateTime;
 use Doctrine\ORM\EntityRepository;
-use Doctrine\DBAL\Connection;
 
 use PaySystem\Entity\Payment;
 use PaySystem\Enum\PaymentStatus;
-use PaySystem\Storage\StorageInterface;
 
 class PaymentRepository extends EntityRepository implements PaymentRepositoryInterface
 {
@@ -20,11 +17,6 @@ class PaymentRepository extends EntityRepository implements PaymentRepositoryInt
 
     public function findByUserId(string $userId): array
     {
-//        return $this->findBy(
-//            ['userId' => $userId],
-//            ['createdAt' => 'DESC']
-//        );
-
         return $this->createQueryBuilder('p')
             ->andWhere('IDENTITY(p.user) = :uid')
             ->orderBy('p.createdAt', 'DESC')
@@ -73,7 +65,7 @@ class PaymentRepository extends EntityRepository implements PaymentRepositoryInt
 
     public function update(Payment $payment): bool
     {
-        $payment->updatedAt = new DateTime();
+        $payment->touch();
         $this->getEntityManager()->flush();
         return true;
     }
