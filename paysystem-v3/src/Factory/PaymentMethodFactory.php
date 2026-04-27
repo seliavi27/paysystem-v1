@@ -10,6 +10,7 @@ use PaySystem\Processor\AbstractPaymentProcessor;
 use PaySystem\Processor\FlutterwaveProcessor;
 use PaySystem\Processor\MollieProcessor;
 use PaySystem\Processor\StripeProcessor;
+use PaySystem\Strategy\PercentageFeeStrategy;
 
 class PaymentMethodFactory {
     private array $processors = [];
@@ -53,6 +54,8 @@ class PaymentMethodFactory {
                 "Unknown payment method: {$method->value}"
             )
         };
+
+        $processor->setCommissionStrategy(new PercentageFeeStrategy($method->getCommission()));
 
         $this->processors[$key] = $processor;
         return $processor;
