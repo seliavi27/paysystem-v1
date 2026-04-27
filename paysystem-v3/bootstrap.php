@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
+use Doctrine\DBAL\Tools\DsnParser;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
 use Symfony\Component\HttpKernel\Controller\ArgumentResolver;
@@ -58,10 +59,8 @@ if (empty($_ENV['DATABASE_URL'])) {
     );
 }
 
-$connection = DriverManager::getConnection([
-    'driver' => 'pdo_pgsql',
-    'url'    => $_ENV['DATABASE_URL'],
-]);
+$dsnParser  = new DsnParser(['postgres' => 'pdo_pgsql', 'postgresql' => 'pdo_pgsql']);
+$connection = DriverManager::getConnection($dsnParser->parse($_ENV['DATABASE_URL']));
 
 // ===== Repositories =====
 $userRepository        = new UserRepository($connection);
