@@ -9,10 +9,10 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
 use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
+use Symfony\Component\Routing\Generator\UrlGenerator;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\RequestContext;
 
@@ -23,15 +23,21 @@ $isDebug    = ($_SERVER['APP_DEBUG'] ?? '0') === '1';
 
 $container = ContainerFactory::build($projectDir, $isDebug);
 
+// Session — общий объект на запрос (synthetic в services.yaml)
 $session = new Session(new NativeSessionStorage());
 $session->start();
+$container->set(Session::class, $session);
 
 $request = Request::createFromGlobals();
 $request->setSession($session);
 
+// Routing — RouteCollection собираем из атрибутов контроллеров
 $routes  = RouterFactory::loadRoutes($projectDir . '/src/Controller');
 $context = (new RequestContext())->fromRequest($request);
 $matcher = new UrlMatcher($routes, $context);
+
+// UrlGenerator — synthetic, нужен AuthController/PaymentController
+$container->set(UrlGenerator::class, new UrlGenerator($routes, $context));
 
 try {
     $parameters = $matcher->match($request->getPathInfo());

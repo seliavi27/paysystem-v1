@@ -2,7 +2,7 @@ parameters:
   kernel.project_dir: '%env(default::string:KERNEL_PROJECT_DIR)%'
   app.templates_dir: '%kernel.project_dir%/templates'
   app.jwt.secret: '%env(JWT_SECRET)%'
-  app.jwt.algorithm: '%env(default:string:JWT_ALGORITHM)%'
+  app.jwt.algorithm: '%env(string:JWT_ALGORITHM)%'
   app.jwt.ttl: '%env(int:JWT_TTL)%'
 
 services:
@@ -11,6 +11,19 @@ services:
     autoconfigure: true      # автоматически вешать теги по интерфейсам
     public: false            # приватные по умолчанию
 
+  # === Теги (instanceof — навешивает теги на все классы, реализующие интерфейс) ===
+  _instanceof:
+    PaySystem\Interface\PaymentProcessorInterface:
+      tags: ['payment.processor']
+    PaySystem\Strategy\CommissionStrategy:
+      tags: ['commission.strategy']
+    PaySystem\Notification\NotificationChannelInterface:
+      tags: ['notification.channel']
+    PaySystem\Middleware\MiddlewareInterface:
+      tags: ['middleware']
+    PaySystem\Listener\EventListenerInterface:
+      tags: ['event.listener']
+
   # Автозагрузка всех классов из src/, кроме «не-сервисов»
   PaySystem\:
     resource: '../src/'
@@ -18,14 +31,44 @@ services:
       - '../src/Entity/'
       - '../src/DTO/'
       - '../src/Enum/'
+      - '../src/Event/'
       - '../src/Exception/{*Exception.php}'
+      - '../src/Interface/'
       - '../src/Trait/'
+      # Notification/Listener — out-of-scope task-05; имеют примитивные args в конструкторах,
+      # не нужны на критичном happy-path (register/login/payment). Подключатся в task-7 (events).
+      - '../src/Notification/'
+      - '../src/Listener/'
+      - '../src/Manager/'
+      - '../src/Validator/'
 
-  # Публичные сервисы, которые index.php достаёт из контейнера напрямую
+  # Контроллеры — публичные, чтобы index.php мог их доставать через $container->get($class)
+  PaySystem\Controller\:
+    resource: '../src/Controller/'
+    public: true
+
+  # Application — публичный, index.php достаёт его напрямую
   PaySystem\Application:
     public: true
 
-  # === БД ===
+  # Symfony HttpKernel resolvers — Application требует их в конструкторе
+  Symfony\Component\HttpKernel\Controller\ControllerResolver: ~
+  Symfony\Component\HttpKernel\Controller\ArgumentResolver: ~
+
+  # Session — общий объект на запрос (создаётся в index.php и регистрируется
+  # синтетическим сервисом, чтобы AuthController мог его получить через autowire)
+  Symfony\Component\HttpFoundation\Session\Session:
+    synthetic: true
+    public: true
+  Symfony\Component\HttpFoundation\Session\SessionInterface: '@Symfony\Component\HttpFoundation\Session\Session'
+
+  # UrlGenerator — создаётся в index.php (нужен RouteCollection из RouterFactory)
+  Symfony\Component\Routing\Generator\UrlGenerator:
+    synthetic: true
+    public: true
+  Symfony\Component\Routing\Generator\UrlGeneratorInterface: '@Symfony\Component\Routing\Generator\UrlGenerator'
+
+  # === БД (фабрики из task-5 спеки) ===
   Doctrine\DBAL\Connection:
     factory: ['@PaySystem\Infrastructure\DoctrineFactory', 'createConnection']
     public: true
@@ -35,10 +78,11 @@ services:
     public: true
 
   PaySystem\Infrastructure\DoctrineFactory:
+    public: true
     arguments:
       $databaseUrl: '%env(DATABASE_URL)%'
 
-  # Репозитории Doctrine нельзя autowire — они требуют ClassMetadata
+  # Doctrine репозитории — через factory, потому что им нужен ClassMetadata
   PaySystem\Repository\UserRepository:
     factory: ['@Doctrine\ORM\EntityManagerInterface', 'getRepository']
     arguments: [PaySystem\Entity\User]
@@ -47,9 +91,8 @@ services:
     factory: ['@Doctrine\ORM\EntityManagerInterface', 'getRepository']
     arguments: [PaySystem\Entity\Payment]
 
-  PaySystem\Repository\TransactionRepository:
-    factory: ['@Doctrine\ORM\EntityManagerInterface', 'getRepository']
-    arguments: [PaySystem\Entity\Transaction]
+  # TransactionRepository — DBAL-based, обычный сервис
+  PaySystem\Repository\TransactionRepository: ~
 
   # === Алиасы интерфейсов ===
   PaySystem\Repository\UserRepositoryInterface: '@PaySystem\Repository\UserRepository'
@@ -59,7 +102,10 @@ services:
   PaySystem\Service\PaymentServiceInterface: '@PaySystem\Service\PaymentService'
   PaySystem\Service\AuthenticationServiceInterface: '@PaySystem\Service\AuthenticationService'
   PaySystem\Service\JwtTokenServiceInterface: '@PaySystem\Service\JwtTokenService'
+  PaySystem\Service\NotificationServiceInterface: '@PaySystem\Service\NotificationService'
   PaySystem\Interface\LogServiceInterface: '@PaySystem\Service\LogService'
+  # CommissionStrategy: дефолтная реализация — процент 2.9% (Stripe-style baseline)
+  PaySystem\Strategy\CommissionStrategy: '@PaySystem\Strategy\PercentageFeeStrategy'
 
   # === JWT ===
   PaySystem\Service\JwtTokenService:
@@ -77,39 +123,52 @@ services:
   Psr\Log\LoggerInterface:
     factory: ['@PaySystem\Infrastructure\MonologFactory', 'create']
 
-  # === Теги ===
-  _instanceof:
-    PaySystem\Processor\PaymentProcessorInterface:
-      tags: ['payment.processor']
-    PaySystem\Strategy\CommissionStrategy:
-      tags: ['commission.strategy']
-    PaySystem\Notification\NotificationChannelInterface:
-      tags: ['notification.channel']
-    PaySystem\Middleware\MiddlewareInterface:
-      tags: ['middleware']
-    PaySystem\Listener\EventListenerInterface:
-      tags: ['event.listener']
-    Symfony\Component\Console\Command\Command:
-      tags: ['console.command']
+  PaySystem\Infrastructure\MonologFactory:
+    arguments:
+      $opsLog: '%kernel.project_dir%/var/logs/operations.log'
+      $errLog: '%kernel.project_dir%/var/logs/errors.log'
 
+  # LogService требует array<LoggerInterface> в конструкторе — autowire не справится
+  PaySystem\Service\LogService:
+    arguments:
+      $loggers: ['@Psr\Log\LoggerInterface']
 
-  # === Processor ===
+  # NotificationService — пока без channels (task-7 переподключит)
+  PaySystem\Service\NotificationService:
+    arguments:
+      $channels: []
+
+  # === Commission strategy concrete (нужен явный $percentage) ===
+  PaySystem\Strategy\PercentageFeeStrategy:
+    arguments:
+      $percentage: 2.9
+
+  # === Processors (apiKey/webhookSecret/commissionRate из env, strategy через setter) ===
   PaySystem\Processor\StripeProcessor:
     arguments:
       $apiKey: '%env(STRIPE_API_KEY)%'
       $webhookSecret: '%env(STRIPE_WEBHOOK_KEY)%'
+      $commissionRate: 2.9
+    calls:
+      - [setCommissionStrategy, ['@PaySystem\Strategy\CommissionStrategy']]
 
   PaySystem\Processor\MollieProcessor:
     arguments:
       $apiKey: '%env(MOLLIE_API_KEY)%'
       $webhookSecret: '%env(MOLLIE_WEBHOOK_KEY)%'
+      $commissionRate: 1.8
+    calls:
+      - [setCommissionStrategy, ['@PaySystem\Strategy\CommissionStrategy']]
 
   PaySystem\Processor\FlutterwaveProcessor:
     arguments:
       $apiKey: '%env(FLUTTERWAVE_API_KEY)%'
       $webhookSecret: '%env(FLUTTERWAVE_WEBHOOK_KEY)%'
+      $commissionRate: 3.4
+    calls:
+      - [setCommissionStrategy, ['@PaySystem\Strategy\CommissionStrategy']]
 
-
+  # === Middlewares (priority задаётся на теге) ===
   PaySystem\Middleware\LoggingMiddleware:
     tags:
       - { name: 'middleware', priority: 100 }

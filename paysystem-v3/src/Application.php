@@ -18,8 +18,8 @@ class Application
         private ControllerResolver $controllerResolver,
         private ArgumentResolver   $argumentResolver,
         private ExceptionHandler   $exceptionHandler,
-        #[AutowireIterator('middleware', defaultPriorityMethod: 'priority')]
-        private array              $middlewares = [],
+        #[AutowireIterator('middleware')]
+        private iterable           $middlewares = [],
     ) { }
 
     public function handle(Request $request): Response
