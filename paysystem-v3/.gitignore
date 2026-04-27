@@ -33,3 +33,5 @@ Thumbs.db
 /var/
 /vendor/
 ###< symfony/framework-bundle ###
+
+/config/reference.php
