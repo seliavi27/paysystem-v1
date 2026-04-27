@@ -22,6 +22,7 @@
         "symfony/filesystem": "^7.4",
         "symfony/cache": "^7.4",
         "symfony/yaml": "^7.4",
+        "symfony/var-exporter": "^7.4",
         "doctrine/dbal": "^4.0",
         "doctrine/orm": "^3.6",
         "doctrine/migrations": "^3.9"
