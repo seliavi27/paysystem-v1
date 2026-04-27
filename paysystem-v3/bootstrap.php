@@ -69,6 +69,9 @@ $ormConfig = ORMSetup::createAttributeMetadataConfiguration(
     paths: [__DIR__ . '/src/Entity'],
     isDevMode: ($_ENV['APP_ENV'] ?? 'dev') === 'dev',
 );
+// PHP 8.4+ native lazy objects — обязательны для proxy сущностей с property hooks
+// (Symfony VarExporter LazyGhost их не поддерживает).
+$ormConfig->enableNativeLazyObjects(true);
 // Не даём Doctrine генерировать миграции под таблицы вне ORM-mapping
 // (transactions пока остаётся на DBAL — см. TransactionRepository).
 $connection->getConfiguration()->setSchemaAssetsFilter(
