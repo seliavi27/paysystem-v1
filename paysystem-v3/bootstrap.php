@@ -1,6 +1,9 @@
 <?php
 declare(strict_types=1);
 
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\DriverManager;
+use Doctrine\DBAL\Tools\DsnParser;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
 use Symfony\Component\HttpKernel\Controller\ArgumentResolver;
@@ -23,6 +26,7 @@ use PaySystem\Infrastructure\RouterFactory;
 use PaySystem\Middleware\AuthMiddleware;
 use PaySystem\Middleware\LoggingMiddleware;
 use PaySystem\Repository\PaymentRepository;
+use PaySystem\Repository\TransactionRepository;
 use PaySystem\Repository\UserRepository;
 use PaySystem\Service\AuthenticationService;
 use PaySystem\Service\JwtTokenService;
@@ -30,7 +34,6 @@ use PaySystem\Service\LogService;
 use PaySystem\Service\NotificationService;
 use PaySystem\Service\PaymentService;
 use PaySystem\Service\UserService;
-use PaySystem\Storage\JsonStorage;
 use PaySystem\View\TemplateEngine;
 
 require_once __DIR__ . '/vendor/autoload.php';
@@ -49,9 +52,20 @@ $logger->pushHandler(new StreamHandler($_ENV['ERRORS_LOG'] ?? ERRORS_LOG, Logger
 $logService = new LogService([$logger]);
 $notificationService = new NotificationService([$logger]);
 
+// ===== Database =====
+if (empty($_ENV['DATABASE_URL'])) {
+    throw new RuntimeException(
+        'DATABASE_URL is required. Copy .env.example to .env or export DATABASE_URL in the environment.'
+    );
+}
+
+$dsnParser  = new DsnParser(['postgres' => 'pdo_pgsql', 'postgresql' => 'pdo_pgsql']);
+$connection = DriverManager::getConnection($dsnParser->parse($_ENV['DATABASE_URL']));
+
 // ===== Repositories =====
-$userRepository = new UserRepository(new JsonStorage(USERS_FILE));
-$paymentRepository = new PaymentRepository(new JsonStorage(PAYMENTS_FILE));
+$userRepository        = new UserRepository($connection);
+$paymentRepository     = new PaymentRepository($connection);
+$transactionRepository = new TransactionRepository($connection);
 
 // ===== Domain services =====
 $paymentFactory = new PaymentMethodFactory(
@@ -66,8 +80,10 @@ $paymentFactory = new PaymentMethodFactory(
 $paymentService = new PaymentService(
     $paymentFactory,
     $paymentRepository,
+    $transactionRepository,
     $notificationService,
     $logService,
+    $connection,
 );
 
 $userService = new UserService($userRepository);
@@ -122,4 +138,5 @@ return [
         PaymentController::class => $paymentController,
         UserController::class    => $userController,
     ],
+    Connection::class     => $connection,
 ];
