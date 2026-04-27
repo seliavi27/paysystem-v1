@@ -3,12 +3,18 @@ declare(strict_types=1);
 
 namespace PaySystem\Processor;
 
+use PaySystem\Enum\PaymentMethod;
 use PaySystem\Enum\PaymentStatus;
 use PaySystem\Entity\Payment;
 use RuntimeException;
 
 class MollieProcessor extends AbstractPaymentProcessor
 {
+    public function supportedMethod(): PaymentMethod
+    {
+        return PaymentMethod::BANK_TRANSFER;
+    }
+
     public function process(Payment $payment): void
     {
         $this->validateApiKey();

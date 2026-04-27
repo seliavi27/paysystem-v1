@@ -1,78 +1,64 @@
 <?php
 declare(strict_types=1);
 
+use PaySystem\Application;
+use PaySystem\Exception\ExceptionHandler;
+use PaySystem\Infrastructure\ContainerFactory;
+use PaySystem\Infrastructure\RouterFactory;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
 use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
-use Symfony\Component\Routing\Matcher\CompiledUrlMatcher;
-use Symfony\Component\Routing\Matcher\Dumper\CompiledUrlMatcherDumper;
+use Symfony\Component\Routing\Generator\UrlGenerator;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\RequestContext;
 
-$container = require_once __DIR__ . '/../bootstrap.php';
+require __DIR__ . '/../vendor/autoload.php';
 
-/** @var \Symfony\Component\Routing\RouteCollection $routes */
-$routes = $container['routes'];
-/** @var RequestContext $context */
-$context = $container['requestContext'];
+$projectDir = dirname(__DIR__);
+$isDebug    = ($_SERVER['APP_DEBUG'] ?? '0') === '1';
+
+$container = ContainerFactory::build($projectDir, $isDebug);
+
+// Session — общий объект на запрос (synthetic в services.yaml)
+$session = new Session(new NativeSessionStorage());
+$session->start();
+$container->set(Session::class, $session);
 
 $request = Request::createFromGlobals();
-$request->setSession($container['session']);
+$request->setSession($session);
 
-$context->fromRequest($request);
+// Routing — RouteCollection собираем из атрибутов контроллеров
+$routes  = RouterFactory::loadRoutes($projectDir . '/src/Controller');
+$context = (new RequestContext())->fromRequest($request);
+$matcher = new UrlMatcher($routes, $context);
 
-$cacheFile = __DIR__ . '/../var/cache/matcher.php';
-$isProd    = ($_ENV['APP_ENV'] ?? 'dev') === 'prod';
+// UrlGenerator — synthetic, нужен AuthController/PaymentController
+$container->set(UrlGenerator::class, new UrlGenerator($routes, $context));
 
-if ($isProd) {
-    if (!file_exists($cacheFile)) {
-        $compiled = (new CompiledUrlMatcherDumper($routes))->getCompiledRoutes();
-        file_put_contents($cacheFile, '<?php return ' . var_export($compiled, true) . ';');
-    }
-    $matcher = new CompiledUrlMatcher(require $cacheFile, $context);
-} else {
-    $matcher = new UrlMatcher($routes, $context);
-}
-
-try
-{
+try {
     $parameters = $matcher->match($request->getPathInfo());
     $request->attributes->add($parameters);
 
-    $controllerId = (string)$request->attributes->get('_controller');
-    [$class, $method] = explode('::', $controllerId, 2);
+    $controllerId       = (string) $request->attributes->get('_controller');
+    [$class, $method]   = explode('::', $controllerId, 2);
+    $controllerInstance = $container->get($class);
+    $request->attributes->set('_controller', [$controllerInstance, $method]);
 
-    $instance = $container['controllers'][$class] ?? null;
-    if ($instance === null) {
-        throw new RuntimeException("Controller {$class} is not registered in container.");
-    }
-    $request->attributes->set('_controller', [$instance, $method]);
-
-    /** @var PaySystem\Application $app */
-    $app = $container['app'];
-    $response = $app->handle($request);
-}
-catch (ResourceNotFoundException)
-{
+    $response = $container->get(Application::class)->handle($request);
+} catch (ResourceNotFoundException) {
     $response = new JsonResponse(['error' => 'Not Found'], Response::HTTP_NOT_FOUND);
-}
-catch (MethodNotAllowedException $e)
-{
+} catch (MethodNotAllowedException $e) {
     $response = new JsonResponse(
         ['error' => 'Method Not Allowed', 'allowed' => $e->getAllowedMethods()],
         Response::HTTP_METHOD_NOT_ALLOWED,
         ['Allow' => implode(', ', $e->getAllowedMethods())],
     );
-}
-catch (Throwable $e)
-{
-    $container['logger']->error('Bootstrap error', ['exception' => (string)$e]);
-    $response = new JsonResponse(
-        ['error' => 'Internal Server Error', 'message' => $e->getMessage()],
-        Response::HTTP_INTERNAL_SERVER_ERROR,
-    );
+} catch (Throwable $e) {
+    $response = $container->get(ExceptionHandler::class)->handle($e, $request);
 }
 
 $response->send();

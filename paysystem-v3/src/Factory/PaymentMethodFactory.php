@@ -5,60 +5,30 @@ namespace PaySystem\Factory;
 
 use InvalidArgumentException;
 use PaySystem\Enum\PaymentMethod;
-use PaySystem\Interface\ProcessableInterface;
-use PaySystem\Processor\AbstractPaymentProcessor;
-use PaySystem\Processor\FlutterwaveProcessor;
-use PaySystem\Processor\MollieProcessor;
-use PaySystem\Processor\StripeProcessor;
-use PaySystem\Strategy\PercentageFeeStrategy;
+use PaySystem\Interface\PaymentProcessorInterface;
+use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 
-class PaymentMethodFactory {
-    private array $processors = [];
+final class PaymentMethodFactory
+{
+    /** @var array<string, PaymentProcessorInterface> */
+    private array $processors;
 
+    /** @param iterable<PaymentProcessorInterface> $processors */
     public function __construct(
-        private readonly string $stripeKey,
-        private readonly string $stripeSecret,
-        private readonly string $mollieKey,
-        private readonly string $mollieSecret,
-        private readonly string $flutterwaveKey,
-        private readonly string $flutterwaveSecret
-    ) {}
+        #[AutowireIterator('payment.processor')]
+        iterable $processors,
+    ) {
+        $this->processors = [];
 
-    public function create(PaymentMethod $method): AbstractPaymentProcessor
-    {
-        $key = $method->value;
-
-        if (isset($this->processors[$key]))
-        {
-            return $this->processors[$key];
+        foreach ($processors as $processor) {
+            $this->processors[$processor->supportedMethod()->value] = $processor;
         }
+    }
 
-        $processor = match($method)
-        {
-            PaymentMethod::CREDIT_CARD => new StripeProcessor(
-                $this->stripeKey,
-                $this->stripeSecret,
-                PaymentMethod::CREDIT_CARD->getCommission()
-            ),
-            PaymentMethod::BANK_TRANSFER => new MollieProcessor(
-                $this->mollieKey,
-                $this->mollieSecret,
-                PaymentMethod::BANK_TRANSFER->getCommission()
-            ),
-            PaymentMethod::DIGITAL_WALLET => new FlutterwaveProcessor(
-                $this->flutterwaveKey,
-                $this->flutterwaveSecret,
-                PaymentMethod::DIGITAL_WALLET->getCommission()
-            ),
-            default => throw new InvalidArgumentException(
-                "Unknown payment method: {$method->value}"
-            )
-        };
-
-        $processor->setCommissionStrategy(new PercentageFeeStrategy($method->getCommission()));
-
-        $this->processors[$key] = $processor;
-        return $processor;
+    public function create(PaymentMethod $method): PaymentProcessorInterface
+    {
+        return $this->processors[$method->value]
+            ?? throw new InvalidArgumentException("No processor for {$method->value}");
     }
 
     public function getAll(): array

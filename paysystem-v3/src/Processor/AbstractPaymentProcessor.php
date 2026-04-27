@@ -5,6 +5,7 @@ namespace PaySystem\Processor;
 
 use InvalidArgumentException;
 use PaySystem\Entity\Payment;
+use PaySystem\Enum\PaymentMethod;
 use PaySystem\Interface\PaymentProcessorInterface;
 use PaySystem\Strategy\CommissionStrategy;
 
