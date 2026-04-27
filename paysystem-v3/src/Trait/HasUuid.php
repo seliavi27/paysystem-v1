@@ -3,12 +3,16 @@ declare(strict_types=1);
 
 namespace PaySystem\Trait;
 
+use Doctrine\ORM\Mapping as ORM;
+
 trait HasUuid
 {
+    #[ORM\Id]
+    #[ORM\Column(type: 'string', length: 36)]
     public string $id
-        {
-            get => $this->id;
-        }
+    {
+        get => $this->id;
+    }
 
     protected function initializeUuid(): void
     {

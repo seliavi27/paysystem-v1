@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace PaySystem\DTO;
 
-use DateTime;
+use DateTimeImmutable;
 use PaySystem\Entity\Payment;
 use PaySystem\Enum\CurrencyType;
 use PaySystem\Enum\PaymentStatus;
@@ -17,7 +17,7 @@ final readonly class PaymentResponse
         public string $description,
         public CurrencyType $currency,
         public PaymentStatus $status,
-        public DateTime $createdAt
+        public DateTimeImmutable $createdAt
     )
     {
     }
@@ -26,7 +26,7 @@ final readonly class PaymentResponse
     {
         return new self(
             id: $payment->id,
-            userId: $payment->userId,
+            userId: $payment->user->id,
             amount: $payment->amount,
             description: $payment->description,
             currency: $payment->currency,
