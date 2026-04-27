@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PaySystem\Exception;
 
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -30,6 +31,7 @@ class ExceptionHandler
             $exception instanceof ValidationException => [422, $exception->getMessage()],
             $exception instanceof NotFoundException => [404, $exception->getMessage()],
             $exception instanceof AuthenticationException => [401, 'Unauthorized'],
+            $exception instanceof UniqueConstraintViolationException => [409, 'Conflict'],
             default => [500, 'Internal Server Error'],
         };
 

@@ -3,88 +3,51 @@ declare(strict_types=1);
 
 namespace PaySystem\Repository;
 
+use Doctrine\ORM\EntityRepository;
+
 use PaySystem\Entity\User;
-use PaySystem\Storage\StorageInterface;
 
-class UserRepository implements UserRepositoryInterface
+/**
+ * @extends EntityRepository<User>
+ */
+class UserRepository extends EntityRepository implements UserRepositoryInterface
 {
-    private StorageInterface $storage;
-
-    public function __construct(StorageInterface $storage)
+    public function findById(string $id): ?User
     {
-        $this->storage = $storage;
+        return $this->find($id);
+    }
+
+    public function findByEmail(string $email): ?User
+    {
+        return $this->findOneBy(['email' => $email]);
     }
 
     public function saveEntity(object $entity): bool
     {
         /** @var User $entity */
-        $users = $this->storage->load();
-        $users[] = $entity->toArray();
-        return $this->storage->save($users);
+        $em = $this->getEntityManager();
+        $em->persist($entity);
+        $em->flush();
+        return true;
     }
 
     public function update(User $user): bool
     {
-        $users = $this->load();
-
-        if (!isset($user->id))
-        {
-            return false;
-        }
-
-        foreach ($users as $u)
-        {
-            if (isset($user->id) && $u->id === $user->id)
-            {
-                unset($u);
-            }
-        }
-
-        return $this->save($users);
+        $user->touch();
+        $this->getEntityManager()->flush();
+        return true;
     }
 
     public function delete(string $id): bool
     {
-        $users = $this->load();
-
-        foreach ($users as $user)
-        {
-            if (isset($user->id) && $user->id === $id)
-            {
-                unset($user);
-            }
+        $user = $this->find($id);
+        if ($user === null) {
+            return false;
         }
 
-        return $this->save($users);
-    }
-
-    public function findById(string $id): ?User
-    {
-        $users = $this->load();
-        return array_find($users, fn($user) => isset($user->id) && $user->id === $id);
-    }
-
-    public function findByEmail(string $email): ?User
-    {
-        $users = $this->findAll();
-        return array_find($users, fn($user) => $user->email === $email);
-    }
-
-    public function findAll(): array
-    {
-        return $this->load();
-    }
-
-    private function load(): array
-    {
-        return array_map(
-            fn($item) => User::fromArray($item),
-            $this->storage->load()
-        );
-    }
-
-    private function save(array $data): bool
-    {
-        return $this->storage->save($data);
+        $em = $this->getEntityManager();
+        $em->remove($user);
+        $em->flush();
+        return true;
     }
 }

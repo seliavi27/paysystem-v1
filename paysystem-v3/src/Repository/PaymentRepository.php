@@ -3,94 +3,82 @@ declare(strict_types=1);
 
 namespace PaySystem\Repository;
 
+use Doctrine\ORM\EntityRepository;
+
 use PaySystem\Entity\Payment;
 use PaySystem\Enum\PaymentStatus;
-use PaySystem\Storage\StorageInterface;
 
-class PaymentRepository implements PaymentRepositoryInterface
+class PaymentRepository extends EntityRepository implements PaymentRepositoryInterface
 {
-    private StorageInterface $storage;
-
-    public function __construct(StorageInterface $storage)
-    {
-        $this->storage = $storage;
-    }
-
-    public function saveEntity(object $entity): bool
-    {
-        $payments = $this->load();
-        $payments[] = $entity;
-        return $this->save($payments);
-    }
-
-    public function update(Payment $payment): bool
-    {
-        $payments = $this->load();
-
-        if (!isset($payment->id))
-        {
-            return false;
-        }
-
-        foreach ($payments as $p)
-        {
-            if (isset($payment->id) && $p->id === $payment->id)
-            {
-                unset($p);
-            }
-        }
-
-        return $this->save($payments);
-    }
-
-    public function delete(string $id): bool
-    {
-        $payments = $this->load();
-
-        foreach ($payments as $payment)
-        {
-            if (isset($payment->id) && $payment->id === $id)
-            {
-                unset($payment);
-            }
-        }
-
-        return $this->save($payments);
-    }
-
     public function findById(string $id): ?object
     {
-        $payments = $this->load();
-        return array_find($payments, fn($payment) => isset($payment->id) && $payment->id === $id);
+        return $this->find($id);
     }
 
     public function findByUserId(string $userId): array
     {
-        $payments = $this->findAll();
-        return array_filter($payments, fn($p) => $p->userId === $userId);
+        return $this->createQueryBuilder('p')
+            ->andWhere('IDENTITY(p.user) = :uid')
+            ->orderBy('p.createdAt', 'DESC')
+            ->setParameter('uid', $userId)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findByUserIdAndStatus(string $userId, PaymentStatus $status): array
+    {
+        return $this->createQueryBuilder('p')
+            ->andWhere('IDENTITY(p.user) = :uid')
+            ->andWhere('p.status = :status')
+            ->orderBy('p.createdAt', 'DESC')
+            ->setParameter('uid', $userId)
+            ->setParameter('status', $status)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function countCompletedForUser(string $userId): int
+    {
+        return (int)$this->createQueryBuilder('p')
+            ->select('COUNT(p.id)')
+            ->andWhere('IDENTITY(p.user) = :uid')
+            ->andWhere('p.status = :status')
+            ->setParameter('uid', $userId)
+            ->setParameter('status', PaymentStatus::COMPLETED)
+            ->getQuery()
+            ->getSingleScalarResult();
     }
 
     public function findByStatus(PaymentStatus $status): array
     {
-        $payments = $this->findAll();
-        return array_filter($payments, fn($p) => $p->status === $status);
+        return $this->findBy(['status' => $status]);
     }
 
-    public function findAll(): array
+    public function saveEntity(object $entity): bool
     {
-        return $this->load();
+        /** @var Payment $entity */
+        $em = $this->getEntityManager();
+        $em->persist($entity);
+        $em->flush();
+        return true;
     }
 
-    private function load(): array
+    public function update(Payment $payment): bool
     {
-        return array_map(
-            fn($item) => Payment::fromArray($item),
-            $this->storage->load()
-        );
+        $payment->touch();
+        $this->getEntityManager()->flush();
+        return true;
     }
 
-    private function save(array $data): bool
+    public function delete(string $id): bool
     {
-        return $this->storage->save($data);
+        $payment = $this->find($id);
+        if ($payment) {
+            $em = $this->getEntityManager();
+            $em->remove($payment);
+            $em->flush();
+            return true;
+        }
+        return false;
     }
 }

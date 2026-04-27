@@ -13,8 +13,7 @@ class UserService implements UserServiceInterface
 {
     public function __construct(
         private UserRepositoryInterface $repository
-    ) {
-    }
+    ) { }
 
     public function create(CreateUserRequest $request): User
     {
@@ -24,7 +23,7 @@ class UserService implements UserServiceInterface
 
         $user = User::create(
             email: $request->email,
-            password: User::hashPassword($request->password),
+            password: $request->password,
             fullName: $request->fullName,
             phone: $request->phone,
         );

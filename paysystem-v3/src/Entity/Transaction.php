@@ -62,11 +62,10 @@ class Transaction
         float           $amount,
         string          $description,
         DateTime        $timestamp,
-//        DateTime $createdAt,
-//        DateTime $updatedAt
+        ?string         $id = null,
     )
     {
-        $this->id = self::generateUuid();
+        $this->id = $id ?? self::generateUuid();
         $this->userId = $userId;
         $this->paymentId = $paymentId;
         $this->type = $type;
@@ -74,8 +73,6 @@ class Transaction
         $this->amount = $amount;
         $this->description = $description;
         $this->timestamp = $timestamp;
-//        $this->createdAt = $createdAt;
-//        $this->updatedAt = $updatedAt;
     }
 
     public function toArray(): array

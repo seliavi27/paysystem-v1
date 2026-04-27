@@ -1,6 +1,12 @@
 <?php
 declare(strict_types=1);
 
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\DriverManager;
+use Doctrine\DBAL\Tools\DsnParser;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\ORMSetup;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
 use Symfony\Component\HttpKernel\Controller\ArgumentResolver;
@@ -17,20 +23,20 @@ use PaySystem\Application;
 use PaySystem\Controller\AuthController;
 use PaySystem\Controller\PaymentController;
 use PaySystem\Controller\UserController;
+use PaySystem\Entity\Payment;
+use PaySystem\Entity\User;
 use PaySystem\Exception\ExceptionHandler;
 use PaySystem\Factory\PaymentMethodFactory;
 use PaySystem\Infrastructure\RouterFactory;
 use PaySystem\Middleware\AuthMiddleware;
 use PaySystem\Middleware\LoggingMiddleware;
-use PaySystem\Repository\PaymentRepository;
-use PaySystem\Repository\UserRepository;
+use PaySystem\Repository\TransactionRepository;
 use PaySystem\Service\AuthenticationService;
 use PaySystem\Service\JwtTokenService;
 use PaySystem\Service\LogService;
 use PaySystem\Service\NotificationService;
 use PaySystem\Service\PaymentService;
 use PaySystem\Service\UserService;
-use PaySystem\Storage\JsonStorage;
 use PaySystem\View\TemplateEngine;
 
 require_once __DIR__ . '/vendor/autoload.php';
@@ -49,9 +55,38 @@ $logger->pushHandler(new StreamHandler($_ENV['ERRORS_LOG'] ?? ERRORS_LOG, Logger
 $logService = new LogService([$logger]);
 $notificationService = new NotificationService([$logger]);
 
+// ===== Database =====
+if (empty($_ENV['DATABASE_URL'])) {
+    throw new RuntimeException(
+        'DATABASE_URL is required. Copy .env.example to .env or export DATABASE_URL in the environment.'
+    );
+}
+
+$dsnParser  = new DsnParser(['postgres' => 'pdo_pgsql', 'postgresql' => 'pdo_pgsql']);
+$connection = DriverManager::getConnection($dsnParser->parse($_ENV['DATABASE_URL']));
+
+$ormConfig = ORMSetup::createAttributeMetadataConfiguration(
+    paths: [__DIR__ . '/src/Entity'],
+    isDevMode: ($_ENV['APP_ENV'] ?? 'dev') === 'dev',
+);
+// PHP 8.4+ native lazy objects — обязательны для proxy сущностей с property hooks
+// (Symfony VarExporter LazyGhost их не поддерживает).
+$ormConfig->enableNativeLazyObjects(true);
+// Не даём Doctrine генерировать миграции под таблицы вне ORM-mapping
+// (transactions пока остаётся на DBAL — см. TransactionRepository).
+$connection->getConfiguration()->setSchemaAssetsFilter(
+    static fn(string|\Doctrine\DBAL\Schema\AbstractAsset $name): bool
+        => (is_string($name) ? $name : $name->getName()) !== 'transactions'
+);
+$entityManager = new EntityManager($connection, $ormConfig);
+
 // ===== Repositories =====
-$userRepository = new UserRepository(new JsonStorage(USERS_FILE));
-$paymentRepository = new PaymentRepository(new JsonStorage(PAYMENTS_FILE));
+/** @var \PaySystem\Repository\UserRepository $userRepository */
+$userRepository    = $entityManager->getRepository(User::class);
+/** @var \PaySystem\Repository\PaymentRepository $paymentRepository */
+$paymentRepository = $entityManager->getRepository(Payment::class);
+// TransactionRepository пока остаётся на DBAL — Антон не переводил в task-4 (см. step 5).
+$transactionRepository = new TransactionRepository($connection);
 
 // ===== Domain services =====
 $paymentFactory = new PaymentMethodFactory(
@@ -66,8 +101,11 @@ $paymentFactory = new PaymentMethodFactory(
 $paymentService = new PaymentService(
     $paymentFactory,
     $paymentRepository,
+    $userRepository,
+    $transactionRepository,
     $notificationService,
     $logService,
+    $connection,
 );
 
 $userService = new UserService($userRepository);
@@ -111,15 +149,17 @@ $app = new Application(
 );
 
 return [
-    'app'                 => $app,
-    'logger'              => $logger,
-    'session'             => $session,
-    'routes'              => $routes,
-    'requestContext'      => $context,
-    'urlGenerator'        => $urlGenerator,
-    'controllers'         => [
+    'app'                         => $app,
+    'logger'                      => $logger,
+    'session'                     => $session,
+    'routes'                      => $routes,
+    'requestContext'              => $context,
+    'urlGenerator'                => $urlGenerator,
+    'controllers'                 => [
         AuthController::class    => $authController,
         PaymentController::class => $paymentController,
         UserController::class    => $userController,
     ],
+    Connection::class             => $connection,
+    EntityManagerInterface::class => $entityManager,
 ];
