@@ -25,6 +25,7 @@ use PaySystem\Infrastructure\RouterFactory;
 use PaySystem\Middleware\AuthMiddleware;
 use PaySystem\Middleware\LoggingMiddleware;
 use PaySystem\Repository\PaymentRepository;
+use PaySystem\Repository\TransactionRepository;
 use PaySystem\Repository\UserRepository;
 use PaySystem\Service\AuthenticationService;
 use PaySystem\Service\JwtTokenService;
@@ -51,26 +52,21 @@ $logService = new LogService([$logger]);
 $notificationService = new NotificationService([$logger]);
 
 // ===== Database =====
-if (!empty($_ENV['DATABASE_URL'])) {
-    $connection = DriverManager::getConnection([
-        'driver' => 'pdo_pgsql',
-        'url'    => $_ENV['DATABASE_URL'],
-    ]);
-} else {
-    $connection = DriverManager::getConnection([
-        'driver'   => 'pdo_pgsql',
-        'host'     => '127.0.0.1',
-        'port'     => 5432,
-        'dbname'   => 'paysystem_dev',
-        'user'     => 'paysystem_user',
-        'password' => 'paysystem_pass',
-        'charset'  => 'utf8',
-    ]);
+if (empty($_ENV['DATABASE_URL'])) {
+    throw new RuntimeException(
+        'DATABASE_URL is required. Copy .env.example to .env or export DATABASE_URL in the environment.'
+    );
 }
 
+$connection = DriverManager::getConnection([
+    'driver' => 'pdo_pgsql',
+    'url'    => $_ENV['DATABASE_URL'],
+]);
+
 // ===== Repositories =====
-$userRepository    = new UserRepository($connection);
-$paymentRepository = new PaymentRepository($connection);
+$userRepository        = new UserRepository($connection);
+$paymentRepository     = new PaymentRepository($connection);
+$transactionRepository = new TransactionRepository($connection);
 
 // ===== Domain services =====
 $paymentFactory = new PaymentMethodFactory(
@@ -85,6 +81,7 @@ $paymentFactory = new PaymentMethodFactory(
 $paymentService = new PaymentService(
     $paymentFactory,
     $paymentRepository,
+    $transactionRepository,
     $notificationService,
     $logService,
     $connection,

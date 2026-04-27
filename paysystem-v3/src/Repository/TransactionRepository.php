@@ -3,14 +3,25 @@ declare(strict_types=1);
 
 namespace PaySystem\Repository;
 
+use DateTime;
 use Doctrine\DBAL\Connection;
 use PaySystem\Entity\Transaction;
+use PaySystem\Enum\CurrencyType;
+use PaySystem\Enum\TransactionType;
 
 class TransactionRepository implements TransactionRepositoryInterface
 {
     public function __construct(
         private Connection $connection
     ) {}
+
+    public function findAll(): array
+    {
+        return $this->connection->createQueryBuilder()
+            ->select('*')->from('transactions')
+            ->executeQuery()
+            ->fetchAllAssociative();
+    }
 
     public function findById(string $id): ?Transaction
     {
@@ -40,15 +51,34 @@ class TransactionRepository implements TransactionRepositoryInterface
         return array_map(fn(array $r) => $this->hydrate($r), $rows);
     }
 
+    /**
+     * @return Transaction[]
+     */
+    public function findByUserId(string $userId): array
+    {
+        $rows = $this->connection->createQueryBuilder()
+            ->select('*')->from('transactions')
+            ->where('user_id = :uid')
+            ->orderBy('created_at', 'DESC')
+            ->setParameter('uid', $userId)
+            ->executeQuery()
+            ->fetchAllAssociative();
+
+        return array_map(fn(array $r) => $this->hydrate($r), $rows);
+    }
+
     public function saveEntity(object $entity): bool
     {
         /** @var Transaction $entity */
         $this->connection->insert('transactions', [
-            'id'         => $entity->id,
-            'payment_id' => $entity->paymentId,
-            'type'       => $entity->type->value,
-            'amount'     => $entity->amount,
-            'created_at' => $entity->timestamp->format('Y-m-d H:i:s.u O'),
+            'id'          => $entity->id,
+            'payment_id'  => $entity->paymentId,
+            'user_id'     => $entity->userId,
+            'type'        => $entity->type->value,
+            'currency'    => $entity->currency->value,
+            'amount'      => $entity->amount,
+            'description' => $entity->description,
+            'created_at'  => $entity->timestamp->format('Y-m-d H:i:s.u O'),
         ]);
         return true;
     }
@@ -60,16 +90,15 @@ class TransactionRepository implements TransactionRepositoryInterface
 
     private function hydrate(array $row): Transaction
     {
-        // Минимальная гидратация — задача 03 фиксирует только payment_id/type/amount/created_at в схеме.
-        // Поля userId/currency/description в Transaction не маппятся в эту таблицу — заполняем дефолтами.
         return new Transaction(
-            userId:      '',
+            userId:      (string)$row['user_id'],
             paymentId:   (string)$row['payment_id'],
-            type:        \PaySystem\Enum\TransactionType::from((string)$row['type']),
-            currency:    \PaySystem\Enum\CurrencyType::RUB,
+            type:        TransactionType::from((string)$row['type']),
+            currency:    CurrencyType::from((string)$row['currency']),
             amount:      (float)$row['amount'],
-            description: '',
-            timestamp:   new \DateTime((string)$row['created_at']),
+            description: (string)$row['description'],
+            timestamp:   new DateTime((string)$row['created_at']),
+            id:          (string)$row['id'],
         );
     }
 }
