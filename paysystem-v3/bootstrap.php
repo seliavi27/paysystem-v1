@@ -69,6 +69,12 @@ $ormConfig = ORMSetup::createAttributeMetadataConfiguration(
     paths: [__DIR__ . '/src/Entity'],
     isDevMode: ($_ENV['APP_ENV'] ?? 'dev') === 'dev',
 );
+// Не даём Doctrine генерировать миграции под таблицы вне ORM-mapping
+// (transactions пока остаётся на DBAL — см. TransactionRepository).
+$connection->getConfiguration()->setSchemaAssetsFilter(
+    static fn(string|\Doctrine\DBAL\Schema\AbstractAsset $name): bool
+        => (is_string($name) ? $name : $name->getName()) !== 'transactions'
+);
 $entityManager = new EntityManager($connection, $ormConfig);
 
 // ===== Repositories =====
