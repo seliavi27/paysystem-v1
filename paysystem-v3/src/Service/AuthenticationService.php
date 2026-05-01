@@ -6,6 +6,7 @@ namespace PaySystem\Service;
 use PaySystem\Entity\User;
 use PaySystem\Exception\AuthenticationException;
 use PaySystem\Exception\ValidationException;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class AuthenticationService implements AuthenticationServiceInterface
 {
@@ -31,10 +32,8 @@ class AuthenticationService implements AuthenticationServiceInterface
         return $user;
     }
 
-    public function logout(): void
+    public function logout(SessionInterface $session): void
     {
-        if (session_status() === PHP_SESSION_ACTIVE) {
-            $_SESSION = [];
-        }
+        $session->invalidate();
     }
 }

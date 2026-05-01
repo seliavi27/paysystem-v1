@@ -3,32 +3,32 @@ declare(strict_types=1);
 
 namespace PaySystem\Trait;
 
+use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
-use DateTime;
 
 trait Timestampable
 {
-    #[ORM\Column(name: 'created_at', type: 'datetimetz_immutable')]
-    public DateTime $createdAt
+    #[ORM\Column(name: 'created_at', type: 'datetime_immutable')]
+    public DateTimeImmutable $createdAt
     {
         get => $this->createdAt;
     }
 
-    #[ORM\Column(name: 'updated_at', type: 'datetimetz_immutable')]
-    public DateTime $updatedAt
+    #[ORM\Column(name: 'updated_at', type: 'datetime_immutable')]
+    public DateTimeImmutable $updatedAt
     {
         get => $this->updatedAt;
     }
 
     protected function initializeTimestamps(): void
     {
-        $now = new DateTime();
+        $now = new DateTimeImmutable();
         $this->createdAt = $now;
         $this->updatedAt = $now;
     }
 
-    protected function updateTimestamp(): void
+    public function touch(): void
     {
-        $this->updatedAt = new DateTime();
+        $this->updatedAt = new DateTimeImmutable();
     }
 }

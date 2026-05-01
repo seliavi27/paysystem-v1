@@ -6,11 +6,6 @@ namespace PaySystem\Factory;
 use InvalidArgumentException;
 use PaySystem\Enum\PaymentMethod;
 use PaySystem\Interface\PaymentProcessorInterface;
-use PaySystem\Interface\ProcessableInterface;
-use PaySystem\Processor\AbstractPaymentProcessor;
-use PaySystem\Processor\FlutterwaveProcessor;
-use PaySystem\Processor\MollieProcessor;
-use PaySystem\Processor\StripeProcessor;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 
 final class PaymentMethodFactory
@@ -21,12 +16,11 @@ final class PaymentMethodFactory
     /** @param iterable<PaymentProcessorInterface> $processors */
     public function __construct(
         #[AutowireIterator('payment.processor')]
-        iterable $processors)
-    {
+        iterable $processors,
+    ) {
         $this->processors = [];
 
-        foreach ($processors as $processor)
-        {
+        foreach ($processors as $processor) {
             $this->processors[$processor->supportedMethod()->value] = $processor;
         }
     }
@@ -34,7 +28,7 @@ final class PaymentMethodFactory
     public function create(PaymentMethod $method): PaymentProcessorInterface
     {
         return $this->processors[$method->value]
-            ?? throw new \InvalidArgumentException("No processor for {$method->value}");
+            ?? throw new InvalidArgumentException("No processor for {$method->value}");
     }
 
     public function getAll(): array
