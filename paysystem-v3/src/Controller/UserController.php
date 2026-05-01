@@ -44,7 +44,7 @@ class UserController extends AbstractController
 
         $payments = $this->paymentService->showAllByUserId($userId);
 
-        return $this->view($request, 'users/profile', [
+        return $this->view('users/profile.html.twig', [
             'title'         => 'Профиль',
             'user'          => $user,
             'paymentsCount' => count($payments),
