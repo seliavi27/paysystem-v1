@@ -62,6 +62,11 @@ services:
     public: true
   Symfony\Component\HttpFoundation\Session\SessionInterface: '@Symfony\Component\HttpFoundation\Session\Session'
 
+  # RequestStack — общий объект, нужен AbstractController для shared-context (flash, isAuthenticated)
+  Symfony\Component\HttpFoundation\RequestStack:
+    synthetic: true
+    public: true
+
   # UrlGenerator — создаётся в index.php (нужен RouteCollection из RouterFactory)
   Symfony\Component\Routing\Generator\UrlGenerator:
     synthetic: true
@@ -113,11 +118,6 @@ services:
       $secretKey: '%app.jwt.secret%'
       $algorithm: '%app.jwt.algorithm%'
       $ttl: '%app.jwt.ttl%'
-
-  # === TemplateEngine ===
-  PaySystem\View\TemplateEngine:
-    arguments:
-      $templatesPath: '%app.templates_dir%'
 
   # === Logger / Monolog ===
   Psr\Log\LoggerInterface:
@@ -176,3 +176,22 @@ services:
   PaySystem\Middleware\AuthMiddleware:
     tags:
       - { name: 'middleware', priority: 50 }
+
+  # === Twig (task-6) ===
+  Twig\Loader\FilesystemLoader:
+    arguments:
+      $paths: ['%app.templates_dir%']
+
+  Twig\Environment:
+    arguments:
+      $loader: '@Twig\Loader\FilesystemLoader'
+      $options:
+        cache: '%kernel.project_dir%/var/cache/twig'
+        auto_reload: '%env(bool:APP_DEBUG)%'
+        strict_variables: true
+    calls:
+      - [addExtension, ['@PaySystem\View\Twig\AppExtension']]
+      - [addGlobal, ['flash', null]]           # fallback — переопределяется в AbstractController
+      - [addGlobal, ['isAuthenticated', false]]
+      - [addGlobal, ['errors', []]]
+      - [addGlobal, ['old', []]]

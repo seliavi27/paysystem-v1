@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace PaySystem\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -17,7 +18,7 @@ use PaySystem\Enum\PaymentStatus;
 use PaySystem\Exception\NotFoundException;
 use PaySystem\Exception\ValidationException;
 use PaySystem\Service\PaymentServiceInterface;
-use PaySystem\View\TemplateEngine;
+use Twig\Environment;
 
 class PaymentController extends AbstractController
 {
@@ -25,12 +26,13 @@ class PaymentController extends AbstractController
     private const string STATUS_REGEX = 'pending|processing|completed|failed|refunded';
 
     public function __construct(
-        TemplateEngine $templateEngine,
+        RequestStack $requestStack,
+        Environment $twig,
         private readonly PaymentServiceInterface $paymentService,
         private readonly UrlGeneratorInterface $urlGenerator,
     )
     {
-        parent::__construct($templateEngine);
+        parent::__construct($requestStack, $twig);
     }
 
     // ===== HTML =====
@@ -45,7 +47,7 @@ class PaymentController extends AbstractController
             ? $this->paymentService->showAllByStatus($userId, (string)$statusFilter)
             : $this->paymentService->showAllByUserId($userId);
 
-        return $this->view($request, 'payments/list', [
+        return $this->view('payments/list.html.twig', [
             'title'        => 'Платежи',
             'payments'     => $payments,
             'statusFilter' => $statusFilter,
@@ -54,9 +56,9 @@ class PaymentController extends AbstractController
     }
 
     #[Route('/payments/create', name: 'payments_create_form', methods: ['GET'])]
-    public function createForm(Request $request): Response
+    public function createForm(): Response
     {
-        return $this->view($request, 'payments/create', [
+        return $this->view('payments/create.html.twig', [
             'title'      => 'Новый платёж',
             'currencies' => CurrencyType::cases(),
             'methods'    => PaymentMethod::cases(),
@@ -86,7 +88,7 @@ class PaymentController extends AbstractController
         }
         catch (ValidationException $e)
         {
-            return $this->view($request, 'payments/create', [
+            return $this->view('payments/create.html.twig', [
                 'title'      => 'Новый платёж',
                 'currencies' => CurrencyType::cases(),
                 'methods'    => PaymentMethod::cases(),

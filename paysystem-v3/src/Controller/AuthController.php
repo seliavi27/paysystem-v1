@@ -6,6 +6,7 @@ namespace PaySystem\Controller;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Attribute\Route;
@@ -17,7 +18,7 @@ use PaySystem\Exception\ValidationException;
 use PaySystem\Service\AuthenticationServiceInterface;
 use PaySystem\Service\JwtTokenServiceInterface;
 use PaySystem\Service\UserServiceInterface;
-use PaySystem\View\TemplateEngine;
+use Twig\Environment;
 
 class AuthController extends AbstractController
 {
@@ -25,7 +26,8 @@ class AuthController extends AbstractController
     private const int TOKEN_TTL = 3600;
 
     public function __construct(
-        TemplateEngine $templateEngine,
+        RequestStack $requestStack,
+        Environment $twig,
         private readonly AuthenticationServiceInterface $authenticationService,
         private readonly JwtTokenServiceInterface $jwtTokenService,
         private readonly UserServiceInterface $userService,
@@ -33,14 +35,14 @@ class AuthController extends AbstractController
         private readonly UrlGeneratorInterface $urlGenerator,
     )
     {
-        parent::__construct($templateEngine);
+        parent::__construct($requestStack, $twig);
     }
 
     #[Route('/login', name: 'login_form', methods: ['GET'])]
     #[Route('/', name: 'home', methods: ['GET'])]
-    public function loginForm(Request $request): Response
+    public function loginForm(): Response
     {
-        return $this->view($request, 'auth/login', ['title' => 'Вход']);
+        return $this->view('auth/login.html.twig', ['title' => 'Вход']);
     }
 
     #[Route('/auth/login', name: 'auth_login', methods: ['POST'])]
@@ -64,7 +66,7 @@ class AuthController extends AbstractController
         }
         catch (Throwable $e)
         {
-            return $this->view($request, 'auth/login', [
+            return $this->view('auth/login.html.twig', [
                 'title'  => 'Вход',
                 'errors' => ['Неверный email или пароль'],
                 'old'    => ['email' => $email],
@@ -73,9 +75,9 @@ class AuthController extends AbstractController
     }
 
     #[Route('/register', name: 'register_form', methods: ['GET'])]
-    public function registerForm(Request $request): Response
+    public function registerForm(): Response
     {
-        return $this->view($request, 'auth/register', ['title' => 'Регистрация']);
+        return $this->view('auth/register.html.twig', ['title' => 'Регистрация']);
     }
 
     #[Route('/auth/register', name: 'auth_register', methods: ['POST'])]
@@ -98,7 +100,7 @@ class AuthController extends AbstractController
         }
         catch (ValidationException $e)
         {
-            return $this->view($request, 'auth/register', [
+            return $this->view('auth/register.html.twig', [
                 'title'  => 'Регистрация',
                 'errors' => [$e->getMessage()],
                 'old'    => [

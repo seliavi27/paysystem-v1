@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace PaySystem\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -12,19 +13,20 @@ use PaySystem\Exception\NotFoundException;
 use PaySystem\Exception\ValidationException;
 use PaySystem\Service\PaymentServiceInterface;
 use PaySystem\Service\UserServiceInterface;
-use PaySystem\View\TemplateEngine;
+use Twig\Environment;
 
 class UserController extends AbstractController
 {
     private const string UUID_REGEX = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
 
     public function __construct(
-        TemplateEngine                           $templateEngine,
-        private readonly UserServiceInterface    $userService,
+        protected readonly RequestStack $requestStack,
+        protected readonly Environment $twig,
+        private readonly UserServiceInterface $userService,
         private readonly PaymentServiceInterface $paymentService,
     )
     {
-        parent::__construct($templateEngine);
+        parent::__construct($requestStack, $twig);
     }
 
     // ===== HTML =====
@@ -42,7 +44,7 @@ class UserController extends AbstractController
 
         $payments = $this->paymentService->showAllByUserId($userId);
 
-        return $this->view($request, 'users/profile', [
+        return $this->view('users/profile.html.twig', [
             'title'         => 'Профиль',
             'user'          => $user,
             'paymentsCount' => count($payments),

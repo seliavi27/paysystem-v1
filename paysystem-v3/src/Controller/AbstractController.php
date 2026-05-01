@@ -5,15 +5,15 @@ namespace PaySystem\Controller;
 
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
-
-use PaySystem\View\TemplateEngine;
+use Twig\Environment;
 
 abstract class AbstractController
 {
     public function __construct(
-        private readonly TemplateEngine $templateEngine
+        private readonly RequestStack $requestStack,
+        private readonly Environment $twig
     ) {}
 
     protected function json(array $data, int $status = Response::HTTP_OK): JsonResponse
@@ -21,10 +21,10 @@ abstract class AbstractController
         return new JsonResponse($data, $status);
     }
 
-    protected function view(Request $request, string $template, array $data = []): Response
+    protected function view(string $template, array $data = []): Response
     {
-        $html = $this->templateEngine->renderWithLayout($template, [
-            ...$this->sharedContext($request),
+        $html = $this->twig->render($template, [
+            ...$this->sharedContext(),
             ...$data,
         ]);
 
@@ -43,19 +43,23 @@ abstract class AbstractController
     /**
      * @return array<string,mixed>
      */
-    private function sharedContext(Request $request): array
+    private function sharedContext(): array
     {
-        $session = $request->getSession();
+        $request = $this->requestStack->getCurrentRequest();
 
         $flash = [];
-        foreach ($session->getFlashBag()->all() as $type => $messages)
+        $session = $request?->getSession();
+        if ($session)
         {
-            $flash[$type] = $messages[0] ?? null;
+            foreach ($session->getFlashBag()->all() as $type => $messages)
+            {
+                $flash[$type] = $messages[0] ?? null;
+            }
         }
 
         return [
             'flash'           => $flash ?: null,
-            'isAuthenticated' => $request->cookies->has('access_token'),
+            'isAuthenticated' => $request?->cookies->has('access_token') ?? false,
             'errors'          => [],
             'old'             => [],
         ];

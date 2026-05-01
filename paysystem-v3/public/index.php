@@ -7,6 +7,7 @@ use PaySystem\Infrastructure\ContainerFactory;
 use PaySystem\Infrastructure\RouterFactory;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
@@ -30,6 +31,11 @@ $container->set(Session::class, $session);
 
 $request = Request::createFromGlobals();
 $request->setSession($session);
+
+// RequestStack — synthetic, нужен AbstractController для shared-context (flash/isAuthenticated)
+$requestStack = new RequestStack();
+$requestStack->push($request);
+$container->set(RequestStack::class, $requestStack);
 
 // Routing — RouteCollection собираем из атрибутов контроллеров
 $routes  = RouterFactory::loadRoutes($projectDir . '/src/Controller');
