@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace PaySystem\Repository;
 
+use DateTimeImmutable;
 use Doctrine\ORM\EntityRepository;
 
 use PaySystem\Entity\Payment;
@@ -82,7 +83,7 @@ class PaymentRepository extends EntityRepository implements PaymentRepositoryInt
         return false;
     }
 
-    public function findSince(DateTime $since): array
+    public function findSince(DateTimeImmutable $since): array
     {
         return $this->createQueryBuilder('p')
             ->where('p.createdAt >= :since')

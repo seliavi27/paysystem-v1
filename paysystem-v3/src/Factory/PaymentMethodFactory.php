@@ -3,8 +3,9 @@ declare(strict_types=1);
 
 namespace PaySystem\Factory;
 
+use InvalidArgumentException;
 use PaySystem\Enum\PaymentMethod;
-use PaySystem\Processor\PaymentProcessorInterface;
+use PaySystem\Interface\PaymentProcessorInterface;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 
 final class PaymentMethodFactory

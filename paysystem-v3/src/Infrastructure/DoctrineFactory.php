@@ -22,12 +22,13 @@ final class DoctrineFactory
 
     public function createEntityManager(): EntityManagerInterface
     {
-        return $this->em ??= new EntityManager(
-            $this->createConnection(),
-            ORMSetup::createAttributeMetadataConfiguration(
-                paths: [dirname(__DIR__) . '/Entity'],
-                isDevMode: ($_ENV['APP_ENV'] ?? 'dev') === 'dev'
-            ),
+        if ($this->em !== null) {
+            return $this->em;
+        }
+
+        $config = ORMSetup::createAttributeMetadataConfiguration(
+            paths: [dirname(__DIR__) . '/Entity'],
+            isDevMode: ($_ENV['APP_ENV'] ?? 'dev') === 'dev',
         );
         // PHP 8.4+ native lazy objects — нужны для proxy сущностей с property hooks.
         $config->enableNativeLazyObjects(true);
@@ -37,9 +38,19 @@ final class DoctrineFactory
 
     public function createConnection(): Connection
     {
-        return $this->connection ??= DriverManager::getConnection([
-            //'driver' => 'pdo_pgsql',
-            'url' => $this->databaseUrl
-        ]);
+        if ($this->connection !== null) {
+            return $this->connection;
+        }
+
+        $parser = new DsnParser(['postgres' => 'pdo_pgsql', 'postgresql' => 'pdo_pgsql']);
+        $this->connection = DriverManager::getConnection($parser->parse($this->databaseUrl));
+
+        // transactions остаётся на DBAL — прячем её от Doctrine schema diff'а.
+        $this->connection->getConfiguration()->setSchemaAssetsFilter(
+            static fn(string|AbstractAsset $name): bool
+                => (is_string($name) ? $name : $name->getName()) !== 'transactions'
+        );
+
+        return $this->connection;
     }
 }

@@ -101,10 +101,4 @@ class TransactionRepository implements TransactionRepositoryInterface
             id:          (string)$row['id'],
         );
     }
-
-    public function saveEntity(object $entity): bool
-    {
-        // TODO: Implement saveEntity() method.
-        return false;
-    }
 }

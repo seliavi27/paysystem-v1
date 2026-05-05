@@ -11,90 +11,7 @@ services:
     autoconfigure: true      # автоматически вешать теги по интерфейсам
     public: false            # приватные по умолчанию
 
-  # Автозагрузка всех классов из src/, кроме «не-сервисов»
-  PaySystem\:
-    resource: '../src/'
-    exclude:
-      - '../src/Entity/'
-      - '../src/DTO/'
-      - '../src/Enum/'
-      - '../src/Exception/{*Exception.php}'
-      - '../src/Trait/'
-
-#  PaySystem\Exception\ExceptionHandler:
-#      public: true
-
-  Symfony\Component\HttpKernel\Controller\ControllerResolver:
-    public: true
-
-  Symfony\Component\HttpKernel\Controller\ArgumentResolver:
-    public: true
-    arguments:
-      $argumentMetadataFactory: '@Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadataFactory'
-
-  Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadataFactory:
-    public: true
-
-  # Публичные сервисы, которые index.php достаёт из контейнера напрямую
-  PaySystem\Application:
-    public: true
-    arguments:
-      $controllerResolver: '@Symfony\Component\HttpKernel\Controller\ControllerResolver'
-      $argumentResolver: '@Symfony\Component\HttpKernel\Controller\ArgumentResolver'
-      $exceptionHandler: '@PaySystem\Exception\ExceptionHandler'
-
-  # === БД ===
-  Doctrine\DBAL\Connection:
-    factory: ['@PaySystem\Infrastructure\DoctrineFactory', 'createConnection']
-    public: true
-
-  Doctrine\ORM\EntityManagerInterface:
-    factory: ['@PaySystem\Infrastructure\DoctrineFactory', 'createEntityManager']
-    public: true
-
-  PaySystem\Infrastructure\DoctrineFactory:
-    arguments:
-      $databaseUrl: '%env(DATABASE_URL)%'
-
-  # Репозитории Doctrine нельзя autowire — они требуют ClassMetadata
-  PaySystem\Repository\UserRepository:
-    factory: ['@Doctrine\ORM\EntityManagerInterface', 'getRepository']
-    arguments: [PaySystem\Entity\User]
-
-  PaySystem\Repository\PaymentRepository:
-    factory: ['@Doctrine\ORM\EntityManagerInterface', 'getRepository']
-    arguments: [PaySystem\Entity\Payment]
-
-  PaySystem\Repository\TransactionRepository:
-    factory: ['@Doctrine\ORM\EntityManagerInterface', 'getRepository']
-    arguments: [PaySystem\Entity\Transaction]
-
-  # === Алиасы интерфейсов ===
-  PaySystem\Repository\UserRepositoryInterface: '@PaySystem\Repository\UserRepository'
-  PaySystem\Repository\PaymentRepositoryInterface: '@PaySystem\Repository\PaymentRepository'
-  PaySystem\Repository\TransactionRepositoryInterface: '@PaySystem\Repository\TransactionRepository'
-  PaySystem\Service\UserServiceInterface: '@PaySystem\Service\UserService'
-  PaySystem\Service\PaymentServiceInterface: '@PaySystem\Service\PaymentService'
-  PaySystem\Service\AuthenticationServiceInterface: '@PaySystem\Service\AuthenticationService'
-  PaySystem\Service\JwtTokenServiceInterface: '@PaySystem\Service\JwtTokenService'
-  PaySystem\Interface\LogServiceInterface: '@PaySystem\Service\LogService'
-
-  # === Command ===
-  PaySystem\Command\:
-    resource: '../src/Command'
-    tags: ['console.command']
-
-  PaySystem\Command\CreateUserCommand:
-    tags: [ 'console.command' ]
-
-  # === JWT ===
-  PaySystem\Service\JwtTokenService:
-    arguments:
-      $secretKey: '%app.jwt.secret%'
-      $algorithm: '%app.jwt.algorithm%'
-      $ttl: '%app.jwt.ttl%'
-
-  # === Теги ===
+  # === Теги (instanceof — навешивает теги на все классы, реализующие интерфейс) ===
   _instanceof:
     PaySystem\Interface\PaymentProcessorInterface:
       tags: ['payment.processor']
@@ -124,6 +41,13 @@ services:
       - '../src/Listener/'
       - '../src/Manager/'
       - '../src/Validator/'
+      # Command — регистрируется отдельно с тегом console.command (task-7)
+      - '../src/Command/'
+
+  # === Command (task-7) ===
+  PaySystem\Command\:
+    resource: '../src/Command/'
+    tags: ['console.command']
 
   # Контроллеры — публичные, чтобы index.php мог их доставать через $container->get($class)
   PaySystem\Controller\:
@@ -278,5 +202,3 @@ services:
       - [addGlobal, ['isAuthenticated', false]]
       - [addGlobal, ['errors', []]]
       - [addGlobal, ['old', []]]
-
-
