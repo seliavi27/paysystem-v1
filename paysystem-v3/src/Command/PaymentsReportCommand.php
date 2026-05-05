@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace PaySystem\Command;
 
-use DateTime;
+use DateTimeImmutable;
 use PaySystem\Enum\PaymentStatus;
 use PaySystem\Repository\PaymentRepositoryInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -33,9 +33,9 @@ final class PaymentsReportCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io       = new SymfonyStyle($input, $output);
-        $since    = new DateTime($input->getOption('since'));
+        $since    = new DateTimeImmutable($input->getOption('since'));
         $limit    = (int)$input->getOption('limit');
-        $payments = $this->repository->findSince($since); // добавь этот метод в репозиторий, DQL: WHERE p.createdAt >= :since
+        $payments = $this->repository->findSince($since);
 
         if (empty($payments)) {
             $io->warning("Нет платежей с {$since->format('Y-m-d')}.");

@@ -5,28 +5,21 @@ declare(strict_types=1);
 use PaySystem\Infrastructure\ContainerFactory;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 require __DIR__ . '/../vendor/autoload.php';
 
 $projectDir = dirname(__DIR__);
-$container  = ContainerFactory::build(
-    projectDir: $projectDir,
-    isDebug: ($_SERVER['APP_DEBUG'] ?? '1') === '1',
-);
+
+// Для CLI используем НЕ-кэшированный ContainerBuilder — на нём работает findTaggedServiceIds.
+$container = ContainerFactory::buildBuilder($projectDir);
 
 $application = new Application('PaySystem CLI', '3.0.0');
 
-if ($container instanceof ContainerBuilder)
-{
-    foreach ($container->findTaggedServiceIds('console.command') as $id => $tags)
-    {
-        $command = $container->get($id);
+foreach ($container->findTaggedServiceIds('console.command') as $id => $tags) {
+    $command = $container->get($id);
 
-        if ($command instanceof Command)
-        {
-            $application->add($command);
-        }
+    if ($command instanceof Command) {
+        $application->add($command);
     }
 }
 
