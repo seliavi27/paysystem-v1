@@ -15,12 +15,11 @@ final class PaymentMethodFactory
     /** @param iterable<PaymentProcessorInterface> $processors */
     public function __construct(
         #[AutowireIterator('payment.processor')]
-        iterable $processors)
-    {
+        iterable $processors,
+    ) {
         $this->processors = [];
 
-        foreach ($processors as $processor)
-        {
+        foreach ($processors as $processor) {
             $this->processors[$processor->supportedMethod()->value] = $processor;
         }
     }
@@ -28,7 +27,7 @@ final class PaymentMethodFactory
     public function create(PaymentMethod $method): PaymentProcessorInterface
     {
         return $this->processors[$method->value]
-            ?? throw new \InvalidArgumentException("No processor for {$method->value}");
+            ?? throw new InvalidArgumentException("No processor for {$method->value}");
     }
 
     public function getAll(): array
