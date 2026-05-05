@@ -98,24 +98,31 @@ services:
       tags: ['notification.channel']
     App\Listener\EventListenerInterface:
       tags: ['event.listener']
-    Symfony\Component\Console\Command\Command:
-      tags: ['console.command']
 
   # === Processor ===
   App\Processor\StripeProcessor:
     arguments:
       $apiKey: '%env(STRIPE_API_KEY)%'
       $webhookSecret: '%env(STRIPE_WEBHOOK_KEY)%'
+      $commissionRate: 2.9
+    calls:
+      - [setCommissionStrategy, ['@PaySystem\Strategy\CommissionStrategy']]
 
   App\Processor\MollieProcessor:
     arguments:
       $apiKey: '%env(MOLLIE_API_KEY)%'
       $webhookSecret: '%env(MOLLIE_WEBHOOK_KEY)%'
+      $commissionRate: 1.8
+    calls:
+      - [setCommissionStrategy, ['@PaySystem\Strategy\CommissionStrategy']]
 
   App\Processor\FlutterwaveProcessor:
     arguments:
       $apiKey: '%env(FLUTTERWAVE_API_KEY)%'
       $webhookSecret: '%env(FLUTTERWAVE_WEBHOOK_KEY)%'
+      $commissionRate: 3.4
+    calls:
+      - [setCommissionStrategy, ['@PaySystem\Strategy\CommissionStrategy']]
 
   # === Twig ===
   Twig\Loader\FilesystemLoader:
@@ -134,5 +141,3 @@ services:
       - [addGlobal, ['isAuthenticated', 'false']]
       - [addGlobal, ['errors', []]]
       - [addGlobal, ['old', []]]
-
-

@@ -7,23 +7,52 @@ use Doctrine\DBAL\Connection;
 $container = require __DIR__ . '/../bootstrap.php';
 /** @var Connection $db */
 $db = $container[Connection::class];
+
 echo 'DATABASE_URL: ' . ($_ENV['DATABASE_URL'] ?? 'not set') . PHP_EOL;
-echo 'Connecting with user: paysystem_user' . PHP_EOL;
-$importTable = function(Connection $db, string $table, string $jsonFile, callable $mapper): int
-{
-    $data = json_decode(file_get_contents($jsonFile), true, flags: JSON_THROW_ON_ERROR);
-    $count = 0;
-    foreach ($data as $row)
-    {
-        if (!is_array($row) || !isset($row['id'])) continue;
-        $db->insert($table, $mapper($row));
-        $count++;
+
+$dataDir = __DIR__ . '/../data';
+if (!is_dir($dataDir)) {
+    echo "No data/ directory — JSON storage already removed. Nothing to migrate.\n";
+    exit(0);
+}
+
+/**
+ * Идемпотентный импорт: ON CONFLICT (id) DO NOTHING.
+ * Повторный запуск не падает с unique violation.
+ */
+$importTable = function (Connection $db, string $table, string $jsonFile, callable $mapper): int {
+    if (!is_file($jsonFile)) {
+        echo "Skipped {$table}: {$jsonFile} not found.\n";
+        return 0;
     }
+
+    $data = json_decode((string)file_get_contents($jsonFile), true, flags: JSON_THROW_ON_ERROR);
+    $count = 0;
+
+    foreach ($data as $row) {
+        if (!is_array($row) || !isset($row['id'])) {
+            continue;
+        }
+
+        $payload = $mapper($row);
+        $columns = array_keys($payload);
+        $placeholders = array_map(fn(string $c) => ':' . $c, $columns);
+
+        $sql = sprintf(
+            'INSERT INTO %s (%s) VALUES (%s) ON CONFLICT (id) DO NOTHING',
+            $table,
+            implode(', ', $columns),
+            implode(', ', $placeholders),
+        );
+
+        $affected = $db->executeStatement($sql, $payload);
+        $count += $affected;
+    }
+
     return $count;
 };
 
-$usersImported = $importTable($db, 'users', __DIR__ . '/../data/users.json', function (array $u): array
-{
+$usersImported = $importTable($db, 'users', $dataDir . '/users.json', function (array $u): array {
     $createdAt = is_array($u['createdAt']) ? $u['createdAt']['date'] : $u['createdAt'];
     $updatedAt = is_array($u['updatedAt']) ? $u['updatedAt']['date'] : $u['updatedAt'];
     return [
@@ -38,8 +67,7 @@ $usersImported = $importTable($db, 'users', __DIR__ . '/../data/users.json', fun
     ];
 });
 
-$paymentsImported = $importTable($db, 'payments', __DIR__ . '/../data/payments.json', function (array $p): array
-{
+$paymentsImported = $importTable($db, 'payments', $dataDir . '/payments.json', function (array $p): array {
     $createdAt = is_array($p['createdAt']) ? $p['createdAt']['date'] : $p['createdAt'];
     $updatedAt = is_array($p['updatedAt']) ? $p['updatedAt']['date'] : $p['updatedAt'];
     return [
@@ -55,22 +83,4 @@ $paymentsImported = $importTable($db, 'payments', __DIR__ . '/../data/payments.j
     ];
 });
 
-echo "Imported: users={$usersImported}, payments={$paymentsImported}\n";
-
-
-//try {
-//    $pdo = new PDO(
-//        'pgsql:host=localhost;port=5432;dbname=paysystem_dev',
-//        'paysystem_user',
-//        'paysystem_pass',
-//        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
-//    );
-//    echo "✅ Connected with PDO!\n";
-//
-//    // Тест запроса
-//    $stmt = $pdo->query("SELECT 1");
-//    var_dump($stmt->fetch());
-//
-//} catch (PDOException $e) {
-//    echo "❌ PDO Error: " . $e->getMessage() . "\n";
-//}
+echo "Imported (new rows): users={$usersImported}, payments={$paymentsImported}\n";

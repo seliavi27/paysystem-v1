@@ -5,10 +5,11 @@ namespace App\Controller;
 
 use Exception;
 use Symfony\Component\HttpFoundation\Cookie;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -53,8 +54,8 @@ class AuthController extends AbstractController
         {
             $user = $this->authenticationService->authenticate($email, $password);
             $token = $this->jwtTokenService->generate([
-                'user_id' => $user->id,
-                'email' => $user->email,
+                'user_id'  => $user->id,
+                'email'    => $user->email,
                 'fullName' => $user->fullName,
             ]);
 
@@ -111,11 +112,11 @@ class AuthController extends AbstractController
     #[Route('/logout', name: 'logout', methods: ['GET'])]
     public function logout(): Response
     {
-        $this->authenticationService->logout();
+        $this->authenticationService->logout($this->session);
         return $this->clearTokenCookie();
     }
 
-    private function setTokenCookie(string $token): Response
+    private function setTokenCookie(string $token): RedirectResponse
     {
         $response = $this->redirectToRoute('payments_index');
 
@@ -132,14 +133,16 @@ class AuthController extends AbstractController
         return $response;
     }
 
-    private function clearTokenCookie(): Response
+    private function clearTokenCookie(): RedirectResponse
     {
         $response = $this->redirectToRoute('login_form');
 
         $response->headers->setCookie(Cookie::create(
-            self::TOKEN_COOKIE,
-            null,
-            1
+            name: self::TOKEN_COOKIE,
+            value: '',
+            expire: 1,
+            path: '/',
+            httpOnly: true,
         ));
 
         return $response;

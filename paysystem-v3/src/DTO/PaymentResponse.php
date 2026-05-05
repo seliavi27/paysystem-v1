@@ -17,7 +17,7 @@ final readonly class PaymentResponse
         public string $description,
         public CurrencyType $currency,
         public PaymentStatus $status,
-        public DateTime $createdAt
+        public DateTimeImmutable $createdAt
     )
     {
     }
@@ -26,7 +26,7 @@ final readonly class PaymentResponse
     {
         return new self(
             id: $payment->id,
-            userId: $payment->userId,
+            userId: $payment->user->id,
             amount: $payment->amount,
             description: $payment->description,
             currency: $payment->currency,

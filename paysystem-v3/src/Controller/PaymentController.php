@@ -8,7 +8,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Twig\Environment;
@@ -60,7 +59,7 @@ final class PaymentController extends AbstractController
         return $this->render('payments/create.html.twig', [
             'title' => 'Новый платёж',
             'currencies' => CurrencyType::cases(),
-            'methods' => PaymentMethod::cases(),
+            'methods'    => PaymentMethod::cases(),
         ]);
     }
 
@@ -90,13 +89,13 @@ final class PaymentController extends AbstractController
             return $this->render('payments/create.html.twig', [
                 'title' => 'Новый платёж',
                 'currencies' => CurrencyType::cases(),
-                'methods' => PaymentMethod::cases(),
-                'errors' => [$e->getMessage()],
-                'old' => [
-                    'amount' => $request->request->get('amount'),
+                'methods'    => PaymentMethod::cases(),
+                'errors'     => [$e->getMessage()],
+                'old'        => [
+                    'amount'      => $request->request->get('amount'),
                     'description' => $request->request->get('description'),
-                    'currency' => $request->request->get('currency'),
-                    'method' => $request->request->get('method'),
+                    'currency'    => $request->request->get('currency'),
+                    'method'      => $request->request->get('method'),
                 ],
             ]);
         }

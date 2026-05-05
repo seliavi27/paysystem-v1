@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
-use DateTime;
+use DateTimeImmutable;
 use Doctrine\ORM\EntityRepository;
 
 use App\Entity\Payment;
@@ -67,7 +67,7 @@ class PaymentRepository extends EntityRepository implements PaymentRepositoryInt
 
     public function update(Payment $payment): bool
     {
-        $payment->updatedAt = new DateTime();
+        $payment->touch();
         $this->getEntityManager()->flush();
         return true;
     }
@@ -84,7 +84,7 @@ class PaymentRepository extends EntityRepository implements PaymentRepositoryInt
         return false;
     }
 
-    public function findSince(DateTime $since): array
+    public function findSince(DateTimeImmutable $since): array
     {
         return $this->createQueryBuilder('p')
             ->where('p.createdAt >= :since')

@@ -14,5 +14,5 @@ interface PaymentRepositoryInterface extends RepositoryInterface
     public function findByStatus(PaymentStatus $status): array;
     public function findByUserIdAndStatus(string $userId, PaymentStatus $status): array;
     public function countCompletedForUser(string $userId): int;
-    public function findSince(DateTime $since): array;
+    public function findSince(DateTimeImmutable $since): array;
 }

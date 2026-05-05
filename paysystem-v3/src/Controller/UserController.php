@@ -58,25 +58,25 @@ class UserController extends AbstractController
     {
         try
         {
-            $requestArray = $request->toArray();
+            $data = $request->toArray();
 
             $user = $this->userService->create(new CreateUserRequest(
-                email:           (string)($request->$requestArray['email'] ?? ''),
-                password:        (string)($request->$requestArray['password'] ?? ''),
-                passwordConfirm: (string)($request->$requestArray['passwordConfirm'] ?? ''),
-                fullName:        (string)($request->$requestArray['fullName'] ?? ''),
-                phone:           (string)($request->$requestArray['phone'] ?? ''),
+                email:           (string)($data['email'] ?? ''),
+                password:        (string)($data['password'] ?? ''),
+                passwordConfirm: (string)($data['passwordConfirm'] ?? ''),
+                fullName:        (string)($data['fullName'] ?? ''),
+                phone:           (string)($data['phone'] ?? ''),
             ));
 
             return $this->json([
                 'id'       => $user->id,
                 'email'    => $user->email,
                 'fullName' => $user->fullName,
-            ], 201);
+            ], Response::HTTP_CREATED);
         }
         catch (Exception $e)
         {
-            return $this->json(['error' => $e->getMessage()], 422);
+            return $this->json(['error' => $e->getMessage()], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
     }
     #[Route(

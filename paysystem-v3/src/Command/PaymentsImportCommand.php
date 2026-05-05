@@ -43,12 +43,17 @@ final class PaymentsImportCommand extends Command
             return Command::FAILURE;
         }
 
-        $rows = json_decode((string)file_get_contents($file), true, flags: JSON_THROW_ON_ERROR);
+        try {
+            $rows = json_decode((string)file_get_contents($file), true, flags: JSON_THROW_ON_ERROR);
+        } catch (\JsonException $e) {
+            $io->error("Невалидный JSON: {$e->getMessage()}");
+            return Command::INVALID;
+        }
 
         if (!is_array($rows))
         {
             $io->error('JSON должен быть массивом платежей');
-            return Command::FAILURE;
+            return Command::INVALID;
         }
 
         $progress = new ProgressBar($output, count($rows));

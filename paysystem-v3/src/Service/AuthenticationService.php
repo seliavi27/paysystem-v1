@@ -31,10 +31,8 @@ class AuthenticationService implements AuthenticationServiceInterface
         return $user;
     }
 
-    public function logout(): void
+    public function logout(SessionInterface $session): void
     {
-        if (session_status() === PHP_SESSION_ACTIVE) {
-            $_SESSION = [];
-        }
+        $session->invalidate();
     }
 }

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Service;
 
+use DateTime;
 use Doctrine\DBAL\Connection;
 use App\DTO\CreatePaymentRequest;
 use App\Entity\Payment;
@@ -21,9 +22,10 @@ class PaymentService implements PaymentServiceInterface
         private PaymentMethodFactory $processorFactory,
         private PaymentRepositoryInterface $paymentRepository,
         private UserRepositoryInterface $userRepository,
+        private TransactionRepositoryInterface $transactionRepository,
         private NotificationServiceInterface $notifier,
         private LogServiceInterface $logger,
-        private Connection $connection
+        private Connection $connection,
     ) {
     }
 
@@ -57,6 +59,16 @@ class PaymentService implements PaymentServiceInterface
 
             $payment->status = PaymentStatus::COMPLETED;
             $this->paymentRepository->update($payment);
+
+            $this->transactionRepository->saveEntity(new Transaction(
+                userId:      $payment->user->id,
+                paymentId:   $payment->id,
+                type:        TransactionType::EXPENSE,
+                currency:    $payment->currency,
+                amount:      $payment->amount,
+                description: 'Payment processed',
+                timestamp:   new DateTime(),
+            ));
         });
     }
 
@@ -74,9 +86,21 @@ class PaymentService implements PaymentServiceInterface
             throw new PaymentException('Only completed payments can be refunded');
         }
 
-        $this->processorFactory->create($payment->method)->refund($payment);
-        $payment->status = PaymentStatus::REFUNDED;
-        $this->paymentRepository->update($payment);
+        $this->connection->transactional(function () use ($payment) {
+            $this->processorFactory->create($payment->method)->refund($payment);
+            $payment->status = PaymentStatus::REFUNDED;
+            $this->paymentRepository->update($payment);
+
+            $this->transactionRepository->saveEntity(new Transaction(
+                userId:      $payment->user->id,
+                paymentId:   $payment->id,
+                type:        TransactionType::REFUND,
+                currency:    $payment->currency,
+                amount:      $payment->amount,
+                description: 'Payment refunded',
+                timestamp:   new DateTime(),
+            ));
+        });
     }
 
     public function show(string $id): ?Payment

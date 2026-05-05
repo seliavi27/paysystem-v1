@@ -9,5 +9,5 @@ interface AuthenticationServiceInterface
 {
     public function authenticate(string $email, string $password): User;
 
-    public function logout(): void;
+    public function logout(SessionInterface $session): void;
 }
