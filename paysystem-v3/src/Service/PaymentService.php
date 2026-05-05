@@ -13,6 +13,7 @@ use App\Exception\PaymentException;
 use App\Factory\PaymentMethodFactory;
 use App\Interface\LogServiceInterface;
 use App\Repository\PaymentRepositoryInterface;
+use App\Repository\TransactionRepositoryInterface;
 use App\Repository\UserRepositoryInterface;
 use Throwable;
 
