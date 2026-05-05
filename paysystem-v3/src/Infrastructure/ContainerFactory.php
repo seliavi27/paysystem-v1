@@ -21,6 +21,26 @@ final class ContainerFactory
             return new \CachedContainer();
         }
 
+        $container = self::buildBuilder($projectDir);
+
+        // Дампим компилированный контейнер всегда — это резолвит %env(...)% placeholders
+        // в реальные get_env-вызовы и даёт ~10x ускорение между запросами.
+        @mkdir(dirname($cacheFile), recursive: true);
+        file_put_contents(
+            $cacheFile,
+            (new PhpDumper($container))->dump(['class' => 'CachedContainer']),
+        );
+
+        require_once $cacheFile;
+        return new \CachedContainer();
+    }
+
+    /**
+     * Возвращает скомпилированный ContainerBuilder без дампа в кэш.
+     * Нужен для CLI (bin/console) — findTaggedServiceIds работает только на ContainerBuilder.
+     */
+    public static function buildBuilder(string $projectDir): ContainerBuilder
+    {
         Dotenv::createImmutable($projectDir)->safeLoad();
         $_ENV['KERNEL_PROJECT_DIR'] = $projectDir;
 
@@ -38,15 +58,6 @@ final class ContainerFactory
         $loader->load('services.yaml');
         $container->compile(true);
 
-        // Дампим компилированный контейнер всегда — это резолвит %env(...)% placeholders
-        // в реальные get_env-вызовы и даёт ~10x ускорение между запросами.
-        @mkdir(dirname($cacheFile), recursive: true);
-        file_put_contents(
-            $cacheFile,
-            (new PhpDumper($container))->dump(['class' => 'CachedContainer']),
-        );
-
-        require_once $cacheFile;
-        return new \CachedContainer();
+        return $container;
     }
 }

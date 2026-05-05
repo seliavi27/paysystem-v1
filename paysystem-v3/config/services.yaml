@@ -41,6 +41,15 @@ services:
       - '../src/Listener/'
       - '../src/Manager/'
       - '../src/Validator/'
+      # Command — регистрируется отдельно с тегом console.command (task-7)
+      - '../src/Command/'
+
+  # === Command (task-7) ===
+  # public: true — bin/console достаёт команды через $container->get($id)
+  PaySystem\Command\:
+    resource: '../src/Command/'
+    public: true
+    tags: ['console.command']
 
   # Контроллеры — публичные, чтобы index.php мог их доставать через $container->get($class)
   PaySystem\Controller\:
