@@ -27,11 +27,12 @@ security:
       custom_authenticators:
         - App\Security\JwtAuthenticator
       logout:
-        path: auth_logout
-        target: auth_login_form
+        path: logout
+        target: login_form
       entry_point: App\Security\JwtAuthenticator
 
   access_control:
     - { path: ^/(login|register|auth/login|auth/register)$, roles: PUBLIC_ACCESS }
+    - { path: ^/api/users/register$, roles: PUBLIC_ACCESS }
     - { path: ^/api/, roles: ROLE_USER }
     - { path: ^/, roles: ROLE_USER }

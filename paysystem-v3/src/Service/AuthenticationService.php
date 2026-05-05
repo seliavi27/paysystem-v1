@@ -30,9 +30,4 @@ class AuthenticationService implements AuthenticationServiceInterface
 
         return $user;
     }
-
-    public function logout(SessionInterface $session): void
-    {
-        $session->invalidate();
-    }
 }

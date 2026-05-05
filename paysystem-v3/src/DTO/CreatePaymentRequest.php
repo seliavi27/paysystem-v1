@@ -4,49 +4,36 @@ declare(strict_types=1);
 namespace App\DTO;
 
 use App\Enum\CurrencyType;
-use InvalidArgumentException;
 use App\Enum\PaymentMethod;
+use Symfony\Component\Validator\Constraints as Assert;
 
 final readonly class CreatePaymentRequest
 {
     public function __construct(
+        #[Assert\NotBlank]
         public string $userId,
+
+        #[Assert\Positive]
         public float $amount,
+
+        #[Assert\NotBlank]
+        #[Assert\Length(max: 500)]
         public string $description,
-        public CurrencyType  $currency,
-        public PaymentMethod $method
-    )
-    {
-        $this->validate();
-    }
 
-    private function validate(): void
-    {
-        if (trim($this->userId) === '') {
-            throw new InvalidArgumentException('User ID is required');
-        }
+        public CurrencyType $currency,
 
-        if ($this->amount < 0) {
-            throw new InvalidArgumentException('Amount must be greater than 0');
-        }
-
-        if (trim($this->description) === '') {
-            throw new InvalidArgumentException('Description is required');
-        }
-
-        if (mb_strlen($this->description) > 500) {
-            throw new InvalidArgumentException('Description must be <= 500 characters');
-        }
+        public PaymentMethod $method,
+    ) {
     }
 
     public function toArray(): array
     {
         return [
-            'userId' => $this->userId,
-            'amount' => $this->amount,
+            'userId'      => $this->userId,
+            'amount'      => $this->amount,
             'description' => $this->description,
-            'currency' => $this->currency->value,
-            'method' => $this->method->value,
+            'currency'    => $this->currency->value,
+            'method'      => $this->method->value,
         ];
     }
 }

@@ -8,6 +8,4 @@ use App\Entity\User;
 interface AuthenticationServiceInterface
 {
     public function authenticate(string $email, string $password): User;
-
-    public function logout(SessionInterface $session): void;
 }

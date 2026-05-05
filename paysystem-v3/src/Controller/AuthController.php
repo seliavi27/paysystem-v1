@@ -109,11 +109,15 @@ class AuthController extends AbstractController
         }
     }
 
+    /**
+     * Symfony Security обрабатывает logout через firewalls.main.logout (security.yaml).
+     * Этот метод никогда не выполняется — он нужен только чтобы маршрут с именем "logout"
+     * существовал (firewalls.main.logout.path: logout).
+     */
     #[Route('/logout', name: 'logout', methods: ['GET'])]
     public function logout(): Response
     {
-        $this->authenticationService->logout($this->session);
-        return $this->clearTokenCookie();
+        throw new \LogicException('Этот метод перехватывается Symfony Security firewall');
     }
 
     private function setTokenCookie(string $token): RedirectResponse
@@ -133,18 +137,4 @@ class AuthController extends AbstractController
         return $response;
     }
 
-    private function clearTokenCookie(): RedirectResponse
-    {
-        $response = $this->redirectToRoute('login_form');
-
-        $response->headers->setCookie(Cookie::create(
-            name: self::TOKEN_COOKIE,
-            value: '',
-            expire: 1,
-            path: '/',
-            httpOnly: true,
-        ));
-
-        return $response;
-    }
 }
