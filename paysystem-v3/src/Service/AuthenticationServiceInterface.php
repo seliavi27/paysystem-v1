@@ -1,14 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\Service;
+namespace App\Service;
 
-use PaySystem\Entity\User;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use App\Entity\User;
 
 interface AuthenticationServiceInterface
 {
     public function authenticate(string $email, string $password): User;
-
-    public function logout(SessionInterface $session): void;
 }

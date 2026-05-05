@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\DTO;
+namespace App\DTO;
 
 use InvalidArgumentException;
 

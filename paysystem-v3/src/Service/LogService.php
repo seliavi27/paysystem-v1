@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\Service;
+namespace App\Service;
 
-use PaySystem\Interface\LogServiceInterface;
+use App\Interface\LogServiceInterface;
 use Psr\Log\LoggerInterface;
 
 class LogService implements LogServiceInterface

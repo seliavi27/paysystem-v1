@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\Processor;
+namespace App\Processor;
 
-use PaySystem\Entity\Payment;
-use PaySystem\Enum\PaymentMethod;
+use App\Entity\Payment;
+use App\Enum\PaymentMethod;
 
 interface PaymentProcessorInterface
 {

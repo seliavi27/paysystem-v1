@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\Service;
+namespace App\Service;
 
 use InvalidArgumentException;
-use PaySystem\DTO\CreateUserRequest;
-use PaySystem\Entity\User;
-use PaySystem\Exception\ValidationException;
-use PaySystem\Repository\UserRepositoryInterface;
+use App\DTO\CreateUserRequest;
+use App\Entity\User;
+use App\Exception\ValidationException;
+use App\Repository\UserRepositoryInterface;
 
 class UserService implements UserServiceInterface
 {

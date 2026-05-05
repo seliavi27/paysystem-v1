@@ -1,13 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\Repository;
+namespace App\Repository;
 
-use DateTime;
-use Doctrine\DBAL\Connection;
-use PaySystem\Entity\Transaction;
-use PaySystem\Enum\CurrencyType;
-use PaySystem\Enum\TransactionType;
+use App\Entity\Transaction;
 
 class TransactionRepository implements TransactionRepositoryInterface
 {

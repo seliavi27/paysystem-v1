@@ -1,16 +1,16 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\Tests\Repository;
+namespace App\Tests\Repository;
 
 use DateTime;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
-use PaySystem\Entity\Payment;
-use PaySystem\Enum\CurrencyType;
-use PaySystem\Enum\PaymentMethod;
-use PaySystem\Enum\PaymentStatus;
-use PaySystem\Repository\PaymentRepository;
+use App\Entity\Payment;
+use App\Enum\CurrencyType;
+use App\Enum\PaymentMethod;
+use App\Enum\PaymentStatus;
+use App\Repository\PaymentRepository;
 use PHPUnit\Framework\TestCase;
 
 /**

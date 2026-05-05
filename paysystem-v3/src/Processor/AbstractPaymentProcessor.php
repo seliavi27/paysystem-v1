@@ -1,13 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\Processor;
+namespace App\Processor;
 
 use InvalidArgumentException;
-use PaySystem\Entity\Payment;
-use PaySystem\Enum\PaymentMethod;
-use PaySystem\Interface\PaymentProcessorInterface;
-use PaySystem\Strategy\CommissionStrategy;
+use App\Entity\Payment;
+use App\Strategy\CommissionStrategy;
 
 abstract class AbstractPaymentProcessor implements PaymentProcessorInterface
 {
@@ -27,20 +25,20 @@ abstract class AbstractPaymentProcessor implements PaymentProcessorInterface
         get => $this->webhookSecret;
     }
 
-    protected float $commissionRate
-    {
-        get => $this->commissionRate;
-    }
+//    protected float $commissionRate
+//    {
+//        get => $this->commissionRate;
+//    }
 
     public function __construct(
         string $apiKey,
         string $webhookSecret,
-        float  $commissionRate
+//        float  $commissionRate
     )
     {
         $this->apiKey = $apiKey;
         $this->webhookSecret = $webhookSecret;
-        $this->commissionRate = $commissionRate;
+//        $this->commissionRate = $commissionRate;
 
         $this->validateApiKey();
     }

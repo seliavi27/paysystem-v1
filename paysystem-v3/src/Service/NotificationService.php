@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\Service;
+namespace App\Service;
 
 use InvalidArgumentException;
-use PaySystem\Entity\Payment;
-use PaySystem\Entity\User;
-use PaySystem\Notification\NotificationChannelInterface;
+use App\Entity\Payment;
+use App\Entity\User;
+use App\Notification\NotificationChannelInterface;
 use Throwable;
 
 class NotificationService implements NotificationServiceInterface
@@ -14,7 +14,7 @@ class NotificationService implements NotificationServiceInterface
     private array $channels;
 
     public function __construct(
-        array $channels
+        array $channels = []
     )
     {
         $this->channels = $channels;

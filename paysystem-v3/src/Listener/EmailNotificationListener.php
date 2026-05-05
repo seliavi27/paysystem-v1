@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\Listener;
+namespace App\Listener;
 
-use PaySystem\Event\EventInterface;
-use PaySystem\Event\PaymentCompletedEvent;
-use PaySystem\Notification\NotificationChannelInterface;
+use App\Event\EventInterface;
+use App\Event\PaymentCompletedEvent;
+use App\Notification\NotificationChannelInterface;
 
 class EmailNotificationListener implements EventListenerInterface
 {

@@ -1,8 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\Controller;
+namespace App\Controller;
 
+use Exception;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -11,14 +12,15 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Twig\Environment;
 use Throwable;
 
-use PaySystem\DTO\CreateUserRequest;
-use PaySystem\Exception\ValidationException;
-use PaySystem\Service\AuthenticationServiceInterface;
-use PaySystem\Service\JwtTokenServiceInterface;
-use PaySystem\Service\UserServiceInterface;
-use Twig\Environment;
+use App\DTO\CreateUserRequest;
+use App\Exception\ValidationException;
+use App\Service\AuthenticationServiceInterface;
+use App\Service\JwtTokenServiceInterface;
+use App\Service\UserServiceInterface;
 
 class AuthController extends AbstractController
 {
@@ -26,23 +28,20 @@ class AuthController extends AbstractController
     private const int TOKEN_TTL = 3600;
 
     public function __construct(
-        RequestStack $requestStack,
-        Environment $twig,
         private readonly AuthenticationServiceInterface $authenticationService,
         private readonly JwtTokenServiceInterface $jwtTokenService,
-        private readonly UserServiceInterface $userService,
-        private readonly SessionInterface $session,
-        private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly UserServiceInterface $userService
     )
     {
-        parent::__construct($requestStack, $twig);
+
     }
 
     #[Route('/login', name: 'login_form', methods: ['GET'])]
-    #[Route('/', name: 'home', methods: ['GET'])]
     public function loginForm(): Response
     {
-        return $this->view('auth/login.html.twig', ['title' => 'Вход']);
+        return $this->render('auth/login.html.twig', [
+            'title' => 'Вход'
+        ]);
     }
 
     #[Route('/auth/login', name: 'auth_login', methods: ['POST'])]
@@ -60,14 +59,14 @@ class AuthController extends AbstractController
                 'fullName' => $user->fullName,
             ]);
 
-            $this->session->getFlashBag()->add('success', "Добро пожаловать, {$user->fullName}!");
+            $this->addFlash('success', "Добро пожаловать, {$user->fullName}!");
 
             return $this->setTokenCookie($token);
         }
         catch (Throwable $e)
         {
-            return $this->view('auth/login.html.twig', [
-                'title'  => 'Вход',
+            return $this->render('auth/login.html.twig', [
+                'title' => 'Вход',
                 'errors' => ['Неверный email или пароль'],
                 'old'    => ['email' => $email],
             ]);
@@ -77,7 +76,9 @@ class AuthController extends AbstractController
     #[Route('/register', name: 'register_form', methods: ['GET'])]
     public function registerForm(): Response
     {
-        return $this->view('auth/register.html.twig', ['title' => 'Регистрация']);
+        return $this->render('auth/register.html.twig', [
+            'title' => 'Регистрация'
+        ]);
     }
 
     #[Route('/auth/register', name: 'auth_register', methods: ['POST'])]
@@ -94,34 +95,34 @@ class AuthController extends AbstractController
                 )
             );
 
-            $this->session->getFlashBag()->add('success', 'Аккаунт создан. Войдите в систему.');
+            $this->addFlash('success', 'Аккаунт создан. Войдите в систему.');
 
-            return $this->redirect($this->urlGenerator->generate('login_form'));
+            return $this->redirectToRoute('login_form');
         }
-        catch (ValidationException $e)
+        catch (Exception $e)
         {
-            return $this->view('auth/register.html.twig', [
-                'title'  => 'Регистрация',
-                'errors' => [$e->getMessage()],
-                'old'    => [
-                    'email'    => (string)$request->request->get('email', ''),
-                    'fullName' => (string)$request->request->get('fullName', ''),
-                    'phone'    => (string)$request->request->get('phone', ''),
-                ],
-            ]);
+            return $this->render('auth/register.html.twig', [
+            'title' => 'Регистрация',
+            'errors' => [$e->getMessage()],
+            'old' => $request->request->all(),
+        ]);
         }
     }
 
+    /**
+     * Symfony Security обрабатывает logout через firewalls.main.logout (security.yaml).
+     * Этот метод никогда не выполняется — он нужен только чтобы маршрут с именем "logout"
+     * существовал (firewalls.main.logout.path: logout).
+     */
     #[Route('/logout', name: 'logout', methods: ['GET'])]
-    public function logout(Request $request): Response
+    public function logout(): Response
     {
-        $this->authenticationService->logout($this->session);
-        return $this->clearTokenCookie();
+        throw new \LogicException('Этот метод перехватывается Symfony Security firewall');
     }
 
     private function setTokenCookie(string $token): RedirectResponse
     {
-        $response = $this->redirect($this->urlGenerator->generate('payments_index'));
+        $response = $this->redirectToRoute('payments_index');
 
         $response->headers->setCookie(Cookie::create(
             name: self::TOKEN_COOKIE,
@@ -136,18 +137,4 @@ class AuthController extends AbstractController
         return $response;
     }
 
-    private function clearTokenCookie(): RedirectResponse
-    {
-        $response = $this->redirect($this->urlGenerator->generate('login_form'));
-
-        $response->headers->setCookie(Cookie::create(
-            name: self::TOKEN_COOKIE,
-            value: '',
-            expire: 1,
-            path: '/',
-            httpOnly: true,
-        ));
-
-        return $response;
-    }
 }

@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\Listener;
+namespace App\Listener;
 
-use PaySystem\Event\EventInterface;
+use App\Event\EventInterface;
 
 class WebhookListener implements EventListenerInterface
 {

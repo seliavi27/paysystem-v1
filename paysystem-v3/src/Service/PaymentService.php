@@ -1,22 +1,21 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\Service;
+namespace App\Service;
 
 use DateTime;
 use Doctrine\DBAL\Connection;
-use PaySystem\DTO\CreatePaymentRequest;
-use PaySystem\Entity\Payment;
-use PaySystem\Entity\Transaction;
-use PaySystem\Enum\PaymentStatus;
-use PaySystem\Enum\TransactionType;
-use PaySystem\Exception\NotFoundException;
-use PaySystem\Exception\PaymentException;
-use PaySystem\Factory\PaymentMethodFactory;
-use PaySystem\Interface\LogServiceInterface;
-use PaySystem\Repository\PaymentRepositoryInterface;
-use PaySystem\Repository\TransactionRepositoryInterface;
-use PaySystem\Repository\UserRepositoryInterface;
+use App\DTO\CreatePaymentRequest;
+use App\Entity\Payment;
+use App\Enum\PaymentStatus;
+use App\Exception\NotFoundException;
+use App\Exception\PaymentException;
+use App\Factory\PaymentMethodFactory;
+use App\Interface\LogServiceInterface;
+use App\Repository\PaymentRepositoryInterface;
+use App\Repository\TransactionRepositoryInterface;
+use App\Repository\UserRepositoryInterface;
+use Throwable;
 
 class PaymentService implements PaymentServiceInterface
 {

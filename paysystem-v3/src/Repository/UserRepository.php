@@ -1,11 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\Repository;
+namespace App\Repository;
 
 use Doctrine\ORM\EntityRepository;
 
-use PaySystem\Entity\User;
+use App\Entity\User;
+use App\Storage\StorageInterface;
 
 /**
  * @extends EntityRepository<User>

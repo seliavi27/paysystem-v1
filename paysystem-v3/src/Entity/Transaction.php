@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\Entity;
+namespace App\Entity;
 
 use DateTime;
-use PaySystem\Enum\CurrencyType;
-use PaySystem\Enum\TransactionType;
-use PaySystem\Trait\HasUuid;
-use PaySystem\Trait\Loggable;
+use App\Enum\CurrencyType;
+use App\Enum\TransactionType;
+use App\Trait\HasUuid;
+use App\Trait\Loggable;
 
 class Transaction
 {

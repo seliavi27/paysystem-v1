@@ -1,11 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\Factory;
+namespace App\Factory;
 
-use InvalidArgumentException;
-use PaySystem\Enum\PaymentMethod;
-use PaySystem\Interface\PaymentProcessorInterface;
+use App\Enum\PaymentMethod;
+use App\Processor\PaymentProcessorInterface;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 
 final class PaymentMethodFactory

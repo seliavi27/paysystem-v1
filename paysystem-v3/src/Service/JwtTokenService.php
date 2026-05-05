@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\Service;
+namespace App\Service;
 
 use Exception;
 use Firebase\JWT\JWT;

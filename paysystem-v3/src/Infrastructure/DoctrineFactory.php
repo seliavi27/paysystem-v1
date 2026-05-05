@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\Infrastructure;
+namespace App\Infrastructure;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
@@ -16,41 +16,36 @@ final class DoctrineFactory
     private ?EntityManagerInterface $em = null;
     private ?Connection $connection = null;
 
-    public function __construct(private string $databaseUrl)
+    public function __construct(
+        private string $databaseUrl)
     {
     }
 
-    public function createEntityManager(): EntityManagerInterface
+    public function createEntityManager(Connection $connection): EntityManagerInterface
     {
-        if ($this->em !== null) {
-            return $this->em;
-        }
+//        return $this->em ??= new EntityManager(
+//            $this->createConnection(),
+//            ORMSetup::createAttributeMetadataConfiguration(
+//                paths: [dirname(__DIR__) . '/Entity'],
+//                isDevMode: ($_ENV['APP_ENV'] ?? 'dev') === 'dev'
+//            ),
+//        );
 
         $config = ORMSetup::createAttributeMetadataConfiguration(
-            paths: [dirname(__DIR__) . '/Entity'],
-            isDevMode: ($_ENV['APP_ENV'] ?? 'dev') === 'dev',
+            [__DIR__ . '/../Entity'], // Путь к твоим сущностям
+            true // Режим разработки
         );
-        // PHP 8.4+ native lazy objects — нужны для proxy сущностей с property hooks.
-        $config->enableNativeLazyObjects(true);
 
-        return $this->em = new EntityManager($this->createConnection(), $config);
+        return new EntityManager($connection, $config);
     }
 
     public function createConnection(): Connection
     {
-        if ($this->connection !== null) {
-            return $this->connection;
-        }
+        $connectionParams = [
+            'url' => $this->databaseUrl,
+            'driver' => 'pdo_pgsql',
+        ];
 
-        $parser = new DsnParser(['postgres' => 'pdo_pgsql', 'postgresql' => 'pdo_pgsql']);
-        $this->connection = DriverManager::getConnection($parser->parse($this->databaseUrl));
-
-        // transactions остаётся на DBAL — прячем её от Doctrine schema diff'а.
-        $this->connection->getConfiguration()->setSchemaAssetsFilter(
-            static fn(string|AbstractAsset $name): bool
-                => (is_string($name) ? $name : $name->getName()) !== 'transactions'
-        );
-
-        return $this->connection;
+        return DriverManager::getConnection($connectionParams);
     }
 }

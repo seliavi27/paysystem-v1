@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace PaySystem\Event;
+namespace App\Event;
 
-use PaySystem\Entity\Payment;
-use PaySystem\Entity\User;
+use App\Entity\Payment;
+use App\Entity\User;
 
 class PaymentCompletedEvent implements EventInterface
 {
